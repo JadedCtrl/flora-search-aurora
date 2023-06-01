@@ -21,9 +21,10 @@
 
 (ql:quickload :cl-tiled)
 
+
 (defun main ()
   (clear-screen)
-  (draw-map "/home/jaidyn/.local/src/games/flower/res/mom.tmx"))
+  (draw-map "/home/jaidyn/.local/src/games/flower/res/map.tmx"))
 
 
 (defun move-cursor (row column &key (stream *standard-output*))
@@ -40,19 +41,33 @@ Borrowed from https://github.com/gorozhin/chlorophyll/
 
 
 (defun draw-map (map-path)
+  "Draw a Tiled-format tilemap to the screen."
   (mapcar #'draw-tile-layer
        (cl-tiled:map-layers (cl-tiled:load-map map-path))))
 
 
 (defun draw-tile-layer (tile-layer)
+  "Draw a Tiled tile-layer to the screen."
   (mapcar #'draw-cell
        (cl-tiled:layer-cells tile-layer)))
 
 
 (defun draw-cell (cell)
-  (move-cursor (cl-tiled:cell-row cell)
-               (cl-tiled:cell-column cell))
-  (write-char #\A))
+  "Draw a specific cell of a tile-layer to the screen."
+  (move-cursor (+ (cl-tiled:cell-row cell) 1)
+               (+ (cl-tiled:cell-column cell) 1))
+  (write-char (tile-character
+               (cl-tiled:cell-tile cell))))
+
+
+(defun tile-character (tile)
+  "Given a tileset's tile, return it's corresponding text character,
+assuming that the tileset is a bitmap font starting with char-code 32
+with 15 characters-per-line."
+  (code-char
+   (+ (* (cl-tiled:tile-row tile) 15)
+      (cl-tiled:tile-column tile)
+      32)))
 
 
 (main)

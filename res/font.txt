@@ -1,0 +1,18 @@
+A Tiled tileset generated from Fira Code Regular⁽¹⁾ printable ASCII characters.
+This is (ofc) not used in the game, but is very handy for visualizing the map in Tiled!
+
+Generated thanks to the beautiful program ttf2png⁽²⁾, like so:
+	$ ttf2png -r 32,126 -s 15 -l 15 -e -t -o font.png FiraCode-Regular.ttf
+
+Note `-l 15`, which sets the row-length to 15. This is very important!
+Flora's engine parses the tiles' character values by calculating the tile's
+[15(row - 1) + column].
+Could we avoid this, and automatically figure out the row-length? Yeaaa.
+Could I be bothered? Nooo.
+
+
+[1] https://github.com/tonsky/FiraCode
+Fira Code © 2014 Fira Coda Authors, SIL OFL 1.1
+
+[2] https://www.tdb.fi/ttf2png.shtml
+TTF2PNG © 2021 tdb, GNU GPLv1

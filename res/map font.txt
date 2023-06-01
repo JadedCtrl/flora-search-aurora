@@ -1,5 +1,0 @@
-License: CC0
-Author: domsson
-URL: https://opengameart.org/content/ascii-bitmap-font-oldschool
-
-Used as a tilemap in Tiled — just to help visualize the maps!

@@ -19,12 +19,7 @@
 ;; https://jamgaroo.xyz/jams/2
 ;; 72x20
 
-(ql:quickload :cl-tiled)
-
-
-(defun main ()
-  (clear-screen)
-  (draw-map "/home/jaidyn/.local/src/games/flower/res/map.tmx"))
+(ql:quickload '(alexandria cl-tiled str))
 
 
 (defun move-cursor (row column &key (stream *standard-output*))
@@ -40,24 +35,79 @@ Borrowed from https://github.com/gorozhin/chlorophyll/
   (format stream "~C[J" #\Esc))
 
 
-(defun draw-map (map-path)
-  "Draw a Tiled-format tilemap to the screen."
-  (mapcar #'draw-tile-layer
-       (cl-tiled:map-layers (cl-tiled:load-map map-path))))
+(defun matrix-delta (a b)
+  "Given two 2D matrices, return a listcontaining on the cells that change between a→b in the following
+format:
+only the cells that change between a→b — all others are nil."
+  (let* ((dimensions (array-dimensions a))
+         (delta (make-array dimensions :initial-element nil))
+         (max-i (car dimensions))
+         (max-j (cadr dimensions))
+         (i 0)  (j 0))
+    (loop
+     (cond
+       ((< i max-i)
+        (cond
+          ((< j max-j)
+           (if (not (eq (aref a i j)
+                        (aref b i j)))
+               (setf (aref delta i j)
+                     (aref b i j)))
+           (incf j))
+          ((eq j max-j)
+           (setf j 0)
+           (incf i))))
+       ((eq i max-i)
+        (return))))
+     delta))
 
 
-(defun draw-tile-layer (tile-layer)
-  "Draw a Tiled tile-layer to the screen."
-  (mapcar #'draw-cell
-       (cl-tiled:layer-cells tile-layer)))
+(defun print-screen-matrix (array)
+  "Given a matrix of characters, print each element to standard output."
+  (let* ((dimensions (array-dimensions array))
+         (max-i (car dimensions))
+         (max-j (cadr dimensions))
+         (i 0)  (j 0))
+    (loop
+     (cond
+       ((< i max-i)
+        (cond
+          ((< j max-j)
+           (if (characterp (aref array i j))
+               (progn
+                 (move-cursor i j)
+                 (write-char (aref array i j))))
+           (incf j))
+          ((eq j max-j)
+           (setf j 0)
+           (incf i))))
+       ((eq i max-i)
+        (return))))))
 
 
-(defun draw-cell (cell)
-  "Draw a specific cell of a tile-layer to the screen."
-  (move-cursor (+ (cl-tiled:cell-row cell) 1)
-               (+ (cl-tiled:cell-column cell) 1))
-  (write-char (tile-character
-               (cl-tiled:cell-tile cell))))
+(defun screen-matrix-set-map (array map-path)
+  "Draw a Tiled-format tilemap to the 2D array."
+  (mapcar (lambda (layer) (screen-matrix-set-map-layer array layer))
+          (cl-tiled:map-layers (cl-tiled:load-map map-path)))
+  array)
+
+
+(defun screen-matrix-set-map-layer (array tile-layer)
+  "Set an array's elements to those corresponding the given Tiled
+tile-layer's cells. a Tiled tile-layer to the screen."
+  (mapcar (lambda (cell) (screen-matrix-set-char-cell array cell))
+          (cl-tiled:layer-cells tile-layer))
+  array)
+
+
+(defun screen-matrix-set-char-cell (array cell)
+  "Set a 2D array's element corresponding to a Tiled cell's
+character-value, using it's column and row."
+  (setf (aref array
+              (cl-tiled:cell-row cell)
+              (cl-tiled:cell-column cell))
+        (tile-character
+         (cl-tiled:cell-tile cell))))
 
 
 (defun tile-character (tile)
@@ -68,6 +118,5 @@ with 15 characters-per-line."
    (+ (* (cl-tiled:tile-row tile) 15)
       (cl-tiled:tile-column tile)
       32)))
-
 
 (main)

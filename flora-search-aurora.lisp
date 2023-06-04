@@ -103,6 +103,42 @@ with 15 characters-per-line."
       32)))
 
 
+(defvar +qwerty-layout+
+  '(#\q #\Q #\w #\W #\e #\E #\r #\R #\t #\T #\y #\Y #\u #\U #\i #\I #\o #\O #\p #\P #\[ #\{ #\] #\}
+    #\a #\A #\s #\S #\d #\D #\f #\F #\g #\G #\h #\H #\j #\J #\k #\K #\l #\L #\; #\: #\' #\"
+    #\z #\Z #\x #\X #\c #\C #\v #\V #\b #\B #\n #\N #\m #\M #\, #\< #\. #\> #\/ #\?))
+
+(defvar +dvorak-layout+
+  '(#\' #\" #\, #\< #\. #\> #\p #\P #\y #\Y #\f #\F #\g #\G #\c #\C #\r #\R #\l #\L #\/ #\? #\= #\+
+    #\a #\A #\o #\O #\e #\E #\u #\U #\i #\I #\d #\D #\h #\H #\t #\T #\n #\N #\s #\S #\- #\_
+    #\; #\: #\q #\Q #\j #\J #\k #\K #\x #\X #\b #\B #\m #\M #\w #\W #\v #\V #\z #\Z))
+
+
+(defun parallel-list-item (item-a list-a list-b &key (test #'eql))
+  "Given two parallel lists and an item contained in the first list, return its
+corresponding item in the other list, by index."
+  (let ((index (position item-a list-a :test test)))
+    (if index
+        (nth index list-b))))
+
+
+(defun normalize-char (char-plist &optional (layout +qwerty-layout+))
+  "Given a character input property list (as received from read-char-plist),
+massage the output into parsable, deescaped, QWERTY-according format."
+  (let ((normalized (deescape-char-plist char-plist)))
+    (setf (getf normalized :char)
+          (qwertyize-char (getf normalized :char)
+                          layout))
+    normalized))
+
+
+(defun qwertyize-char (char layout)
+  "Given a char input in some layout, return the corresponding character in QWERTY.
+Not at all comprehensive, but probably-mostly-just-good-enough. ¯\_ (ツ)_/¯"
+  (or (parallel-list-item char layout +qwerty-layout+)
+      char))
+
+
 (defun deescape-char-plist (char-plist)
   "Translate escaped characters into somewhat-semantically-adjacent
 characters, like left arrow-key (escaped D) into ← (“LEFTWARDS ARROW”)."

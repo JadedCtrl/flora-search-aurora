@@ -1,7 +1,7 @@
 ;;;; A simple TUI-game made for the text-flavoured LibreJam of 2023-06!
 ;;;; https://jamgaroo.xyz/jams/2
 
-(ql:quickload '(alexandria cl-tiled str))
+(ql:quickload '(alexandria cl-charms cl-tiled str))
 
 
 (defun move-cursor (row column &key (stream *standard-output*))
@@ -23,12 +23,12 @@ The body has access to 4 variables:
   * i/j — The current row/column.
   * dimensions — Dimensions of the given matrix.
   * cell — The value of the current cell."
-  `(let* ((dimensions (array-dimensions matrix))
+  `(let* ((dimensions (array-dimensions ,matrix))
           (max-i (car dimensions))
           (max-j (cadr dimensions))
           (i 0)  (j 0))
      (loop
-      (let ((cell (ignore-errors (aref matrix i j))))
+      (let ((cell (ignore-errors (aref ,matrix i j))))
         (cond
           ((< i max-i)
            (cond
@@ -43,9 +43,8 @@ The body has access to 4 variables:
 
 
 (defun matrix-delta (a b)
-  "Given two 2D matrices, return a listcontaining on the cells that change between a→b in the following
-format:
-only the cells that change between a→b — all others are nil."
+  "Given two 2D matrices, return a matrix containing only the cells
+that change between a→b (favouring those in b) — all others are nil."
   (let ((delta (make-array (array-dimensions a))))
     (do-for-cell a
       (when (not (eq cell
@@ -102,3 +101,59 @@ with 15 characters-per-line."
    (+ (* (cl-tiled:tile-row tile) 15)
       (cl-tiled:tile-column tile)
       32)))
+
+
+(defun deescape-char-plist (char-plist)
+  "Translate escaped characters into somewhat-semantically-adjacent
+characters, like left arrow-key (escaped D) into ← (“LEFTWARDS ARROW”)."
+  (list :modifier (getf char-plist :modifier)
+        :char (if (getf char-plist :escaped)
+                  (case (getf char-plist :char)
+                    (#\A #\↑)
+                    (#\B #\↓)
+                    (#\C #\→)
+                    (#\D #\←)
+                    (otherwise (getf char-plist :char)))
+                  (getf char-plist :char))))
+
+
+(defun read-char-plist (&optional (stream *standard-input*))
+  "Reads a character directly from standard-input (sans buffering).
+Simple terminal escape codes (like arrow-keys) are translated into
+roughly-semantically-equal character representations — see the
+docstring of #'escape-code-to-character for more info."
+  (let* ((char-1 (read-char stream))
+         (char-2 (if (eq char-1 #\ESC) (read-char-no-hang stream)))  ; Maybe escaped char or [.
+         (char-3 (if (eq char-2 #\[)   (read-char-no-hang stream)))  ; Maybe end-of-sequence, or 1.
+         (char-4 (if (eq char-3 #\1)   (read-char-no-hang stream)))  ; Maybe semicolon.
+         (char-5 (if (eq char-4 #\;)   (read-char-no-hang stream)))  ; Maybe modifer-key.
+         (char-6 (if (characterp char-5) (read-char-no-hang stream)))) ; Escaped char and EOS.
+    ;; Let me explain! There are pretty much three input-cases we should care about:
+    ;;   * character
+    ;;   * ␛ character
+    ;;   * ␛ [ character
+    ;;   * ␛ [ 1 ; modifier character
+    ;; This is by no means comprehensive, sorry: I didn't even try! But it suits my purposes. :-P
+    (let ((the-char (or char-6 char-3 char-2 char-1))
+          (modifier (case char-5
+                      (#\2 'shift)
+                      (#\3 'meta)
+                      (#\5 'control)))
+          (escaped (eq char-1 #\ESC)))
+      (list :char the-char :modifier modifier :escaped escaped))))
+
+
+(defun main ()
+  "A pathetic fascimile of a main loop. Look, I'm still tinkering!"
+  (let ((matrix (make-screen-matrix)))
+    (screen-matrix-set-map
+     matrix
+     (str:concat (namestring (uiop:getcwd)) "res/map.tmx"))
+    (cl-charms:with-curses ()
+      (cl-charms:enable-raw-input :interpret-control-characters 't)
+      (print-screen-matrix matrix)
+      (loop (print (deescape-char-plist (read-char-plist))))
+      (sleep 5))))
+
+
+(main)

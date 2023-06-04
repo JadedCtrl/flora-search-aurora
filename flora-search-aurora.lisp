@@ -20,10 +20,13 @@
 (ql:quickload '(alexandria cl-charms cl-tiled str))
 (load "input.lisp")
 (load "display.lisp")
+(load "ui.lisp")
 
 (defpackage :flora-search-aurora
-  (:use :cl :flora-search-aurora.input :flora-search-aurora.display)
-  (:export #:main))
+  (:export #:main)
+  (:use :cl
+   :flora-search-aurora.input :flora-search-aurora.display
+   :flora-search-aurora.ui))
 
 (in-package :flora-search-aurora)
 

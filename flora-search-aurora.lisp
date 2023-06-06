@@ -33,14 +33,21 @@
 
 (defun main ()
   "A pathetic fascimile of a main loop. Look, I'm still tinkering!"
-  (let ((matrix (make-screen-matrix)))
-    (screen-matrix-set-map
-     matrix
-     (str:concat (namestring (uiop:getcwd)) "res/map.tmx"))
+  (let ((matrix (make-screen-matrix))
+        (items '(("PLAY" ((selected . 30))) ("QUIT") ("ESCAPE") ("RUN AWAY"))))
+
     (cl-charms:with-curses ()
       (cl-charms:enable-raw-input :interpret-control-characters 't)
+      (clear-screen)
       (print-screen-matrix matrix)
-      (loop (print (normalize-char-plist (read-char-plist))))
-      (sleep 5))))
+      (ui-loop matrix items))))
+;;    (print-screen-matrix
+;      (render-menu-strip matrix items 2 5
+;;                         :max-item-width 20 :height 3)))
+;;    (screen-matrix-set-map
+;;     matrix
+;;      (print-screen-matrix matrix)
+;;      (loop (print (normalize-char-plist (read-char-plist))))
+;;      (sleep 5)))
 
 (main)

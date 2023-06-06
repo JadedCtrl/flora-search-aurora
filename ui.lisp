@@ -19,11 +19,41 @@
 
 (defpackage :flora-search-aurora.ui
   (:use :cl :flora-search-aurora.display)
-  (:export #:render-menu-strip))
+  (:export #:ui-loop #:render-menu-strip))
 
 (in-package :flora-search-aurora.ui)
 
+
+;;; ———————————————————————————————————
+;;; Menu loops
+;;; ———————————————————————————————————
+(defun ui-loop (last-matrix menu-alist)
+  "The state loop to be used for displaying/processing/input-managing
+with menus."
+  (let* ((matrix (make-screen-matrix))
+         (new-menu (ui-update matrix menu-alist)))
+    (ui-draw matrix last-matrix)
+    (sleep 1)
+    (ui-loop matrix new-menu)))
 
+
+(defun ui-draw (matrix last-matrix)
+  "The draw loop for menus."
+  (print-screen-matrix (matrix-delta last-matrix matrix))
+  (finish-output))
+
+
+(defun ui-update (matrix menu-alist)
+  "The update loop for menus. It processes all input, state, etc, and
+returns the new state of the menu."
+  (render-menu-strip matrix menu-alist 0 0)
+  (cdr menu-alist))
+
+
+
+;;; ———————————————————————————————————
+;;; Menu display
+;;; ———————————————————————————————————
 (defun render-line (matrix text x y)
   "Apply a one-line string to the matrix at the given coordinates."
   (if (and (stringp text)
@@ -34,14 +64,6 @@
         (render-line matrix (subseq text 1)
                      (+ x 1) y))
       matrix))
-
-
-(defun at-most (maximum num)
-  "This function returns at most every hope and dream you've ever had, and at
-minimum returns your more pitiful of moments."
-  (if (> num maximum)
-      maximum
-      num))
 
 
 (defun render-menu-item
@@ -72,29 +94,30 @@ left-to-right, unless negative — in which case, right-to-left."
           (setf (aref matrix (+ y (- height 1)) (+ x bar-start i)) #\=))))
 
   ;; Render the horizontal “earmuffs” for helping the selected item stand out.
-  (when selected
+  (when (and selected
+             (not (eq selected 0)))
     (dotimes (i (- height 2))
       (setf (aref matrix (+ y i 1) x) #\|)
       (setf (aref matrix (+ y i 1) (+ x width -1)) #\|))
    matrix))
 
 
-(defun render-menu-strip
-    (matrix items x y &key max-item-width height (selected-item nil) (selected-% 100))
+(defun render-menu-strip (matrix items x y &key (max-item-width 12) (height 3))
   "Render several menu items to the matrix, starting at the given x/y coordinates,
 maximum width for any given item, and the height of all items. If given a selected
 item, than selected-% percent of it is displayed as highlighted/selected."
   (let ((x x))
     (mapcar
      (lambda (item)
-       (let ((width (at-most max-item-width
-                             (+ (length item) 2))))
-         (render-menu-item matrix item x y
+       (let* ((label (car item))
+              (selected (or (assoc 'selected (cdr item))
+                            0))
+              (width (at-most max-item-width
+                              (+ (length label) 2))))
+         (render-menu-item matrix label x y
                            :width width
                            :height height
-                           :selected (if (equal item selected-item)
-                                         selected-%
-                                         0))
+                           :selected selected)
          (setf x (+ x width 1))))
      items))
   matrix)
@@ -118,6 +141,10 @@ positional arguments nor the dimensions of the matrix."
   matrix)
 
 
+
+;;; ———————————————————————————————————
+;;; Misc. utils
+;;; ———————————————————————————————————
 (defun split-string-by-length (string line-length &key (substrings '()))
   "Given a string, split it into a list of substrings all with lengths
 equal or lower to the given length."
@@ -130,8 +157,29 @@ equal or lower to the given length."
       (append substrings `(,string))))
 
 
+(defun at-most (maximum num)
+  "This function returns at most every hope and dream you've ever had, and at
+minimum returns your more pitiful of moments."
+  (if (> num maximum)
+      maximum
+      num))
 
-;;"---{=============   -------------------"
-;; | Kill your mom |    Give into despair
-;; ---{=============   -------------------
 
+(defun at-least (minimum num)
+  "This function returns at least every hope and dream you've ever had, and at
+maximum returns your more pitiful of moments."
+  (if (< num minimum)
+      minimum
+      num))
+
+
+(defun ± (num add)
+  "Either add to a number, or subtract from it; whichever brings it closer to zero.
+In addition, the resultant value shall not “pass” zero."
+  (cond
+    ((< num 0)
+     (at-most 0 (+ num add)))
+    ((> num 0)
+     (at-minimum 0 (- num add)))
+    ('t
+     num)))

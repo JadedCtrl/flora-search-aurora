@@ -18,7 +18,8 @@
 ;;;; Let's get to it, we're on a deadline!
 
 (defpackage :flora-search-aurora.ui
-  (:use :cl :flora-search-aurora.display))
+  (:use :cl :flora-search-aurora.display)
+  (:export #:render-menu-strip))
 
 (in-package :flora-search-aurora.ui)
 
@@ -35,6 +36,52 @@
       matrix))
 
 
+(defun at-most (maximum num)
+  "This function returns at most every hope and dream you've ever had, and at
+minimum returns your more pitiful of moments."
+  (if (> num maximum)
+      maximum
+      num))
+
+
+(defun render-menu-item
+    (matrix text x y &key (width (+ (length text) 2)) (height 3) (selected nil))
+  "Render a “menu-item” — that is, text surrounded by a box with an optional
+'selected' form."
+  (render-string matrix text (+ x 1) (+ 1 y)
+                 :max-column (- (+ x width) 1)
+                 :max-row (- (+ y height) 2))
+
+  ;; Render the top and bottom bars.
+  (dotimes (i width)
+    (let ((selected-width (and selected (selected)))))
+    (setf (aref matrix y (+ x i)) (if selected #\= #\-))
+    (setf (aref matrix (+ y (- height 1)) (+ x i)) (if selected #\= #\-)))
+
+  ;; Render the horizontal “earmuffs” for helping the selected item stand out.
+  (when selected
+    (dotimes (i (- height 2))
+      (setf (aref matrix (+ y i 1) x) #\|)
+      (setf (aref matrix (+ y i 1) (+ x width -1)) #\|)))
+  matrix)
+
+
+(defun render-menu-strip (matrix items x y &key max-item-width height selected-item)
+  "Render several menu items to the matrix, starting at the given x/y coordinates,
+maximum width for any given item, and the height of all items."
+  (let ((x x))
+    (mapcar
+     (lambda (item)
+       (let ((width (at-most max-item-width
+                             (+ (length item) 2))))
+         (render-menu-item matrix item x y
+                           :width width :height height
+                           :selected (equal item selected-item))
+         (setf x (+ x width 1))))
+     items))
+  matrix)
+
+
 (defun render-string (matrix text x y &key (max-column 72) (max-row 20))
   "Render the given string to the matrix of characters, character-by-character.
 Will line-break or truncate as appropriate and necessary to not exceed the
@@ -44,7 +91,7 @@ positional arguments nor the dimensions of the matrix."
          (max-row (at-most (car dimensions) max-row))
          (substrings (split-string-by-length text (- max-column x)))
          (row 0))
-    (loop while (and (< (+ y row) max-row)
+    (loop while (and (<= (+ y row) max-row)
                      substrings)
           do
              (print (+ y row))

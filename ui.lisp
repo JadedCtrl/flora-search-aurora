@@ -45,38 +45,56 @@ minimum returns your more pitiful of moments."
 
 
 (defun render-menu-item
-    (matrix text x y &key (width (+ (length text) 2)) (height 3) (selected nil))
+    (matrix text x y &key (width (+ (length text) 2)) (height 3) (selected 0))
   "Render a “menu-item” — that is, text surrounded by a box with an optional
-'selected' form."
+'selected' form. If selected is a non-zero number below 100, then that percent
+of the box will be displayed as selected/highlighted. This percent is from
+left-to-right, unless negative — in which case, right-to-left."
   (render-string matrix text (+ x 1) (+ 1 y)
                  :max-column (- (+ x width) 1)
                  :max-row (- (+ y height) 2))
 
-  ;; Render the top and bottom bars.
+  ;; Render the normal top and bottom bars.
   (dotimes (i width)
-    (let ((selected-width (and selected (selected)))))
-    (setf (aref matrix y (+ x i)) (if selected #\= #\-))
-    (setf (aref matrix (+ y (- height 1)) (+ x i)) (if selected #\= #\-)))
+    (setf (aref matrix y (+ x i)) #\-)
+    (setf (aref matrix (+ y (- height 1)) (+ x i)) #\-))
+
+  ;; Render the weird “selected” top and bottom bars. A menu item might be
+  ;; only partially-selected…
+  (if (and selected
+           (not (eq selected 0)))
+      (let* ((bar-width
+               (at-most width (ceiling (* width (* (abs selected)
+                                                   .01)))))
+             (bar-start (if (> 0 selected) (- width bar-width) 0)))
+        (dotimes (i bar-width)
+          (setf (aref matrix y (+ x bar-start i)) #\=)
+          (setf (aref matrix (+ y (- height 1)) (+ x bar-start i)) #\=))))
 
   ;; Render the horizontal “earmuffs” for helping the selected item stand out.
   (when selected
     (dotimes (i (- height 2))
       (setf (aref matrix (+ y i 1) x) #\|)
-      (setf (aref matrix (+ y i 1) (+ x width -1)) #\|)))
-  matrix)
+      (setf (aref matrix (+ y i 1) (+ x width -1)) #\|))
+   matrix))
 
 
-(defun render-menu-strip (matrix items x y &key max-item-width height selected-item)
+(defun render-menu-strip
+    (matrix items x y &key max-item-width height (selected-item nil) (selected-% 100))
   "Render several menu items to the matrix, starting at the given x/y coordinates,
-maximum width for any given item, and the height of all items."
+maximum width for any given item, and the height of all items. If given a selected
+item, than selected-% percent of it is displayed as highlighted/selected."
   (let ((x x))
     (mapcar
      (lambda (item)
        (let ((width (at-most max-item-width
                              (+ (length item) 2))))
          (render-menu-item matrix item x y
-                           :width width :height height
-                           :selected (equal item selected-item))
+                           :width width
+                           :height height
+                           :selected (if (equal item selected-item)
+                                         selected-%
+                                         0))
          (setf x (+ x width 1))))
      items))
   matrix)
@@ -94,7 +112,6 @@ positional arguments nor the dimensions of the matrix."
     (loop while (and (<= (+ y row) max-row)
                      substrings)
           do
-             (print (+ y row))
              (render-line matrix (pop substrings)
                           x (+ y row))
              (incf row)))

@@ -19,7 +19,7 @@
 
 (defpackage :flora-search-aurora.ui
   (:use :cl :flora-search-aurora.display)
-  (:export #:ui-loop #:render-menu-strip))
+  (:export #:ui-loop #:render-menu-strip :selection :selected))
 
 (in-package :flora-search-aurora.ui)
 
@@ -33,7 +33,7 @@ with menus."
   (let* ((matrix (make-screen-matrix))
          (new-menu (ui-update matrix menu-alist)))
     (ui-draw matrix last-matrix)
-    (sleep 1)
+    (sleep .2)
     (ui-loop matrix new-menu)))
 
 
@@ -46,8 +46,9 @@ with menus."
 (defun ui-update (matrix menu-alist)
   "The update loop for menus. It processes all input, state, etc, and
 returns the new state of the menu."
-  (render-menu-strip matrix menu-alist 0 0)
-  (cdr menu-alist))
+  (let ((new-menu (progress-menu-items menu-alist)))
+    (render-menu-strip matrix new-menu 0 0)
+    new-menu))
 
 
 
@@ -67,7 +68,7 @@ returns the new state of the menu."
 
 
 (defun render-menu-item
-    (matrix text x y &key (width (+ (length text) 2)) (height 3) (selected 0))
+    (matrix text x y &key (width (+ (length text) 2)) (height 3) (selection 100))
   "Render a “menu-item” — that is, text surrounded by a box with an optional
 'selected' form. If selected is a non-zero number below 100, then that percent
 of the box will be displayed as selected/highlighted. This percent is from
@@ -83,19 +84,19 @@ left-to-right, unless negative — in which case, right-to-left."
 
   ;; Render the weird “selected” top and bottom bars. A menu item might be
   ;; only partially-selected…
-  (if (and selected
-           (not (eq selected 0)))
+  (if (and selection
+           (not (eq selection 0)))
       (let* ((bar-width
-               (at-most width (ceiling (* width (* (abs selected)
+               (at-most width (ceiling (* width (* (abs selection)
                                                    .01)))))
-             (bar-start (if (> 0 selected) (- width bar-width) 0)))
+             (bar-start (if (> 0 selection) (- width bar-width) 0)))
         (dotimes (i bar-width)
           (setf (aref matrix y (+ x bar-start i)) #\=)
           (setf (aref matrix (+ y (- height 1)) (+ x bar-start i)) #\=))))
 
   ;; Render the horizontal “earmuffs” for helping the selected item stand out.
-  (when (and selected
-             (not (eq selected 0)))
+  (when (and selection
+             (not (eq selection 0)))
     (dotimes (i (- height 2))
       (setf (aref matrix (+ y i 1) x) #\|)
       (setf (aref matrix (+ y i 1) (+ x width -1)) #\|))
@@ -104,20 +105,21 @@ left-to-right, unless negative — in which case, right-to-left."
 
 (defun render-menu-strip (matrix items x y &key (max-item-width 12) (height 3))
   "Render several menu items to the matrix, starting at the given x/y coordinates,
-maximum width for any given item, and the height of all items. If given a selected
-item, than selected-% percent of it is displayed as highlighted/selected."
+maximum width for any given item, and the height of all items.
+The item list should be an alist of the following format:
+   ((“LABEL” ((SELECTED . 'T)(SELECTION . 100))) (“LABEL-2” (SELECTION . -20)) ⋯)"
   (let ((x x))
     (mapcar
      (lambda (item)
        (let* ((label (car item))
-              (selected (or (assoc 'selected (cdr item))
-                            0))
+              (selection (or (cdr (assoc 'selection (cdr item)))
+                             0))
               (width (at-most max-item-width
                               (+ (length label) 2))))
          (render-menu-item matrix label x y
                            :width width
                            :height height
-                           :selected selected)
+                           :selection selection)
          (setf x (+ x width 1))))
      items))
   matrix)
@@ -139,6 +141,26 @@ positional arguments nor the dimensions of the matrix."
                           x (+ y row))
              (incf row)))
   matrix)
+
+
+
+;;; ———————————————————————————————————
+;;; Menu logic
+;;; ———————————————————————————————————
+(defun progress-menu-items (menu-alist)
+  "Given an associative list of menu-items, decrement or increment each
+item's “selected-percentage”, so that they converge at the right percent.
+That is, 0 for non-selected items and 100 for selected items."
+  (mapcar
+   (lambda (item)
+     (let ((selection (assoc 'selection (cdr item)))
+           (selectedp (assoc 'selected (cdr item))))
+       (if selection
+           (setf (cdr selection)
+                 (gravitate-toward (if selectedp 100 0)
+                                   (cdr selection) 10)))))
+   menu-alist)
+  menu-alist)
 
 
 
@@ -173,13 +195,19 @@ maximum returns your more pitiful of moments."
       num))
 
 
-(defun ± (num add)
+(defun gravitate-toward (goal num delta)
   "Either add to a number, or subtract from it; whichever brings it closer to zero.
 In addition, the resultant value shall not “pass” zero."
   (cond
-    ((< num 0)
-     (at-most 0 (+ num add)))
-    ((> num 0)
-     (at-minimum 0 (- num add)))
+    ((< num goal)
+     (at-most goal (+ num delta)))
+    ((> num goal)
+     (at-least goal (- num delta)))
     ('t
-     num)))
+     goal)))
+
+
+;;"---{=============   -------------------"
+;; | Kill your mom |    Give into despair
+;; ---{=============   -------------------
+

@@ -19,7 +19,7 @@
 
 (defpackage :flora-search-aurora.ui
   (:use :cl :flora-search-aurora.display :flora-search-aurora.input :assoc-utils)
-  (:export #:ui-loop #:render-menu-strip :selection :selected))
+  (:export #:ui-loop #:render-menu-strip :label :selection :selected))
 
 (in-package :flora-search-aurora.ui)
 
@@ -107,12 +107,12 @@ left-to-right, unless negative — in which case, right-to-left."
   "Render several menu items to the matrix, starting at the given x/y coordinates,
 maximum width for any given item, and the height of all items.
 The item list should be an alist of the following format:
-   ((“LABEL” ((SELECTED . 'T)(SELECTION . 100))) (“LABEL-2” (SELECTION . -20)) ⋯)"
+   (((LABEL . “FOO”)(SELECTED . T)(SELECTION . 100)) ((LABEL . “BAR”)(SELECTION . -20)) ⋯)"
   (let ((x x))
     (mapcar
      (lambda (item)
-       (let* ((label (car item))
-              (selection (or (cdr (assoc 'selection (cdr item)))
+       (let* ((label (cdr (assoc 'label item)))
+              (selection (or (cdr (assoc 'selection item))
                              0))
               (width (at-most max-item-width
                               (+ (length label) 2))))
@@ -120,7 +120,7 @@ The item list should be an alist of the following format:
                            :width width
                            :height height
                            :selection selection
-                           :selected (cdr (assoc 'selected (cdr item))))
+                           :selected (cdr (assoc 'selected item)))
          (setf x (+ x width 1))))
      items))
   matrix)
@@ -154,9 +154,9 @@ item's “selected-percentage”, so that they converge at the right percent.
 That is, 0 for non-selected items and 100 for selected items."
   (mapcar
    (lambda (item)
-     (let* ((selection (assoc 'selection (cdr item)))
+     (let* ((selection (assoc 'selection item))
             (selection-num (or (cdr selection) 0))
-            (selectedp (cdr (assoc 'selected (cdr item)))))
+            (selectedp (cdr (assoc 'selected item))))
        (if selection
            (setf (cdr selection)
                  (gravitate-toward
@@ -179,8 +179,7 @@ That is, 0 for non-selected items and 100 for selected items."
        (#\→ (select-right-menu-item menu-alist))
        (#\← (select-left-menu-item menu-alist)))
       (if (eq (getf input :char) #\return)
-          (ignore-errors (apply (cdr (assoc 'function (cdr selected-item))) '()))))))
-
+          (ignore-errors (apply (cdr (assoc 'function selected-item)) '()))))))
 
 
 (defun select-menu-item (menu-alist position)
@@ -188,13 +187,13 @@ That is, 0 for non-selected items and 100 for selected items."
   (let ((old-position (selected-menu-item-position menu-alist)))
     ;; The “polarity” (direction of selection) depends on the relative
     ;; direction of the previous selection.
-    (setf (aget (cdr (nth position menu-alist)) 'selection)
+    (setf (aget (nth position menu-alist) 'selection)
       (if (< old-position position) 10 -10))
-    (setf (aget (cdr (nth position menu-alist)) 'selected) 't)
+    (setf (aget (nth position menu-alist) 'selected) 't)
     ;; Likewise for the previously-selected item.
-    (setf (aget (cdr (nth old-position menu-alist)) 'selection)
+    (setf (aget (nth old-position menu-alist) 'selection)
           (if (< old-position position) -90 90))
-    (setf (aget (cdr (nth old-position menu-alist)) 'selected) nil))
+    (setf (aget (nth old-position menu-alist) 'selected) nil))
   menu-alist)
 
 
@@ -205,7 +204,7 @@ That is, 0 for non-selected items and 100 for selected items."
       (select-menu-item menu-alist new-selection))))
 
 
-(defun select-left-menu-item (menu-alist)
+(defun select-left-menu-item ( menu-alist)
   "Select the item to the left of the currenty-selected item."
   (let ((new-selection (- (selected-menu-item-position menu-alist) 1)))
     (if (>= new-selection 0)
@@ -217,8 +216,7 @@ That is, 0 for non-selected items and 100 for selected items."
   (position
    't menu-alist
    :test (lambda (ignore list-item)
-           (cdr (assoc 'selected
-                       (cdr list-item))))))
+           (cdr (assoc 'selected list-item)))))
 
 
 

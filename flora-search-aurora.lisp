@@ -35,8 +35,10 @@
 (defun main ()
   "A pathetic fascimile of a main loop. Look, I'm still tinkering!"
   (let ((matrix (make-screen-matrix))
-        (items '(("PLAY" (SELECTION . 100) (SELECTED . T)) ("QUIT" (SELECTION . 100)) ("ESCAPE")
-                 ("RUN AWAY" (SELECTION . -100)))))
+        (items `(((LABEL . "PLAY") (SELECTION . 100) (SELECTED . T))
+                 ((LABEL . "QUIT") (SELECTION . 100) (FUNCTION . ,(lambda () (print "AAAAAA"))))
+                 ((LABEL . "ESCAPE"))
+                 ((LABEL . "RUN AWAY") (SELECTION . -100)))))
     (cl-charms:with-curses ()
       (cl-charms:enable-raw-input :interpret-control-characters 't)
       (clear-screen)

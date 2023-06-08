@@ -18,7 +18,7 @@
 ;;;; Let's get to it, we're on a deadline!
 
 (defpackage :flora-search-aurora.ui
-  (:use :cl :flora-search-aurora.display)
+  (:use :cl :flora-search-aurora.display :flora-search-aurora.input :assoc-utils)
   (:export #:ui-loop #:render-menu-strip :selection :selected))
 
 (in-package :flora-search-aurora.ui)
@@ -33,7 +33,7 @@ with menus."
   (let* ((matrix (make-screen-matrix))
          (new-menu (ui-update matrix menu-alist)))
     (ui-draw matrix last-matrix)
-    (sleep .2)
+    (sleep .02)
     (ui-loop matrix new-menu)))
 
 
@@ -46,9 +46,10 @@ with menus."
 (defun ui-update (matrix menu-alist)
   "The update loop for menus. It processes all input, state, etc, and
 returns the new state of the menu."
-  (let ((new-menu (progress-menu-items menu-alist)))
-    (render-menu-strip matrix new-menu 0 0)
-    new-menu))
+  (progress-menu-items menu-alist)
+  (process-menu-input menu-alist)
+  (render-menu-strip matrix menu-alist 0 0)
+  menu-alist)
 
 
 
@@ -68,7 +69,7 @@ returns the new state of the menu."
 
 
 (defun render-menu-item
-    (matrix text x y &key (width (+ (length text) 2)) (height 3) (selection 100))
+    (matrix text x y &key (width (+ (length text) 2)) (height 3) (selection 0) (selected nil))
   "Render a “menu-item” — that is, text surrounded by a box with an optional
 'selected' form. If selected is a non-zero number below 100, then that percent
 of the box will be displayed as selected/highlighted. This percent is from
@@ -95,11 +96,10 @@ left-to-right, unless negative — in which case, right-to-left."
           (setf (aref matrix (+ y (- height 1)) (+ x bar-start i)) #\=))))
 
   ;; Render the horizontal “earmuffs” for helping the selected item stand out.
-  (when (and selection
-             (not (eq selection 0)))
+  (when selected
     (dotimes (i (- height 2))
-      (setf (aref matrix (+ y i 1) x) #\|)
-      (setf (aref matrix (+ y i 1) (+ x width -1)) #\|))
+     (setf (aref matrix (+ y i 1) x) #\|)
+     (setf (aref matrix (+ y i 1) (+ x width -1)) #\|))
    matrix))
 
 
@@ -119,7 +119,8 @@ The item list should be an alist of the following format:
          (render-menu-item matrix label x y
                            :width width
                            :height height
-                           :selection selection)
+                           :selection selection
+                           :selected (cdr (assoc 'selected (cdr item))))
          (setf x (+ x width 1))))
      items))
   matrix)
@@ -153,14 +154,67 @@ item's “selected-percentage”, so that they converge at the right percent.
 That is, 0 for non-selected items and 100 for selected items."
   (mapcar
    (lambda (item)
-     (let ((selection (assoc 'selection (cdr item)))
-           (selectedp (assoc 'selected (cdr item))))
+     (let* ((selection (assoc 'selection (cdr item)))
+            (selection-num (or (cdr selection) 0))
+            (selectedp (cdr (assoc 'selected (cdr item)))))
        (if selection
            (setf (cdr selection)
-                 (gravitate-toward (if selectedp 100 0)
-                                   (cdr selection) 10)))))
+                 (gravitate-toward
+                  (cond ((and selectedp (< selection-num 0) 0)
+                         -100)
+                        (selectedp 100)
+                        ('t 0))
+                  (cdr selection) 10)))))
    menu-alist)
   menu-alist)
+
+
+(defun process-menu-input (menu-alist)
+  "Get and process any keyboard input, modifying the menu alist as necessary."
+  (when (listen)
+    (let ((input (normalize-char-plist (read-char-plist)))
+          (current (selected-menu-item-position menu-alist)))
+      (case (getf input :char)
+        (#\→ (select-right-menu-item menu-alist))
+        (#\← (select-left-menu-item menu-alist))))))
+
+
+(defun select-menu-item (menu-alist position)
+  "Given a menu associative list, select the menu-item at the given position."
+  (let ((old-position (selected-menu-item-position menu-alist)))
+    ;; The “polarity” (direction of selection) depends on the relative
+    ;; direction of the previous selection.
+    (setf (aget (cdr (nth position menu-alist)) 'selection)
+      (if (< old-position position) 10 -10))
+    (setf (aget (cdr (nth position menu-alist)) 'selected) 't)
+    ;; Likewise for the previously-selected item.
+    (setf (aget (cdr (nth old-position menu-alist)) 'selection)
+          (if (< old-position position) -90 90))
+    (setf (aget (cdr (nth old-position menu-alist)) 'selected) nil))
+  menu-alist)
+
+
+(defun select-right-menu-item (menu-alist)
+  "Select the item to the right of the currenty-selected item."
+  (let ((new-selection (+ (selected-menu-item-position menu-alist) 1)))
+    (if (< new-selection (length menu-alist))
+      (select-menu-item menu-alist new-selection))))
+
+
+(defun select-left-menu-item (menu-alist)
+  "Select the item to the left of the currenty-selected item."
+  (let ((new-selection (- (selected-menu-item-position menu-alist) 1)))
+    (if (>= new-selection 0)
+      (select-menu-item menu-alist new-selection))))
+
+
+(defun selected-menu-item-position (menu-alist)
+  "Returns the index of the menu alist's selected item."
+  (position
+   't menu-alist
+   :test (lambda (ignore list-item)
+           (cdr (assoc 'selected
+                       (cdr list-item))))))
 
 
 

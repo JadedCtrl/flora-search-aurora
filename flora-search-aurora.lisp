@@ -17,7 +17,8 @@
 ;; A simple TUI-game made for the text-flavoured LibreJam of 2023-06!
 ;; See: https://jamgaroo.xyz/jams/2
 
-(ql:quickload '(alexandria cl-charms cl-tiled str))
+(ql:quickload '(alexandria assoc-utils cl-charms cl-tiled str))
+
 (load "input.lisp")
 (load "display.lisp")
 (load "ui.lisp")

@@ -46,9 +46,9 @@ with menus."
 (defun ui-update (matrix menu-alist)
   "The update loop for menus. It processes all input, state, etc, and
 returns the new state of the menu."
+  (render-menu-strip matrix menu-alist 0 0)
   (progress-menu-items menu-alist)
   (process-menu-input menu-alist)
-  (render-menu-strip matrix menu-alist 0 0)
   menu-alist)
 
 
@@ -172,11 +172,15 @@ That is, 0 for non-selected items and 100 for selected items."
 (defun process-menu-input (menu-alist)
   "Get and process any keyboard input, modifying the menu alist as necessary."
   (when (listen)
-    (let ((input (normalize-char-plist (read-char-plist)))
-          (current (selected-menu-item-position menu-alist)))
+    (let* ((input (normalize-char-plist (read-char-plist)))
+           (selected-item (nth (selected-menu-item-position menu-alist)
+                               menu-alist)))
       (case (getf input :char)
-        (#\→ (select-right-menu-item menu-alist))
-        (#\← (select-left-menu-item menu-alist))))))
+       (#\→ (select-right-menu-item menu-alist))
+       (#\← (select-left-menu-item menu-alist)))
+      (if (eq (getf input :char) #\return)
+          (ignore-errors (apply (cdr (assoc 'function (cdr selected-item))) '()))))))
+
 
 
 (defun select-menu-item (menu-alist position)

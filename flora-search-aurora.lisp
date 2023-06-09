@@ -73,10 +73,10 @@ or something ¯\_(ツ)_/¯"
   (let ((main-menu
           `(((LABEL . "PLAY")
              (SELECTION . 100) (SELECTED . T)
-             (FUNCTION . ,(lambda () (make-main-overworld-state))))
+             (FUNCTION . ,#'make-main-overworld-state))
             ((LABEL . "SUBMENU")
-             (FUNCTION . ,(lambda () (make-options-menu-state))))
-            ((LABEL . "QUIT") (FUNCTION . ,(lambda () nil))))))
+             (FUNCTION . ,#'make-options-menu-state))
+            ((LABEL . "QUIT") (RETURN . NIL)))))
     (lambda (matrix)
       (menu-state matrix main-menu))))
 
@@ -88,7 +88,7 @@ or something ¯\_(ツ)_/¯"
              (SELECTION . 100) (SELECTED . T)
              (FUNCTION . ,(lambda () (print "¯\_(ツ)_/¯"))))
             ((LABEL . "GO BACK")
-             (FUNCTION . ,(lambda () nil))))))
+             (RETURN . ,NIL)))))
     (lambda (matrix)
       (menu-state matrix options-menu))))
 

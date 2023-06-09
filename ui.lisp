@@ -171,13 +171,24 @@ That is, 0 for non-selected items and 100 for selected items."
       (let* ((input (normalize-char-plist (read-char-plist)))
              (selected-item (nth (selected-menu-item-position menu-alist)
                                  menu-alist))
-             (func (cdr (assoc 'function selected-item))))
+             (func (cdr (assoc 'function selected-item)))
+             (return-val (assoc 'return selected-item)))
         (case (getf input :char)
-         (#\→ (select-right-menu-item menu-alist))
-         (#\← (select-left-menu-item menu-alist)))
-        (if (and func (eq (getf input :char) #\return))
-            (apply func  '())
-            't))
+          (#\→ (progn (select-right-menu-item menu-alist)
+                      't))
+          (#\← (progn (select-left-menu-item menu-alist)
+                      't))
+          (#\return
+           (cond ((and func return-val)
+                  (apply func '())
+                  (cdr return-val))
+                 (func
+                  (apply func '()))
+                 (return-val
+                  (cdr return-val))
+                 ('t
+                  't)))
+          (otherwise 't)))
       't))
 
 
@@ -212,10 +223,11 @@ That is, 0 for non-selected items and 100 for selected items."
 
 (defun selected-menu-item-position (menu-alist)
   "Returns the index of the menu alist's selected item."
-  (position
-   't menu-alist
-   :test (lambda (ignore list-item)
-           (cdr (assoc 'selected list-item)))))
+  (or (position
+       't menu-alist
+       :test (lambda (ignore list-item)
+               (cdr (assoc 'selected list-item))))
+      0))
 
 
 

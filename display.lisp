@@ -18,7 +18,8 @@
 
 (defpackage :flora-search-aurora.display
   (:use :cl)
-  (:export #:make-screen-matrix #:print-screen-matrix #:screen-matrix-set-map))
+  (:export #:make-screen-matrix #:print-screen-matrix #:matrix-delta
+           #:clear-screen))
 
 (in-package :flora-search-aurora.display)
 
@@ -65,7 +66,9 @@ that change between a→b (favouring those in b) — all others are nil."
   (do-for-cell matrix
     (when (characterp cell)
       (move-cursor (+ i 1) (+ j 1))
-      (write-char cell))))
+      (write-char cell)))
+  (destructuring-bind (i j) (array-dimensions matrix)
+      (move-cursor i j)))
 
 
 (defun make-screen-matrix ()
@@ -74,43 +77,10 @@ that change between a→b (favouring those in b) — all others are nil."
   (make-array '(20 72) :initial-element #\space))
 
 
-(defun screen-matrix-set-char-cell (matrix cell)
-  "Set a matrice's (2d array's) element corresponding to
-a Tiled cell's character-value, using it's column and row."
-  (setf (aref matrix
-              (cl-tiled:cell-row cell)
-              (cl-tiled:cell-column cell))
-        (tile-character
-         (cl-tiled:cell-tile cell))))
-
-
-(defun screen-matrix-set-map (matrix map-path)
-  "Draw a Tiled-format tilemap to the 2D array."
-  (mapcar (lambda (layer) (screen-matrix-set-map-layer matrix layer))
-          (cl-tiled:map-layers (cl-tiled:load-map map-path)))
-  matrix)
-
-
-(defun screen-matrix-set-map-layer (matrix tile-layer)
-  "Set an array's elements to those corresponding the given Tiled
-tile-layer's cells. a Tiled tile-layer to the screen."
-  (mapcar (lambda (cell) (screen-matrix-set-char-cell matrix cell))
-          (cl-tiled:layer-cells tile-layer))
-  matrix)
-
-
-(defun tile-character (tile)
-  "Given a tileset's tile, return it's corresponding text character,
-assuming that the tileset is a bitmap font starting with char-code 32
-with 15 characters-per-line."
-  (code-char
-   (+ (* (cl-tiled:tile-row tile) 15)
-      (cl-tiled:tile-column tile)
-      32)))
-
-
-;;; ~ Utilities ~
-
+
+;;; ———————————————————————————————————
+;;; Misc. utils
+;;; ———————————————————————————————————
 (defun move-cursor (row column &key (stream *standard-output*))
   "Moves cursor to desired position.
 Borrowed from https://github.com/gorozhin/chlorophyll/

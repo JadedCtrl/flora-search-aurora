@@ -22,12 +22,13 @@
 (load "input.lisp")
 (load "display.lisp")
 (load "ui.lisp")
+(load "overworld.lisp")
 
 (defpackage :flora-search-aurora
   (:export #:main)
   (:use :cl
    :flora-search-aurora.input :flora-search-aurora.display
-   :flora-search-aurora.ui))
+   :flora-search-aurora.overworld :flora-search-aurora.ui))
 
 (in-package :flora-search-aurora)
 
@@ -67,21 +68,18 @@
       (menu-loop matrix options-menu))))
 
 
+(defun make-main-overworld-loop ()
+  (lambda (matrix)
+    (overworld-loop matrix "/home/jaidyn/.local/src/games/flora search aurora/res/map.tmx")))
+
+
 (defun main ()
   "A pathetic fascimile of a main loop. Look, I'm still tinkering!"
   (cl-charms:with-curses ()
    (cl-charms:enable-raw-input :interpret-control-characters 't)
    (clear-screen)
-   (state-loop (list (make-main-menu-loop)))))
+   (state-loop (list (make-main-menu-loop)
+                     (make-main-overworld-loop)))))
 
-
-;;    (print-screen-matrix
-;      (render-menu-strip matrix items 2 5
-;;                         :max-item-width 20 :height 3)))
-;;    (screen-matrix-set-map
-;;     matrix
-;;      (print-screen-matrix matrix)
-;;      (loop (print (normalize-char-plist (read-char-plist))))
-;;      (sleep 5)))
 
 (main)

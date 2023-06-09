@@ -47,25 +47,32 @@
       matrix))))
 
 
+(defun make-main-menu-loop ()
+  (let ((main-menu
+          `(((LABEL . "CRY OUT") (SELECTED . T) (FUNCTION . ,(lambda () (print "AAAAAA"))))
+            ((LABEL . "RUN AWAY") (FUNCTION . ,(lambda () nil)))
+            ((LABEL . "SUBMENU")
+             (SELECTION . -100)
+             (FUNCTION . ,(make-options-menu-loop))))))
+    (lambda (matrix)
+      (menu-loop matrix main-menu))))
+
+
+(defun make-options-menu-loop ()
+  (let ((options-menu
+         `(((LABEL . "IDK") (SELECTION . 100) (SELECTED . T)
+                            (FUNCTION . ,(lambda () (print "¯\_(ツ)_/¯"))))
+           ((LABEL . "GO BACK") (FUNCTION . ,(lambda () nil))))))
+    (lambda (matrix)
+      (menu-loop matrix options-menu))))
+
+
 (defun main ()
   "A pathetic fascimile of a main loop. Look, I'm still tinkering!"
-  (let* ((options-menu
-           `(((LABEL . "IDK") (SELECTION . 100) (SELECTED . T)
-                              (FUNCTION . ,(lambda () (print "¯\_(ツ)_/¯"))))
-             ((LABEL . "GO BACK") (FUNCTION . ,(lambda () nil)))))
-         (main-menu
-           `(((LABEL . "CRY OUT") (SELECTED . T) (FUNCTION . ,(lambda () (print "AAAAAA"))))
-             ((LABEL . "RUN AWAY") (FUNCTION . ,(lambda () nil)))
-             ((LABEL . "SUBMENU")
-              (SELECTION . -100)
-              (FUNCTION
-               . ,(lambda ()
-                   (lambda (matrix)
-                    (menu-loop matrix options-menu))))))))
-    (cl-charms:with-curses ()
-      (cl-charms:enable-raw-input :interpret-control-characters 't)
-      (clear-screen)
-      (state-loop (list (lambda (matrix) (menu-loop matrix main-menu)))))))
+  (cl-charms:with-curses ()
+   (cl-charms:enable-raw-input :interpret-control-characters 't)
+   (clear-screen)
+   (state-loop (list (make-main-menu-loop)))))
 
 
 ;;    (print-screen-matrix

@@ -21,7 +21,7 @@
   (:use :cl
    :flora-search-aurora.input :flora-search-aurora.display
    :flora-search-aurora.ui)
-  (:export #:overworld-loop))
+  (:export #:overworld-state))
 
 (in-package :flora-search-aurora.overworld)
 
@@ -30,28 +30,27 @@
 ;;; ———————————————————————————————————
 ;;; Overworld loop
 ;;; ———————————————————————————————————
-(defun overworld-loop (matrix map)
-  "The state loop to be used for displaying/processing/input-managing
-with menus."
+(defun overworld-state (matrix map)
+  "Render the given map to the matrix and take user-input — for one frame.
+A state-function for use with #'state-loop."
   (let ((map (if (or (stringp map) (pathnamep map))
                  (cl-tiled:load-map map)
                  map)))
     (sleep .02)
-    (overworld-loop-draw matrix map)
-    (overworld-loop-update map)))
+    (overworld-state-draw matrix map)
+    (overworld-state-update map)))
 
 
-(defun overworld-loop-draw (matrix map)
-  "Drawing for."
+(defun overworld-state-draw (matrix map)
+  "Draw the overworld map to the given matrix.
+A core part of #'overworld-state."
   (matrix-write-tiled-map matrix map))
 
 
-
-(defun overworld-loop-update (map)
-  "The update loop for menus. It processes all input, state, etc, and
-returns the new state of the menu."
+(defun overworld-state-update (map)
+  "Do nothing, lol.
+Core part of #'overworld-state."
   't)
-
 
 
 

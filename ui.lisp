@@ -19,7 +19,7 @@
 
 (defpackage :flora-search-aurora.ui
   (:use :cl :flora-search-aurora.display :flora-search-aurora.input :assoc-utils)
-  (:export #:menu-loop #:render-menu-strip :label :selection :selected))
+  (:export #:menu-state #:render-menu-strip :label :selection :selected))
 
 (in-package :flora-search-aurora.ui)
 
@@ -27,22 +27,23 @@
 ;;; ———————————————————————————————————
 ;;; Menu loops
 ;;; ———————————————————————————————————
-(defun menu-loop (matrix menu-alist)
-  "The state loop to be used for displaying/processing/input-managing
-with menus."
+(defun menu-state (matrix menu-alist)
+  "Render a menu in menu-alist format to the given matrix, and process user-input.
+A state-function for use with the #'state-loop."
   (sleep .02)
-  (menu-loop-draw matrix menu-alist)
-  (menu-loop-update menu-alist))
+  (menu-state-draw matrix menu-alist)
+  (menu-state-update menu-alist))
 
 
-(defun menu-loop-draw (matrix menu-alist)
-  "Drawing for."
+(defun menu-state-draw (matrix menu-alist)
+  "Render a menu in menu-alist format to the given matrix.
+A core part of #'menu-state."
   (render-menu-strip matrix menu-alist 0 0))
 
 
-(defun menu-loop-update (menu-alist)
-  "The update loop for menus. It processes all input, state, etc, and
-returns the new state of the menu."
+(defun menu-state-update (menu-alist)
+  "Update a menu — that is, take user input and modify the menu’s alist appropriately.
+A core part of #'menu-state."
   (progress-menu-items menu-alist)
   (process-menu-input menu-alist))
 

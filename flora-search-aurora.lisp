@@ -13,9 +13,9 @@
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-;; FLORA-SEARCH-AURORA
-;; A simple TUI-game made for the text-flavoured LibreJam of 2023-06!
-;; See: https://jamgaroo.xyz/jams/2
+;;;; FLORA-SEARCH-AURORA
+;;;; A simple TUI-game made for the text-flavoured LibreJam of 2023-06!
+;;;; See: https://jamgaroo.xyz/jams/2
 
 (ql:quickload '(alexandria assoc-utils cl-charms cl-tiled str))
 
@@ -32,18 +32,42 @@
 (in-package :flora-search-aurora)
 
 
+(defun state-loop (loops &optional (last-matrix (make-screen-matrix)) (matrix (make-screen-matrix)))
+  (when loops
+   (let ((loop-result
+           (apply (car loops) (list matrix))))
+     (print-screen-matrix (matrix-delta last-matrix matrix))
+     (force-output)
+     (state-loop
+      (cond ((functionp loop-result)
+             (cons loop-result loops))
+            ((not loop-result)
+             (cdr loops))
+            ('t loops))
+      matrix))))
+
+
 (defun main ()
   "A pathetic fascimile of a main loop. Look, I'm still tinkering!"
-  (let ((matrix (make-screen-matrix))
-        (items `(((LABEL . "PLAY") (SELECTION . 100) (SELECTED . T))
-                 ((LABEL . "QUIT") (SELECTION . 100) (FUNCTION . ,(lambda () (print "AAAAAA"))))
-                 ((LABEL . "ESCAPE"))
-                 ((LABEL . "RUN AWAY") (SELECTION . -100)))))
+  (let* ((options-menu
+           `(((LABEL . "IDK") (SELECTION . 100) (SELECTED . T)
+                              (FUNCTION . ,(lambda () (print "¯\_(ツ)_/¯"))))
+             ((LABEL . "GO BACK") (FUNCTION . ,(lambda () nil)))))
+         (main-menu
+           `(((LABEL . "CRY OUT") (SELECTED . T) (FUNCTION . ,(lambda () (print "AAAAAA"))))
+             ((LABEL . "RUN AWAY") (FUNCTION . ,(lambda () nil)))
+             ((LABEL . "SUBMENU")
+              (SELECTION . -100)
+              (FUNCTION
+               . ,(lambda ()
+                   (lambda (matrix)
+                    (menu-loop matrix options-menu))))))))
     (cl-charms:with-curses ()
       (cl-charms:enable-raw-input :interpret-control-characters 't)
       (clear-screen)
-      (print-screen-matrix matrix)
-      (ui-loop matrix items))))
+      (state-loop (list (lambda (matrix) (menu-loop matrix main-menu)))))))
+
+
 ;;    (print-screen-matrix
 ;      (render-menu-strip matrix items 2 5
 ;;                         :max-item-width 20 :height 3)))

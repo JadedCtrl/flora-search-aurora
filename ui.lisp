@@ -19,7 +19,7 @@
 
 (defpackage :flora-search-aurora.ui
   (:use :cl :flora-search-aurora.display :flora-search-aurora.input :assoc-utils)
-  (:export #:ui-loop #:render-menu-strip :label :selection :selected))
+  (:export #:menu-loop #:render-menu-strip :label :selection :selected))
 
 (in-package :flora-search-aurora.ui)
 
@@ -27,29 +27,24 @@
 ;;; ———————————————————————————————————
 ;;; Menu loops
 ;;; ———————————————————————————————————
-(defun ui-loop (last-matrix menu-alist)
+(defun menu-loop (matrix menu-alist)
   "The state loop to be used for displaying/processing/input-managing
 with menus."
-  (let* ((matrix (make-screen-matrix))
-         (new-menu (ui-update matrix menu-alist)))
-    (ui-draw matrix last-matrix)
-    (sleep .02)
-    (ui-loop matrix new-menu)))
+  (sleep .02)
+  (menu-loop-draw matrix menu-alist)
+  (menu-loop-update menu-alist))
 
 
-(defun ui-draw (matrix last-matrix)
-  "The draw loop for menus."
-  (print-screen-matrix (matrix-delta last-matrix matrix))
-  (finish-output))
+(defun menu-loop-draw (matrix menu-alist)
+  "Drawing for."
+  (render-menu-strip matrix menu-alist 0 0))
 
 
-(defun ui-update (matrix menu-alist)
+(defun menu-loop-update (menu-alist)
   "The update loop for menus. It processes all input, state, etc, and
 returns the new state of the menu."
-  (render-menu-strip matrix menu-alist 0 0)
   (progress-menu-items menu-alist)
-  (process-menu-input menu-alist)
-  menu-alist)
+  (process-menu-input menu-alist))
 
 
 
@@ -171,15 +166,18 @@ That is, 0 for non-selected items and 100 for selected items."
 
 (defun process-menu-input (menu-alist)
   "Get and process any keyboard input, modifying the menu alist as necessary."
-  (when (listen)
-    (let* ((input (normalize-char-plist (read-char-plist)))
-           (selected-item (nth (selected-menu-item-position menu-alist)
-                               menu-alist)))
-      (case (getf input :char)
-       (#\→ (select-right-menu-item menu-alist))
-       (#\← (select-left-menu-item menu-alist)))
-      (if (eq (getf input :char) #\return)
-          (ignore-errors (apply (cdr (assoc 'function selected-item)) '()))))))
+  (if (listen)
+      (let* ((input (normalize-char-plist (read-char-plist)))
+             (selected-item (nth (selected-menu-item-position menu-alist)
+                                 menu-alist))
+             (func (cdr (assoc 'function selected-item))))
+        (case (getf input :char)
+         (#\→ (select-right-menu-item menu-alist))
+         (#\← (select-left-menu-item menu-alist)))
+        (if (and func (eq (getf input :char) #\return))
+            (apply func  '())
+            't))
+      't))
 
 
 (defun select-menu-item (menu-alist position)

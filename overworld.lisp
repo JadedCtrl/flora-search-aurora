@@ -30,9 +30,10 @@
 ;;; ———————————————————————————————————
 ;;; Overworld loop
 ;;; ———————————————————————————————————
-(defun overworld-state (matrix &key (map-path nil)
-                                 (map (cl-tiled:load-map map-path))
-                                 (entities-alist '((player . (:x 0 :y 0 :icon #\@)))))
+(defun overworld-state
+    (matrix &key (map-path nil) (map (cl-tiled:load-map map-path))
+              (entities-alist
+               '((player . (:x 0 :y 0 :face "uwu" :direction right)))))
   "Render the given map to the matrix and take user-input — for one frame.
 A state-function for use with #'state-loop."
   (sleep .02)
@@ -77,6 +78,10 @@ Returns parameters to be used in the next invocation of #'overworld-state."
 (defun move-entity (entity entities-alist &key (x 0) (y 0))
   "Move an entity relative to its current position."
   (let ((entity-plist (cdr (assoc entity entities-alist))))
+    (when (< x 0)
+      (setf (getf entity-plist :direction) 'left))
+    (when (> x 0)
+      (setf (getf entity-plist :direction) 'right))
     (move-entity-to entity entities-alist
                     :x (+ x (getf entity-plist :x))
                     :y (+ y (getf entity-plist :y)))))
@@ -135,16 +140,34 @@ with 15 characters-per-line."
 (defun matrix-write-entities (matrix entities-alist)
   "Draw all entities from an alist of entities to the matrix."
   (mapcar (lambda (entity-assoc)
-            (print entity-assoc)
-            (force-output)
             (matrix-write-entity matrix (cdr entity-assoc)))
    entities-alist))
 
 
 (defun matrix-write-entity (matrix entity-plist)
   "Render an entity-plist to the matrix."
-  (setf (aref matrix (getf entity-plist :y) (getf entity-plist :x))
-        (getf entity-plist :icon)))
+  (let ((x (getf entity-plist :x))
+        (y (getf entity-plist :y))
+        (face (getf entity-plist :face)))
+    (setf (aref matrix y x) #\|)
+    (setf (aref matrix y (+ (length face) x 1))
+          #\|)
+    (render-line matrix face (+ x 1) y)
+    (matrix-write-entity-legs matrix entity-plist)))
+
+
+(defun matrix-write-entity-legs (matrix entity-plist)
+  "Draw an entity's legs — a surprisingly in-depth task!"
+  (let ((x (getf entity-plist :x))
+        (y (+ (getf entity-plist :y) 1))
+        (width (+ (length (getf entity-plist :face)) 2))
+        (direction (getf entity-plist :direction)))
+    (cond ((eq direction 'right)
+           (setf (aref matrix y (+ x 1)) #\|)
+           (setf (aref matrix y (+ x 2)) #\|))
+          ((eq direction 'left)
+           (setf (aref matrix y (+ x width -2)) #\|)
+           (setf (aref matrix y (+ x width -3)) #\|)))))
 
 
 

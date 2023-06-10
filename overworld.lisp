@@ -30,27 +30,25 @@
 ;;; ———————————————————————————————————
 ;;; Overworld loop
 ;;; ———————————————————————————————————
-(defun overworld-state (matrix map)
+(defun overworld-state (matrix &key (map-path nil) (map nil) (entity-data nil))
   "Render the given map to the matrix and take user-input — for one frame.
 A state-function for use with #'state-loop."
-  (let ((map (if (or (stringp map) (pathnamep map))
-                 (cl-tiled:load-map map)
-                 map)))
-    (sleep .02)
-    (overworld-state-draw matrix map)
-    (overworld-state-update map)))
+  (sleep .02)
+  (let ((map (if (not map) (cl-tiled:load-map map-path) map)))
+    (overworld-state-draw matrix map entity-data)
+    (overworld-state-update map entity-data)))
 
 
-(defun overworld-state-draw (matrix map)
+(defun overworld-state-draw (matrix map entity-data)
   "Draw the overworld map to the given matrix.
 A core part of #'overworld-state."
   (matrix-write-tiled-map matrix map))
 
 
-(defun overworld-state-update (map)
-  "Do nothing, lol.
-Core part of #'overworld-state."
-  't)
+(defun overworld-state-update (map entity-data)
+  "Do nothing, lol. Core part of #'overworld-state.
+Returns parameters to be used in the next invocation of #'overworld-state."
+  (list :map map :entity-data entity-data))
 
 
 

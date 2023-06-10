@@ -96,8 +96,11 @@ or something ¯\_(ツ)_/¯"
 (defun make-main-overworld-state ()
   "Return a state-function for the game’s overworld (the majority of the game), for use with
 #'state-loop."
-  (lambda (matrix)
-    (overworld-state matrix "/home/jaidyn/.local/src/games/flora search aurora/res/map.tmx")))
+  (lambda (matrix &rest args)
+    (apply #'overworld-state
+           (append (list matrix)
+                   '(:map-path #p"/home/jaidyn/.local/src/games/flora search aurora/res/map.tmx")
+                   args))))
 
 
 (defun main ()

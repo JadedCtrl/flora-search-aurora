@@ -31,11 +31,11 @@
 ;;; Overworld loop
 ;;; ———————————————————————————————————
 (defun overworld-state
-    (matrix &key (map-path nil) (map (cl-tiled:load-map map-path))
+    (matrix &key (map-path nil) (map (load-map-chunks map-path))
               (entities-alist
                '((player . (:x 0 :y 0 :face "uwu" :direction right)))))
   "Render the given map to the matrix and take user-input — for one frame.
-A state-function for use with #'state-loop."
+A state-function for use with STATE-LOOP."
   (sleep .02)
   (overworld-state-draw matrix map entities-alist)
   (overworld-state-update map entities-alist))
@@ -43,14 +43,14 @@ A state-function for use with #'state-loop."
 
 (defun overworld-state-draw (matrix map entities-alist)
   "Draw the overworld map to the given matrix.
-A core part of #'overworld-state."
-  (matrix-write-tiled-map matrix map)
+A core part of OVERWORLD-STATE."
+  (matrix-write-tiled-map-chunk matrix map 0 0)
   (matrix-write-entities matrix entities-alist))
 
 
 (defun overworld-state-update (map entities-alist)
-  "Do nothing, lol. Core part of #'overworld-state.
-Returns parameters to be used in the next invocation of #'overworld-state."
+  "Do nothing, lol. Core part of OVERWORLD-STATE.
+Returns parameters to be used in the next invocation of OVERWORLD-STATE."
   (process-overworld-input map entities-alist)
   (list :map map :entities-alist entities-alist))
 
@@ -72,7 +72,6 @@ Returns parameters to be used in the next invocation of #'overworld-state."
            (move-entity 'player entities :y -1))
           ((plist= input '(:modifier nil :char #\↓))
            (move-entity 'player entities :y 1))))))
-
 
 
 (defun move-entity (entity entities-alist &key (x 0) (y 0))
@@ -98,29 +97,32 @@ Returns parameters to be used in the next invocation of #'overworld-state."
 ;;; ———————————————————————————————————
 ;;; Mapping & map-rendering
 ;;; ———————————————————————————————————
-(defun matrix-write-tiled-cell (matrix cell)
+(defun load-map-chunks (map-file)
+  (let ((cells (mapcar #'cl-tiled:layer-cells
+                       (cl-tiled:map-layers (cl-tiled:load-map map-file)))))
+    (collect-items-into-groups
+     (car cells)
+     (lambda (cell)
+       (apply #'coords->symbol (map-chunk-of-tiled-cell cell))))))
+
+
+(defun matrix-write-tiled-map-chunk (matrix map-alist x y
+                                     &key (chunk-width 72) (chunk-height 20))
+  (mapcar (lambda (cell)
+            (matrix-write-tiled-cell matrix cell
+                                     :x-offset (* x chunk-width)
+                                     :y-offset (* y chunk-height)))
+          (cdr (assoc (coords->symbol x y) map-alist))))
+
+
+(defun matrix-write-tiled-cell (matrix cell &key (x-offset 0) (y-offset 0))
   "Set a matrice's (2d array's) element corresponding to
 a Tiled cell's character-value, using it's column and row."
   (setf (aref matrix
-              (cl-tiled:cell-row cell)
-              (cl-tiled:cell-column cell))
+              (- (cl-tiled:cell-row cell) y-offset)
+              (- (cl-tiled:cell-column cell) x-offset))
         (tiled-tile-character
          (cl-tiled:cell-tile cell))))
-
-
-(defun matrix-write-tiled-map (matrix map)
-  "Draw a Tiled-format tilemap to the 2D array."
-  (mapcar (lambda (layer) (matrix-write-tiled-map-layer matrix layer))
-          (cl-tiled:map-layers map))
-  matrix)
-
-
-(defun matrix-write-tiled-map-layer (matrix tile-layer)
-  "Set an array's elements to those corresponding the given Tiled
-tile-layer's cells. a Tiled tile-layer to the screen."
-  (mapcar (lambda (cell) (matrix-write-tiled-cell matrix cell))
-          (cl-tiled:layer-cells tile-layer))
-  matrix)
 
 
 (defun tiled-tile-character (tile)
@@ -131,6 +133,26 @@ with 15 characters-per-line."
    (+ (* (cl-tiled:tile-row tile) 15)
       (cl-tiled:tile-column tile)
       32)))
+
+
+(defun map-chunk-of-tiled-cell (cell &key (chunk-width 72) (chunk-height 20))
+  "Given a Tiled cell, return a corresponding map chunk it resides in."
+  (map-chunk-of-coords (cl-tiled:cell-column cell)
+                       (cl-tiled:cell-row cell)
+                       :chunk-width chunk-width :chunk-height chunk-height))
+
+
+(defun map-chunk-of-coords (x y &key (chunk-width 72) (chunk-height 20))
+  "Given a pair of coordinates, return the map chunk they reside within."
+  (list (floor (/ x chunk-width)) (floor (/ y chunk-height))))
+
+
+(defun coords->symbol (x y)
+  (intern (format nil "~A,~A" x y)))
+
+
+(defun symbol->coords (coords-symbol)
+  (str:split #\, (symbol-name coords-symbol)))
 
 
 
@@ -174,6 +196,19 @@ with 15 characters-per-line."
 ;;; ———————————————————————————————————
 ;;; Misc. utility
 ;;; ———————————————————————————————————
+(defun collect-items-into-groups (list key-function)
+  "Given a LIST of items and a function categorizing an individual item
+(returning a “category” symbol for any given item), return an sorted
+associative list."
+  (let ((groups-alist '()))
+    (loop for item in list
+          do (let ((key (apply key-function (list item))))
+               (setf (assoc-utils:aget groups-alist key)
+                     (append (assoc-utils:aget groups-alist key)
+                             (list item)))))
+    groups-alist))
+
+
 (defun every-other-element (list)
   "Collect every-other-element of a list. E.g., (1 2 3 4) → (1 3)."
   (when list

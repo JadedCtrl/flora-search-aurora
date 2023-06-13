@@ -33,7 +33,7 @@
 (defun overworld-state
     (matrix &key (map-path nil) (map (load-map-chunks map-path))
               (entities-alist
-               '((player . (:x 0 :y 0 :face "uwu" :direction right)))))
+               '((player :coords (:x 1 :y 1) :face "uwu" :direction right))))
   "Render the given map to the matrix and take user-input — for one frame.
 A state-function for use with STATE-LOOP."
   (sleep .02)
@@ -41,11 +41,13 @@ A state-function for use with STATE-LOOP."
   (overworld-state-update map entities-alist))
 
 
-(defun overworld-state-draw (matrix map entities-alist)
+(defun overworld-state-draw (matrix map entities)
   "Draw the overworld map to the given matrix.
 A core part of OVERWORLD-STATE."
-  (matrix-write-tiled-map-chunk matrix map 0 0)
-  (matrix-write-entities matrix entities-alist))
+  (let* ((player-data (cdr (assoc 'player entities)))
+         (chunk (getf (world-coords->screen-coords (getf player-data :coords)) :chunk)))
+    (matrix-write-tiled-map-chunk matrix map chunk)
+    (matrix-write-entities matrix entities)))
 
 
 (defun overworld-state-update (map entities-alist)
@@ -82,15 +84,15 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
     (when (> x 0)
       (setf (getf entity-plist :direction) 'right))
     (move-entity-to entity entities-alist
-                    :x (+ x (getf entity-plist :x))
-                    :y (+ y (getf entity-plist :y)))))
+                    :x (+ x (getf (getf entity-plist :coords) :x))
+                    :y (+ y (getf (getf entity-plist :coords) :y)))))
 
 
 (defun move-entity-to (entity entities-alist &key (x 0) (y 0))
   "Move the given entity to the given coordinates."
   (let ((entity-plist (cdr (assoc entity entities-alist))))
-    (setf (getf entity-plist :x) x)
-    (setf (getf entity-plist :y) y)))
+    (setf (getf (getf entity-plist :coords) :x) x)
+    (setf (getf (getf entity-plist :coords) :y) y)))
 
 
 
@@ -101,28 +103,28 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
   (let ((cells (mapcar #'cl-tiled:layer-cells
                        (cl-tiled:map-layers (cl-tiled:load-map map-file)))))
     (collect-items-into-groups
-     (car cells)
+     (cdar cells) ;; Only take the first layer, for now!
      (lambda (cell)
-       (apply #'coords->symbol (map-chunk-of-tiled-cell cell))))))
+       (getf (world-coords->screen-coords (tiled-cell-world-coords cell))
+             :chunk)))))
 
 
-(defun matrix-write-tiled-map-chunk (matrix map-alist x y
+(defun matrix-write-tiled-map-chunk (matrix map-alist chunk
                                      &key (chunk-width 72) (chunk-height 20))
   (mapcar (lambda (cell)
-            (matrix-write-tiled-cell matrix cell
-                                     :x-offset (* x chunk-width)
-                                     :y-offset (* y chunk-height)))
-          (cdr (assoc (coords->symbol x y) map-alist))))
+            (matrix-write-tiled-cell matrix cell))
+          (cdr (assoc chunk map-alist))))
 
 
-(defun matrix-write-tiled-cell (matrix cell &key (x-offset 0) (y-offset 0))
+(defun matrix-write-tiled-cell (matrix cell)
   "Set a matrice's (2d array's) element corresponding to
 a Tiled cell's character-value, using it's column and row."
-  (setf (aref matrix
-              (- (cl-tiled:cell-row cell) y-offset)
-              (- (cl-tiled:cell-column cell) x-offset))
-        (tiled-tile-character
-         (cl-tiled:cell-tile cell))))
+  (let ((coords (world-coords->screen-coords (tiled-cell-world-coords cell))))
+    (setf (aref matrix
+                (getf coords :y)
+                (getf coords :x))
+          (tiled-tile-character
+           (cl-tiled:cell-tile cell)))))
 
 
 (defun tiled-tile-character (tile)
@@ -135,16 +137,20 @@ with 15 characters-per-line."
       32)))
 
 
-(defun map-chunk-of-tiled-cell (cell &key (chunk-width 72) (chunk-height 20))
-  "Given a Tiled cell, return a corresponding map chunk it resides in."
-  (map-chunk-of-coords (cl-tiled:cell-column cell)
-                       (cl-tiled:cell-row cell)
-                       :chunk-width chunk-width :chunk-height chunk-height))
+(defun tiled-cell-world-coords (cell)
+  (list :x (cl-tiled:cell-column cell) :y (cl-tiled:cell-row cell)))
 
 
-(defun map-chunk-of-coords (x y &key (chunk-width 72) (chunk-height 20))
-  "Given a pair of coordinates, return the map chunk they reside within."
-  (list (floor (/ x chunk-width)) (floor (/ y chunk-height))))
+(defun world-coords->screen-coords (world-coords &key (chunk-width 72) (chunk-height 20))
+  (let* ((chunk-x (floor (/ (getf world-coords :x)
+                            chunk-width)))
+         (chunk-y (floor (/ (getf world-coords :y)
+                            chunk-height)))
+         (x (- (getf world-coords :x) (* chunk-x chunk-width)))
+         (y (- (getf world-coords :y) (* chunk-y chunk-height))))
+    (list :x x
+          :y y
+          :chunk (coords->symbol chunk-x chunk-y))))
 
 
 (defun coords->symbol (x y)
@@ -162,34 +168,37 @@ with 15 characters-per-line."
 (defun matrix-write-entities (matrix entities-alist)
   "Draw all entities from an alist of entities to the matrix."
   (mapcar (lambda (entity-assoc)
-            (matrix-write-entity matrix (cdr entity-assoc)))
+;;            (ignore-errors
+             (matrix-write-entity matrix (cdr entity-assoc)))
    entities-alist))
 
 
 (defun matrix-write-entity (matrix entity-plist)
   "Render an entity-plist to the matrix."
-  (let ((x (getf entity-plist :x))
-        (y (getf entity-plist :y))
-        (face (getf entity-plist :face)))
-    (setf (aref matrix y x) #\|)
-    (setf (aref matrix y (+ (length face) x 1))
-          #\|)
+  (let* ((screen-coords (world-coords->screen-coords (getf entity-plist :coords)))
+         (x (getf screen-coords :x))
+         (y (getf screen-coords :y))
+         (face (getf entity-plist :face)))
+    (ignore-errors (setf (aref matrix y x) #\|))
+    (ignore-errors (setf (aref matrix y (+ (length face) x 1))
+                         #\|))
     (render-line matrix face (+ x 1) y)
     (matrix-write-entity-legs matrix entity-plist)))
 
 
 (defun matrix-write-entity-legs (matrix entity-plist)
   "Draw an entity's legs — a surprisingly in-depth task!"
-  (let ((x (getf entity-plist :x))
-        (y (+ (getf entity-plist :y) 1))
-        (width (+ (length (getf entity-plist :face)) 2))
-        (direction (getf entity-plist :direction)))
+  (let* ((screen-coords (world-coords->screen-coords (getf entity-plist :coords)))
+         (x (getf screen-coords :x))
+         (y (+ (getf screen-coords :y) 1))
+         (width (+ (length (getf entity-plist :face)) 2))
+         (direction (getf entity-plist :direction)))
     (cond ((eq direction 'right)
-           (setf (aref matrix y (+ x 1)) #\|)
-           (setf (aref matrix y (+ x 2)) #\|))
+           (ignore-errors (setf (aref matrix y (+ x 1)) #\|))
+           (ignore-errors (setf (aref matrix y (+ x 2)) #\|)))
           ((eq direction 'left)
-           (setf (aref matrix y (+ x width -2)) #\|)
-           (setf (aref matrix y (+ x width -3)) #\|)))))
+           (ignore-errors (setf (aref matrix y (+ x width -2)) #\|))
+           (ignore-errors (setf (aref matrix y (+ x width -3)) #\|))))))
 
 
 

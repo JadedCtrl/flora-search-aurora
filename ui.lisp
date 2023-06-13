@@ -19,7 +19,7 @@
 
 (defpackage :flora-search-aurora.ui
   (:use :cl :flora-search-aurora.display :flora-search-aurora.input :assoc-utils)
-  (:export #:menu-state #:render-menu-strip :label :selection :selected))
+  (:export #:menu-state #:render-line :label :selection :selected))
 
 (in-package :flora-search-aurora.ui)
 
@@ -54,14 +54,14 @@ A core part of #'menu-state."
 ;;; ———————————————————————————————————
 (defun render-line (matrix text x y)
   "Apply a one-line string to the matrix at the given coordinates."
-  (if (and (stringp text)
-           (> (length text) 0))
-      (progn
-        (setf (aref matrix y x)
-              (char text 0))
-        (render-line matrix (subseq text 1)
-                     (+ x 1) y))
-      matrix))
+  (let ((dims (array-dimensions matrix)))
+    (if (and (stringp text)
+             (> (length text) 0))
+        (progn
+          (ignore-errors (setf (aref matrix y x) (char text 0)))
+          (render-line matrix (subseq text 1)
+                       (+ x 1) y))
+        matrix)))
 
 
 (defun render-menu-item
@@ -73,7 +73,6 @@ left-to-right, unless negative — in which case, right-to-left."
   (render-string matrix text (+ x 1) (+ 1 y)
                  :max-column (- (+ x width) 1)
                  :max-row (- (+ y height) 2))
-
   ;; Render the normal top and bottom bars.
   (dotimes (i width)
     (setf (aref matrix y (+ x i)) #\-)

@@ -33,7 +33,7 @@
 (defun overworld-state
     (matrix &key (map-path nil) (map (load-map-chunks map-path))
               (entities-alist
-               '((player :coords (:x 1 :y 1) :face "uwu" :direction right))))
+               '((player :coords (:x 3 :y 3) :face "uwu" :direction right))))
   "Render the given map to the matrix and take user-input — for one frame.
 A state-function for use with STATE-LOOP."
   (sleep .02)
@@ -175,30 +175,38 @@ with 15 characters-per-line."
 
 (defun matrix-write-entity (matrix entity-plist)
   "Render an entity-plist to the matrix."
+  (matrix-write-entity-head matrix entity-plist)
+  (matrix-write-entity-legs matrix entity-plist))
+
+
+(defun matrix-write-entity-head (matrix entity-plist)
+  "Draw an entity’s head. There aren't any Mami Tomoes in this game, dang it!"
   (let* ((screen-coords (world-coords->screen-coords (getf entity-plist :coords)))
-         (x (getf screen-coords :x))
-         (y (getf screen-coords :y))
-         (face (getf entity-plist :face)))
-    (ignore-errors (setf (aref matrix y x) #\|))
-    (ignore-errors (setf (aref matrix y (+ (length face) x 1))
-                         #\|))
+         (direction (getf entity-plist :direction))
+         (face (getf entity-plist :face))
+         (width (+ (length face) 2)) ;; Face + |borders|
+         (y (- (getf screen-coords :y) 1))
+         (x (if (eq direction 'right)
+                (- (getf screen-coords :x) (floor (/ width 2)) 0)
+                (- (getf screen-coords :x) (floor (/ width 2)) 0))))
     (render-line matrix face (+ x 1) y)
-    (matrix-write-entity-legs matrix entity-plist)))
+    (ignore-errors (setf (aref matrix y x) #\|))
+    (ignore-errors (setf (aref matrix y (+ width x -1))
+                         #\|))))
 
 
 (defun matrix-write-entity-legs (matrix entity-plist)
-  "Draw an entity's legs — a surprisingly in-depth task!"
+  "Draw a bipdel entity’s legs — a surprisingly in-depth task!"
   (let* ((screen-coords (world-coords->screen-coords (getf entity-plist :coords)))
          (x (getf screen-coords :x))
-         (y (+ (getf screen-coords :y) 1))
-         (width (+ (length (getf entity-plist :face)) 2))
+         (y (getf screen-coords :y))
          (direction (getf entity-plist :direction)))
     (cond ((eq direction 'right)
-           (ignore-errors (setf (aref matrix y (+ x 1)) #\|))
-           (ignore-errors (setf (aref matrix y (+ x 2)) #\|)))
+           (ignore-errors (setf (aref matrix y x) #\|))
+           (ignore-errors (setf (aref matrix y (- x 1)) #\|)))
           ((eq direction 'left)
-           (ignore-errors (setf (aref matrix y (+ x width -2)) #\|))
-           (ignore-errors (setf (aref matrix y (+ x width -3)) #\|))))))
+           (ignore-errors (setf (aref matrix y x) #\|))
+           (ignore-errors (setf (aref matrix y (+ x 1)) #\|))))))
 
 
 

@@ -31,68 +31,69 @@
 ;;; Overworld loop
 ;;; ———————————————————————————————————
 (defun overworld-state
-    (matrix &key (map-path nil) (map (getf (load-map map-path) :tile-chunks))
-              (entities-alist
-               '((player :coords (:x 3 :y 3) :face "uwu" :direction right))))
+    (matrix &key (map-path nil) (map (load-map map-path)))
   "Render the given map to the matrix and take user-input — for one frame.
 A state-function for use with STATE-LOOP."
   (sleep .02)
-  (overworld-state-draw matrix map entities-alist)
-  (overworld-state-update map entities-alist))
+  (overworld-state-draw matrix map)
+  (overworld-state-update map))
 
 
-(defun overworld-state-draw (matrix map entities)
+(defun overworld-state-draw (matrix map)
   "Draw the overworld map to the given matrix.
 A core part of OVERWORLD-STATE."
-  (let* ((player-data (cdr (assoc 'player entities)))
-         (chunk (getf (world-coords->screen-coords (getf player-data :coords)) :chunk)))
+  (let* ((player-data (cdr (assoc 'player (getf map :entities))))
+         (chunk (world-coords-chunk (getf player-data :coords))))
     (matrix-write-tiled-map-chunk matrix map chunk)
-    (matrix-write-entities matrix entities)))
+    (matrix-write-entities matrix map)))
 
 
-(defun overworld-state-update (map entities-alist)
+(defun overworld-state-update (map)
   "Do nothing, lol. Core part of OVERWORLD-STATE.
 Returns parameters to be used in the next invocation of OVERWORLD-STATE."
-  (process-overworld-input map entities-alist)
-  (list :map map :entities-alist entities-alist))
+  (process-overworld-input map)
+  (list :map map))
 
 
 
 ;;; ———————————————————————————————————
 ;;; Overworld logic
 ;;; ———————————————————————————————————
-(defun process-overworld-input (map entities)
+(defun process-overworld-input (map)
   "Get and process any keyboard input, modifying the map or entities as necessary."
   (if (listen)
       (let* ((input (normalize-char-plist (read-char-plist))))
         (cond
           ((plist= input '(:modifier nil :char #\→))
-           (move-entity 'player entities :x 1))
+           (move-entity map 'player :x 1))
           ((plist= input '(:modifier nil :char #\←))
-           (move-entity 'player entities :x -1))
+           (move-entity map 'player :x -1))
           ((plist= input '(:modifier nil :char #\↑))
-           (move-entity 'player entities :y -1))
+           (move-entity map 'player :y -1))
           ((plist= input '(:modifier nil :char #\↓))
-           (move-entity 'player entities :y 1))))))
+           (move-entity map 'player :y 1))))))
 
 
-(defun move-entity (entity entities-alist &key (x 0) (y 0))
+(defun move-entity (map entity &key (x 0) (y 0))
   "Move an entity relative to its current position."
-  (let ((entity-plist (cdr (assoc entity entities-alist))))
+  (let ((entity-plist (cdr (assoc entity (getf map :entities)))))
     (when (< x 0)
       (setf (getf entity-plist :direction) 'left))
     (when (> x 0)
       (setf (getf entity-plist :direction) 'right))
-    (move-entity-to entity entities-alist
+    (move-entity-to map entity
                     :x (+ x (getf (getf entity-plist :coords) :x))
                     :y (+ y (getf (getf entity-plist :coords) :y)))))
 
 
-(defun move-entity-to (entity entities-alist &key (x 0) (y 0))
+(defun move-entity-to (map entity &key (x 0) (y 0))
   "Move the given entity to the given coordinates."
-  (let ((entity-plist (cdr (assoc entity entities-alist))))
-    (setf (getf (getf entity-plist :coords) :x) x)
-    (setf (getf (getf entity-plist :coords) :y) y)))
+  (let ((entity-plist (cdr (assoc entity (getf map :entities)))))
+    (when (walkable-tile-p map x y)
+      (setf (getf (getf entity-plist :coords) :x) x)
+      (setf (getf (getf entity-plist :coords) :y) y))))
+
+
 
 
 
@@ -103,16 +104,20 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
   "Parse a map-file into an plist of its data.)
 At the moment, this consists solely of :TILE-CHUNKS, all visible cells sorted
 into an alist by their “chunk” on the map."
-  (let ((tile-chunks '()))
+  (let ((tile-chunks '())
+        (bump-map '())
+        (entities '((player :coords (:x 10 :y 10) :face "uwu" :direction right))))
     (mapcar (lambda (layer)
               (typecase layer
                 (cl-tiled.data-types:tile-layer
-                 (setf tile-chunks (load-map-tile-layer layer tile-chunks)))))
+                 (when (gethash "colliding" (cl-tiled:properties layer) #'string-equal)
+                   (setf bump-map (tile-layer-chunks layer bump-map)))
+                 (setf tile-chunks (tile-layer-chunks layer tile-chunks)))))
             (cl-tiled:map-layers (cl-tiled:load-map map-file)))
-    (list :tile-chunks tile-chunks)))
+    (list :tiles tile-chunks :bump-map bump-map :entities entities)))
 
 
-(defun load-map-tile-layer (layer &optional (tile-chunks '()))
+(defun tile-layer-chunks (layer &optional (chunks '()))
   "Given a Tiled tile-layer (that is, graphics of the map), parse it into an
 alist of Tiled cell “chunks”."
   (let ((cells (cl-tiled:layer-cells layer)))
@@ -121,14 +126,15 @@ alist of Tiled cell “chunks”."
      (lambda (cell)
        (getf (world-coords->screen-coords (tiled-cell-world-coords cell))
              :chunk))
-     :groups tile-chunks)))
+     :groups chunks)))
 
 
-(defun matrix-write-tiled-map-chunk (matrix map-alist chunk
+(defun matrix-write-tiled-map-chunk (matrix map chunk
                                      &key (chunk-width 72) (chunk-height 20))
+  "Draw a map’s specific chunk (by its ID) to the matrix."
   (mapcar (lambda (cell)
             (matrix-write-tiled-cell matrix cell))
-          (cdr (assoc chunk map-alist))))
+          (cdr (assoc chunk (getf map :tiles)))))
 
 
 (defun matrix-write-tiled-cell (matrix cell)
@@ -153,10 +159,28 @@ with 15 characters-per-line."
 
 
 (defun tiled-cell-world-coords (cell)
+  "Return the world coordinates of a cell."
   (list :x (cl-tiled:cell-column cell) :y (cl-tiled:cell-row cell)))
 
 
+(defun tiled-cell-at-world-coords-p (map-chunks coords)
+  "Return whether or not there is a Tiled cell at the given coordinates."
+  (let ((chunk (world-coords-chunk coords)))
+    (member 't (cdr (assoc chunk map-chunks))
+            :test (lambda (ignored cell)
+                    (plist= (tiled-cell-world-coords cell) coords)))))
+
+
+(defun walkable-tile-p (map x y)
+  "Return whether or not the given coordinates on the map are traversable for an entity."
+  (not (tiled-cell-at-world-coords-p (getf map :bump-map)
+                                     (list :x x :y y))))
+
+
 (defun world-coords->screen-coords (world-coords &key (chunk-width 72) (chunk-height 20))
+  "Given a set of “world” coordinates, determine where this spot would be on the screen.
+The world is split into screen-sized “chunks” to this end.
+— Chester P. Runk"
   (let* ((chunk-x (floor (/ (getf world-coords :x)
                             chunk-width)))
          (chunk-y (floor (/ (getf world-coords :y)
@@ -166,6 +190,10 @@ with 15 characters-per-line."
     (list :x x
           :y y
           :chunk (coords->symbol chunk-x chunk-y))))
+
+
+(defun world-coords-chunk (coords)
+  (getf (world-coords->screen-coords coords) :chunk))
 
 
 (defun coords->symbol (x y)
@@ -180,12 +208,11 @@ with 15 characters-per-line."
 ;;; ———————————————————————————————————
 ;;; Entity magic (AKA player, NPCs)
 ;;; ———————————————————————————————————
-(defun matrix-write-entities (matrix entities-alist)
+(defun matrix-write-entities (matrix map)
   "Draw all entities from an alist of entities to the matrix."
   (mapcar (lambda (entity-assoc)
-;;            (ignore-errors
-             (matrix-write-entity matrix (cdr entity-assoc)))
-   entities-alist))
+            (matrix-write-entity matrix (cdr entity-assoc)))
+   (getf map :entities)))
 
 
 (defun matrix-write-entity (matrix entity-plist)

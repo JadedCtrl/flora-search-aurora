@@ -31,7 +31,7 @@
 ;;; Overworld loop
 ;;; ———————————————————————————————————
 (defun overworld-state
-    (matrix &key (map-path nil) (map (load-map-chunks map-path))
+    (matrix &key (map-path nil) (map (getf (load-map map-path) :tile-chunks))
               (entities-alist
                '((player :coords (:x 3 :y 3) :face "uwu" :direction right))))
   "Render the given map to the matrix and take user-input — for one frame.
@@ -99,14 +99,29 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
 ;;; ———————————————————————————————————
 ;;; Mapping & map-rendering
 ;;; ———————————————————————————————————
-(defun load-map-chunks (map-file)
-  (let ((cells (mapcar #'cl-tiled:layer-cells
-                       (cl-tiled:map-layers (cl-tiled:load-map map-file)))))
+(defun load-map (map-file)
+  "Parse a map-file into an plist of its data.)
+At the moment, this consists solely of :TILE-CHUNKS, all visible cells sorted
+into an alist by their “chunk” on the map."
+  (let ((tile-chunks '()))
+    (mapcar (lambda (layer)
+              (typecase layer
+                (cl-tiled.data-types:tile-layer
+                 (setf tile-chunks (load-map-tile-layer layer tile-chunks)))))
+            (cl-tiled:map-layers (cl-tiled:load-map map-file)))
+    (list :tile-chunks tile-chunks)))
+
+
+(defun load-map-tile-layer (layer &optional (tile-chunks '()))
+  "Given a Tiled tile-layer (that is, graphics of the map), parse it into an
+alist of Tiled cell “chunks”."
+  (let ((cells (cl-tiled:layer-cells layer)))
     (collect-items-into-groups
-     (cdar cells) ;; Only take the first layer, for now!
+     (cl-tiled:layer-cells layer)
      (lambda (cell)
        (getf (world-coords->screen-coords (tiled-cell-world-coords cell))
-             :chunk)))))
+             :chunk))
+     :groups tile-chunks)))
 
 
 (defun matrix-write-tiled-map-chunk (matrix map-alist chunk
@@ -213,17 +228,16 @@ with 15 characters-per-line."
 ;;; ———————————————————————————————————
 ;;; Misc. utility
 ;;; ———————————————————————————————————
-(defun collect-items-into-groups (list key-function)
+(defun collect-items-into-groups (list key-function &key (groups '()))
   "Given a LIST of items and a function categorizing an individual item
 (returning a “category” symbol for any given item), return an sorted
 associative list."
-  (let ((groups-alist '()))
-    (loop for item in list
-          do (let ((key (apply key-function (list item))))
-               (setf (assoc-utils:aget groups-alist key)
-                     (append (assoc-utils:aget groups-alist key)
-                             (list item)))))
-    groups-alist))
+  (loop for item in list
+        do (let ((key (apply key-function (list item))))
+             (setf (assoc-utils:aget groups key)
+                   (append (assoc-utils:aget groups key)
+                           (list item)))))
+  groups)
 
 
 (defun every-other-element (list)

@@ -120,32 +120,36 @@ into an alist by their “chunk” on the map."
 (defun tile-layer-chunks (layer &optional (chunks '()))
   "Given a Tiled tile-layer (that is, graphics of the map), parse it into an
 alist of Tiled cell “chunks”."
-  (let ((cells (cl-tiled:layer-cells layer)))
+  (let ((cells (mapcar #'tiled-cell->cell (cl-tiled:layer-cells layer))))
     (collect-items-into-groups
-     (cl-tiled:layer-cells layer)
+     cells
      (lambda (cell)
-       (getf (world-coords->screen-coords (tiled-cell-world-coords cell))
-             :chunk))
+       (world-coords-chunk (getf cell :coords)))
      :groups chunks)))
+
+
+(defun tiled-cell->cell (tiled-cell)
+  (list :coords (list :x (cl-tiled:cell-column tiled-cell)
+                      :y (cl-tiled:cell-row tiled-cell))
+        :char (tiled-tile-character (cl-tiled:cell-tile tiled-cell))))
 
 
 (defun matrix-write-tiled-map-chunk (matrix map chunk
                                      &key (chunk-width 72) (chunk-height 20))
   "Draw a map’s specific chunk (by its ID) to the matrix."
   (mapcar (lambda (cell)
-            (matrix-write-tiled-cell matrix cell))
+            (matrix-write-cell matrix cell))
           (cdr (assoc chunk (getf map :tiles)))))
 
 
-(defun matrix-write-tiled-cell (matrix cell)
-  "Set a matrice's (2d array's) element corresponding to
-a Tiled cell's character-value, using it's column and row."
-  (let ((coords (world-coords->screen-coords (tiled-cell-world-coords cell))))
+(defun matrix-write-cell (matrix cell)
+  "Set a matrice's (2d array's) element corresponding to a “cell”; that is, an
+alist containing a character (:CHAR) and :X & :Y coordinates."
+  (let ((coords (world-coords->screen-coords (getf cell :coords))))
     (setf (aref matrix
                 (getf coords :y)
                 (getf coords :x))
-          (tiled-tile-character
-           (cl-tiled:cell-tile cell)))))
+          (getf cell :char))))
 
 
 (defun tiled-tile-character (tile)
@@ -158,23 +162,18 @@ with 15 characters-per-line."
       32)))
 
 
-(defun tiled-cell-world-coords (cell)
-  "Return the world coordinates of a cell."
-  (list :x (cl-tiled:cell-column cell) :y (cl-tiled:cell-row cell)))
-
-
-(defun tiled-cell-at-world-coords-p (map-chunks coords)
-  "Return whether or not there is a Tiled cell at the given coordinates."
+(defun cell-at-world-coords-p (map-chunks coords)
+  "Return whether or not there is a cell at the given coordinates."
   (let ((chunk (world-coords-chunk coords)))
     (member 't (cdr (assoc chunk map-chunks))
             :test (lambda (ignored cell)
-                    (plist= (tiled-cell-world-coords cell) coords)))))
+                    (plist= (getf cell :coords) coords)))))
 
 
 (defun walkable-tile-p (map x y)
   "Return whether or not the given coordinates on the map are traversable for an entity."
-  (not (tiled-cell-at-world-coords-p (getf map :bump-map)
-                                     (list :x x :y y))))
+  (not (cell-at-world-coords-p (getf map :bump-map)
+                               (list :x x :y y))))
 
 
 (defun world-coords->screen-coords (world-coords &key (chunk-width 72) (chunk-height 20))

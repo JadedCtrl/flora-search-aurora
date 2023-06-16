@@ -65,6 +65,10 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
   (if (listen)
       (let* ((input (normalize-char-plist (read-char-plist))))
         (cond
+          ((plist= input '(:modifier nil :char #\return))
+           (let ((interact (getf (cdr (assoc 'player (getf map :entities))) :interact)))
+             (if interact
+                 (apply (intern interact) (list map)))))
           ((plist= input '(:modifier nil :char #\→))
            (move-entity map 'player :x 1))
           ((plist= input '(:modifier nil :char #\←))
@@ -173,7 +177,7 @@ alist containing a character (:CHAR) and :X & :Y coordinates."
     (cond ((eq direction 'right)
            (ignore-errors (setf (aref matrix y x) #\|))
            (ignore-errors (setf (aref matrix y (- x 1)) #\|)))
-          ((eq direction 'left)
+          ('t
            (ignore-errors (setf (aref matrix y x) #\|))
            (ignore-errors (setf (aref matrix y (+ x 1)) #\|))))))
 

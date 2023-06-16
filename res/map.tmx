@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="left-down" width="144" height="40" tilewidth="12" tileheight="17" infinite="0" nextlayerid="10" nextobjectid="3">
+<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="left-down" width="144" height="40" tilewidth="12" tileheight="17" infinite="0" nextlayerid="10" nextobjectid="5">
  <tileset firstgid="1" source="font.tsx"/>
  <layer id="1" name="Background" width="144" height="40">
   <properties>
@@ -98,9 +98,19 @@
  <objectgroup id="7" name="Entities">
   <object id="2" name="Player" type="Entity" x="103" y="368">
    <properties>
-    <property name="face" value="uwu"/>
+    <property name="face" value="=w="/>
     <property name="facing_right" type="bool" value="true"/>
     <property name="id" value="player"/>
+    <property name="interact" value="TALK"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="4" name="Literary girl" type="Entity" x="317.604" y="366.606">
+   <properties>
+    <property name="face" value="owo"/>
+    <property name="facing_right" type="bool" value="true"/>
+    <property name="id" value="literary-girl"/>
+    <property name="interact" value="flora-search-aurora::interact"/>
    </properties>
    <point/>
   </object>

@@ -22,6 +22,7 @@
 (load "input.lisp")
 (load "display.lisp")
 (load "ui.lisp")
+(load "tiled.lisp")
 (load "overworld.lisp")
 
 (defpackage :flora-search-aurora
@@ -31,6 +32,10 @@
    :flora-search-aurora.overworld :flora-search-aurora.ui))
 
 (in-package :flora-search-aurora)
+
+
+(defun talk (map)
+  (print "AAAAA"))
 
 
 (defun state-loop
@@ -49,9 +54,8 @@ state-function in the next iteration, in addition to the aforementioned matrix.
 If this function returns a function, then the returned function will go to the front of the
 state-function list, and will be ran in the next iteration onward.
 If this function returns anything else, then it’ll simply be run again in the next iteration.
-Make note to add a delay to your state functions, or… well, y’know. Your computer will overheat,
-or something ¯\_(ツ)_/¯"
-
+Make note to add a delay w SLEEP to your state functions, or… well, y’know. Your computer will
+overheat, or something ¯\_(ツ)_/¯"
   (when states
    (let ((state-result
            (apply (car states) (cons matrix state-params)))) ;; Run the latest-added update/draw loop
@@ -69,7 +73,7 @@ or something ¯\_(ツ)_/¯"
 
 
 (defun make-main-menu-state ()
-  "Return a state-function for the game’s main menu, for use with #'state-loop."
+  "Return a state-function for the game’s main menu, for use with STATE-LOOP."
   (let ((main-menu
           `(((LABEL . "PLAY")
              (SELECTION . 100) (SELECTED . T)
@@ -82,7 +86,7 @@ or something ¯\_(ツ)_/¯"
 
 
 (defun make-options-menu-state ()
-  "Return a state-function for the options menu, for use with #'state-loop."
+  "Return a state-function for the options menu, for use with STATE-LOOP."
   (let ((options-menu
           `(((LABEL . "IDK")
              (SELECTION . 100) (SELECTED . T)
@@ -94,8 +98,8 @@ or something ¯\_(ツ)_/¯"
 
 
 (defun make-main-overworld-state ()
-  "Return a state-function for the game’s overworld (the majority of the game), for use with
-#'state-loop."
+  "Return a state-function for the game’s overworld (the majority of the game), for use
+with STATE-LOOP."
   (lambda (matrix &rest args)
     (apply #'overworld-state
            (append (list matrix)
@@ -106,6 +110,7 @@ or something ¯\_(ツ)_/¯"
 (defun main ()
   "A pathetic fascimile of a main loop. What does it do? WHAST DOES TI DODOO?"
   (cl-charms:with-curses ()
+   (cl-charms/low-level:curs-set 0) ;; Hide the terminal cursor
    (cl-charms:enable-raw-input :interpret-control-characters 't)
    (clear-screen)
    (state-loop (list (make-main-menu-state)))))

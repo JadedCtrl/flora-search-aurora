@@ -20,8 +20,9 @@
 (defpackage :flora-search-aurora.overworld
   (:use :cl
    :flora-search-aurora.input :flora-search-aurora.display
+   :flora-search-aurora.overworld.tiled
    :flora-search-aurora.ui)
-  (:export #:overworld-state #:player))
+  (:export #:overworld-state :player))
 
 (in-package :flora-search-aurora.overworld)
 
@@ -42,7 +43,7 @@ A state-function for use with STATE-LOOP."
 (defun overworld-state-draw (matrix map)
   "Draw the overworld map to the given matrix.
 A core part of OVERWORLD-STATE."
-  (let* ((player-data (cdr (assoc 'PLAYER (getf map :entities))))
+  (let* ((player-data (cdr (assoc 'player (getf map :entities))))
          (chunk (world-coords-chunk (getf player-data :coords))))
     (matrix-write-map-chunk matrix map chunk)
     (matrix-write-entities matrix map)))
@@ -98,65 +99,6 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
 ;;; ———————————————————————————————————
 ;;; Mapping & map-rendering
 ;;; ———————————————————————————————————
-(defun load-map (map-file)
-  "Parse a map-file into an plist of its data.)
-At the moment, this consists solely of :TILE-CHUNKS, all visible cells sorted
-into an alist by their “chunk” on the map."
-  (let ((tile-chunks '())
-        (bump-map '())
-        (entities '()))
-    (mapcar (lambda (layer)
-              (typecase layer
-                (cl-tiled.data-types:tile-layer
-                 (when (gethash "colliding" (cl-tiled:properties layer) #'string-equal)
-                   (setf bump-map (tiled-tile-layer-chunks layer bump-map)))
-                 (setf tile-chunks (tiled-tile-layer-chunks layer tile-chunks)))
-                (cl-tiled.data-types:object-layer
-                 (setf entities (tiled-object-layer-entities layer entities)))))
-            (cl-tiled:map-layers (cl-tiled:load-map map-file)))
-    (list :tiles tile-chunks :bump-map bump-map :entities entities)))
-
-
-(defun tiled-tile-layer-chunks (layer &optional (chunks '()))
-  "Given a Tiled tile-layer (that is, graphics of the map), parse it into an
-alist of Tiled cell “chunks”."
-  (let ((cells (mapcar #'tiled-cell->cell (cl-tiled:layer-cells layer))))
-    (collect-items-into-groups
-     cells
-     (lambda (cell)
-       (world-coords-chunk (getf cell :coords)))
-     :groups chunks)))
-
-
-(defun tiled-object-layer-entities (layer &optional (entities '()))
-  (append
-   entities
-   (mapcar
-    (lambda (object)
-      (tiled-object->entity object
-                      (cl-tiled:layer-map layer)))
-    (layer-objects layer))))
-
-
-(defun tiled-object->entity (tiled-obj tiled-map)
-  (let ((properties (cl-tiled:properties tiled-obj)))
-    (list (intern (string-upcase (gethash "id" properties #'string-equal)))
-          :coords (list :x (floor (/ (cl-tiled:object-x tiled-obj)
-                                     (cl-tiled:map-tile-width tiled-map)))
-                        :y (floor (/ (cl-tiled:object-y tiled-obj)
-                                     (cl-tiled:map-tile-height tiled-map))))
-          :face (gethash "face" properties #'string-equal)
-          :direction (if (gethash "facing_right" properties #'string-equal)
-                         'right
-                         'left))))
-
-
-(defun tiled-cell->cell (tiled-cell)
-  (list :coords (list :x (cl-tiled:cell-column tiled-cell)
-                      :y (cl-tiled:cell-row tiled-cell))
-        :char (tiled-tile-character (cl-tiled:cell-tile tiled-cell))))
-
-
 (defun matrix-write-map-chunk (matrix map chunk
                                &key (chunk-width 72) (chunk-height 20))
   "Draw a map’s specific chunk (by its ID) to the matrix."
@@ -175,20 +117,6 @@ alist containing a character (:CHAR) and :X & :Y coordinates."
           (getf cell :char))))
 
 
-(defun layer-objects (layer)
-  (slot-value layer 'cl-tiled.data-types::objects))
-
-
-(defun tiled-tile-character (tile)
-  "Given a tileset's tile, return it's corresponding text character,
-assuming that the tileset is a bitmap font starting with char-code 32
-with 15 characters-per-line."
-  (code-char
-   (+ (* (cl-tiled:tile-row tile) 15)
-      (cl-tiled:tile-column tile)
-      32)))
-
-
 (defun cell-at-world-coords-p (map-chunks coords)
   "Return whether or not there is a cell at the given coordinates."
   (let ((chunk (world-coords-chunk coords)))
@@ -201,33 +129,6 @@ with 15 characters-per-line."
   "Return whether or not the given coordinates on the map are traversable for an entity."
   (not (cell-at-world-coords-p (getf map :bump-map)
                                (list :x x :y y))))
-
-
-(defun world-coords->screen-coords (world-coords &key (chunk-width 72) (chunk-height 20))
-  "Given a set of “world” coordinates, determine where this spot would be on the screen.
-The world is split into screen-sized “chunks” to this end.
-— Chester P. Runk"
-  (let* ((chunk-x (floor (/ (getf world-coords :x)
-                            chunk-width)))
-         (chunk-y (floor (/ (getf world-coords :y)
-                            chunk-height)))
-         (x (- (getf world-coords :x) (* chunk-x chunk-width)))
-         (y (- (getf world-coords :y) (* chunk-y chunk-height))))
-    (list :x x
-          :y y
-          :chunk (coords->symbol chunk-x chunk-y))))
-
-
-(defun world-coords-chunk (coords)
-  (getf (world-coords->screen-coords coords) :chunk))
-
-
-(defun coords->symbol (x y)
-  (intern (format nil "~A,~A" x y)))
-
-
-(defun symbol->coords (coords-symbol)
-  (str:split #\, (symbol-name coords-symbol)))
 
 
 
@@ -281,18 +182,6 @@ The world is split into screen-sized “chunks” to this end.
 ;;; ———————————————————————————————————
 ;;; Misc. utility
 ;;; ———————————————————————————————————
-(defun collect-items-into-groups (list key-function &key (groups '()))
-  "Given a LIST of items and a function categorizing an individual item
-(returning a “category” symbol for any given item), return an sorted
-associative list."
-  (loop for item in list
-        do (let ((key (apply key-function (list item))))
-             (setf (assoc-utils:aget groups key)
-                   (append (assoc-utils:aget groups key)
-                           (list item)))))
-  groups)
-
-
 (defun every-other-element (list)
   "Collect every-other-element of a list. E.g., (1 2 3 4) → (1 3)."
   (when list

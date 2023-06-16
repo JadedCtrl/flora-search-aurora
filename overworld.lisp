@@ -21,7 +21,7 @@
   (:use :cl
    :flora-search-aurora.input :flora-search-aurora.display
    :flora-search-aurora.ui)
-  (:export #:overworld-state))
+  (:export #:overworld-state #:player))
 
 (in-package :flora-search-aurora.overworld)
 
@@ -42,9 +42,9 @@ A state-function for use with STATE-LOOP."
 (defun overworld-state-draw (matrix map)
   "Draw the overworld map to the given matrix.
 A core part of OVERWORLD-STATE."
-  (let* ((player-data (cdr (assoc 'player (getf map :entities))))
+  (let* ((player-data (cdr (assoc 'PLAYER (getf map :entities))))
          (chunk (world-coords-chunk (getf player-data :coords))))
-    (matrix-write-tiled-map-chunk matrix map chunk)
+    (matrix-write-map-chunk matrix map chunk)
     (matrix-write-entities matrix map)))
 
 
@@ -94,8 +94,6 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
       (setf (getf (getf entity-plist :coords) :y) y))))
 
 
-
-
 
 ;;; ———————————————————————————————————
 ;;; Mapping & map-rendering
@@ -106,18 +104,20 @@ At the moment, this consists solely of :TILE-CHUNKS, all visible cells sorted
 into an alist by their “chunk” on the map."
   (let ((tile-chunks '())
         (bump-map '())
-        (entities '((player :coords (:x 10 :y 10) :face "uwu" :direction right))))
+        (entities '()))
     (mapcar (lambda (layer)
               (typecase layer
                 (cl-tiled.data-types:tile-layer
                  (when (gethash "colliding" (cl-tiled:properties layer) #'string-equal)
-                   (setf bump-map (tile-layer-chunks layer bump-map)))
-                 (setf tile-chunks (tile-layer-chunks layer tile-chunks)))))
+                   (setf bump-map (tiled-tile-layer-chunks layer bump-map)))
+                 (setf tile-chunks (tiled-tile-layer-chunks layer tile-chunks)))
+                (cl-tiled.data-types:object-layer
+                 (setf entities (tiled-object-layer-entities layer entities)))))
             (cl-tiled:map-layers (cl-tiled:load-map map-file)))
     (list :tiles tile-chunks :bump-map bump-map :entities entities)))
 
 
-(defun tile-layer-chunks (layer &optional (chunks '()))
+(defun tiled-tile-layer-chunks (layer &optional (chunks '()))
   "Given a Tiled tile-layer (that is, graphics of the map), parse it into an
 alist of Tiled cell “chunks”."
   (let ((cells (mapcar #'tiled-cell->cell (cl-tiled:layer-cells layer))))
@@ -128,16 +128,39 @@ alist of Tiled cell “chunks”."
      :groups chunks)))
 
 
+(defun tiled-object-layer-entities (layer &optional (entities '()))
+  (append
+   entities
+   (mapcar
+    (lambda (object)
+      (tiled-object->entity object
+                      (cl-tiled:layer-map layer)))
+    (layer-objects layer))))
+
+
+(defun tiled-object->entity (tiled-obj tiled-map)
+  (let ((properties (cl-tiled:properties tiled-obj)))
+    (list (intern (string-upcase (gethash "id" properties #'string-equal)))
+          :coords (list :x (floor (/ (cl-tiled:object-x tiled-obj)
+                                     (cl-tiled:map-tile-width tiled-map)))
+                        :y (floor (/ (cl-tiled:object-y tiled-obj)
+                                     (cl-tiled:map-tile-height tiled-map))))
+          :face (gethash "face" properties #'string-equal)
+          :direction (if (gethash "facing_right" properties #'string-equal)
+                         'right
+                         'left))))
+
+
 (defun tiled-cell->cell (tiled-cell)
   (list :coords (list :x (cl-tiled:cell-column tiled-cell)
                       :y (cl-tiled:cell-row tiled-cell))
         :char (tiled-tile-character (cl-tiled:cell-tile tiled-cell))))
 
 
-(defun matrix-write-tiled-map-chunk (matrix map chunk
-                                     &key (chunk-width 72) (chunk-height 20))
+(defun matrix-write-map-chunk (matrix map chunk
+                               &key (chunk-width 72) (chunk-height 20))
   "Draw a map’s specific chunk (by its ID) to the matrix."
-  (mapcar (lambda (cell)
+  (mapcar (lambda (cell) 
             (matrix-write-cell matrix cell))
           (cdr (assoc chunk (getf map :tiles)))))
 
@@ -150,6 +173,10 @@ alist containing a character (:CHAR) and :X & :Y coordinates."
                 (getf coords :y)
                 (getf coords :x))
           (getf cell :char))))
+
+
+(defun layer-objects (layer)
+  (slot-value layer 'cl-tiled.data-types::objects))
 
 
 (defun tiled-tile-character (tile)

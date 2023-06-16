@@ -35,7 +35,8 @@
   :ENTITIES, a list of entity plists."
   (let ((tile-chunks '())
         (bump-map '())
-        (entities '()))
+        (entities '())
+        (hash (make-hash-table)))
     (mapcar (lambda (layer)
               (typecase layer
                 (cl-tiled.data-types:tile-layer
@@ -45,18 +46,10 @@
                 (cl-tiled.data-types:object-layer
                  (setf entities (object-layer-entities layer entities)))))
             (cl-tiled:map-layers (cl-tiled:load-map map-file)))
-    (list :tiles tile-chunks :bump-map bump-map :entities entities)))
-
-
-(defun tile-layer-chunks (layer &optional (chunks '()))
-  "Given a Tiled tile-layer (that is, graphics of the map), parse it into an
-alist of Tiled cell “chunks”."
-  (let ((cells (mapcar #'tiled-cell->cell (cl-tiled:layer-cells layer))))
-    (collect-items-into-groups
-     cells
-     (lambda (cell)
-       (world-coords-chunk (getf cell :coords)))
-     :groups chunks)))
+    (setf (gethash :tiles hash) tile-chunks)
+    (setf (gethash :bump-map hash) bump-map)
+    (setf (gethash :entities hash) entities)
+    hash))
 
 
 (defun object-layer-entities (layer &optional (entities '()))
@@ -79,9 +72,21 @@ alist of Tiled cell “chunks”."
                         :y (floor (/ (cl-tiled:object-y tiled-obj)
                                      (cl-tiled:map-tile-height tiled-map))))
           :face (gethash "face" properties #'string-equal)
+          :interact (gethash "interact" properties #'string-equal)
           :direction (if (gethash "facing_right" properties #'string-equal)
                          'right
                          'left))))
+
+
+(defun tile-layer-chunks (layer &optional (chunks '()))
+  "Given a Tiled tile-layer (that is, graphics of the map), parse it into an
+alist of Tiled cell “chunks”."
+  (let ((cells (mapcar #'tiled-cell->cell (cl-tiled:layer-cells layer))))
+    (collect-items-into-groups
+     cells
+     (lambda (cell)
+       (world-coords-chunk (getf cell :coords)))
+     :groups chunks)))
 
 
 (defun tiled-cell->cell (tiled-cell)

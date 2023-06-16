@@ -43,7 +43,7 @@ A state-function for use with STATE-LOOP."
 (defun overworld-state-draw (matrix map)
   "Draw the overworld map to the given matrix.
 A core part of OVERWORLD-STATE."
-  (let* ((player-data (cdr (assoc 'player (getf map :entities))))
+  (let* ((player-data (cdr (assoc 'player (gethash :entities map))))
          (chunk (world-coords-chunk (getf player-data :coords))))
     (matrix-write-map-chunk matrix map chunk)
     (matrix-write-entities matrix map)))
@@ -66,7 +66,8 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
       (let* ((input (normalize-char-plist (read-char-plist))))
         (cond
           ((plist= input '(:modifier nil :char #\return))
-           (let ((interact (getf (cdr (assoc 'player (getf map :entities))) :interact)))
+           (let ((interact (getf (cdr (assoc 'player (gethash :entities map)))
+                                 :interact)))
              (if interact
                  (apply (intern interact) (list map)))))
           ((plist= input '(:modifier nil :char #\→))
@@ -81,7 +82,7 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
 
 (defun move-entity (map entity &key (x 0) (y 0))
   "Move an entity relative to its current position."
-  (let ((entity-plist (cdr (assoc entity (getf map :entities)))))
+  (let ((entity-plist (cdr (assoc entity (gethash :entities map)))))
     (when (< x 0)
       (setf (getf entity-plist :direction) 'left))
     (when (> x 0)
@@ -93,7 +94,7 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
 
 (defun move-entity-to (map entity &key (x 0) (y 0))
   "Move the given entity to the given coordinates."
-  (let ((entity-plist (cdr (assoc entity (getf map :entities)))))
+  (let ((entity-plist (cdr (assoc entity (gethash :entities map)))))
     (when (walkable-tile-p map x y)
       (setf (getf (getf entity-plist :coords) :x) x)
       (setf (getf (getf entity-plist :coords) :y) y))))
@@ -106,9 +107,9 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
 (defun matrix-write-map-chunk (matrix map chunk
                                &key (chunk-width 72) (chunk-height 20))
   "Draw a map’s specific chunk (by its ID) to the matrix."
-  (mapcar (lambda (cell) 
+  (mapcar (lambda (cell)
             (matrix-write-cell matrix cell))
-          (cdr (assoc chunk (getf map :tiles)))))
+          (cdr (assoc chunk (gethash :tiles map)))))
 
 
 (defun matrix-write-cell (matrix cell)
@@ -131,7 +132,7 @@ alist containing a character (:CHAR) and :X & :Y coordinates."
 
 (defun walkable-tile-p (map x y)
   "Return whether or not the given coordinates on the map are traversable for an entity."
-  (not (cell-at-world-coords-p (getf map :bump-map)
+  (not (cell-at-world-coords-p (gethash :bump-map map)
                                (list :x x :y y))))
 
 
@@ -143,7 +144,7 @@ alist containing a character (:CHAR) and :X & :Y coordinates."
   "Draw all entities from an alist of entities to the matrix."
   (mapcar (lambda (entity-assoc)
             (matrix-write-entity matrix (cdr entity-assoc)))
-   (getf map :entities)))
+   (gethash :entities map)))
 
 
 (defun matrix-write-entity (matrix entity-plist)

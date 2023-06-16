@@ -35,7 +35,9 @@
 
 
 (defun talk (map)
-  (print "AAAAA"))
+  (print (gethash :mom map))
+  (setf (gethash :mom map) 3434))
+
 
 
 (defun state-loop

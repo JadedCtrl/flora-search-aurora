@@ -65,11 +65,14 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
   (if (listen)
       (let* ((input (normalize-char-plist (read-char-plist))))
         (cond
+          ;; Interacting with nearby characters/entities
           ((plist= input '(:modifier nil :char #\return))
-           (let ((interact (getf (cdr (assoc 'player (gethash :entities map)))
-                                 :interact)))
-             (if interact
-                 (apply (intern interact) (list map)))))
+           (let* ((player (assoc 'player (gethash :entities map)))
+                  (interactee (car (entities-near-entity player (gethash :entities map))))
+                  (interaction (getf (cdr interactee) :interact)))
+             (if interaction
+                 (apply (intern (string-upcase interaction)) (list map)))))
+          ;; Simple up-down-left-right movements
           ((plist= input '(:modifier nil :char #\→))
            (move-entity map 'player :x 1))
           ((plist= input '(:modifier nil :char #\←))
@@ -187,6 +190,30 @@ alist containing a character (:CHAR) and :X & :Y coordinates."
 ;;; ———————————————————————————————————
 ;;; Misc. utility
 ;;; ———————————————————————————————————
+(defun entities-near-coords (coords radius entities &key (x-radius radius) (y-radius radius))
+  (remove-if-not
+   (lambda (test-entity)
+     (let ((test-coords (getf (cdr test-entity) :coords)))
+       (and (< (abs (- (getf coords :x)
+                       (getf test-coords :x)))
+               x-radius)
+            (< (abs (- (getf coords :y)
+                       (getf test-coords :y)))
+               y-radius))))
+   entities))
+
+
+(defun entities-near-entity (entity entities)
+  (remove-if
+   (lambda (test-entity)
+     (plist= (cdr entity)
+             (cdr test-entity)))
+   (entities-near-coords (getf (cdr entity) :coords)
+                         (+ (length (getf (cdr entity) :face)) 2)
+                         entities
+                         :y-radius 2)))
+
+
 (defun every-other-element (list)
   "Collect every-other-element of a list. E.g., (1 2 3 4) → (1 3)."
   (when list

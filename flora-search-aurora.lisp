@@ -34,9 +34,9 @@
 (in-package :flora-search-aurora)
 
 
-(defun talk (map)
-  (print (gethash :mom map))
-  (setf (gethash :mom map) 3434))
+(defun literary-girl-dialogue (map)
+  (print "uwu"))
+
 
 
 

@@ -101,7 +101,6 @@
     <property name="face" value="=w="/>
     <property name="facing_right" type="bool" value="true"/>
     <property name="id" value="player"/>
-    <property name="interact" value="TALK"/>
    </properties>
    <point/>
   </object>
@@ -110,7 +109,7 @@
     <property name="face" value="owo"/>
     <property name="facing_right" type="bool" value="true"/>
     <property name="id" value="literary-girl"/>
-    <property name="interact" value="flora-search-aurora::interact"/>
+    <property name="interact" value="literary-girl-dialogue"/>
    </properties>
    <point/>
   </object>

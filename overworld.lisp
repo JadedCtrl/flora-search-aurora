@@ -29,6 +29,59 @@
 
 
 ;;; ———————————————————————————————————
+;;; Accessors
+;;; ———————————————————————————————————
+(defmacro getf-entity (map entity-id)
+  "Get an entity from the map-data, using its ID."
+  `(assoc ,entity-id (gethash :entities ,map)))
+
+(defmacro getf-entity-data (map entity-id key)
+  "Get a specific piece of data from the given entity's property-list."
+  `(getf (cdr (assoc ,entity-id (gethash :entities ,map))) ,key))
+;;  `(getf (cdr (getf-entity map entity-id)) key))
+
+
+(defun entities-near-coords (coords radius entities &key (x-radius radius) (y-radius radius))
+  "Return a list of entity-plists that are near the given coordinates within the given RADIUS."
+  (remove-if-not
+   (lambda (test-entity)
+     (let ((test-coords (getf (cdr test-entity) :coords)))
+       (and (< (abs (- (getf coords :x)
+                       (getf test-coords :x)))
+               x-radius)
+            (< (abs (- (getf coords :y)
+                       (getf test-coords :y)))
+               y-radius))))
+   entities))
+
+
+(defun entities-near-entity (entity entities)
+  "Return a list of entities near the given entity — that is, within touching-distance."
+  (remove-if
+   (lambda (test-entity)
+     (plist= (cdr entity)
+             (cdr test-entity)))
+   (entities-near-coords (getf (cdr entity) :coords)
+                         (+ (length (getf (cdr entity) :face)) 2)
+                         entities
+                         :y-radius 2)))
+
+(defun cell-at-world-coords-p (map-chunks coords)
+  "Return whether or not there is a cell at the given coordinates."
+  (let ((chunk (world-coords-chunk coords)))
+    (member 't (cdr (assoc chunk map-chunks))
+            :test (lambda (ignored cell)
+                    (plist= (getf cell :coords) coords)))))
+
+
+(defun walkable-tile-p (map x y)
+  "Return whether or not the given coordinates on the map are traversable for an entity."
+  (not (cell-at-world-coords-p (gethash :bump-map map)
+                               (list :x x :y y))))
+
+
+
+;;; ———————————————————————————————————
 ;;; Overworld loop
 ;;; ———————————————————————————————————
 (defun overworld-state
@@ -43,8 +96,7 @@ A state-function for use with STATE-LOOP."
 (defun overworld-state-draw (matrix map)
   "Draw the overworld map to the given matrix.
 A core part of OVERWORLD-STATE."
-  (let* ((player-data (cdr (assoc 'player (gethash :entities map))))
-         (chunk (world-coords-chunk (getf player-data :coords))))
+  (let* ((chunk (world-coords-chunk (getf-entity-data map 'player :coords))))
     (matrix-write-map-chunk matrix map chunk)
     (matrix-write-entities matrix map)))
 
@@ -67,7 +119,7 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
         (cond
           ;; Interacting with nearby characters/entities
           ((plist= input '(:modifier nil :char #\return))
-           (let* ((player (assoc 'player (gethash :entities map)))
+           (let* ((player (getf-entity map 'player))
                   (interactee (car (entities-near-entity player (gethash :entities map))))
                   (interaction (getf (cdr interactee) :interact)))
              (if interaction
@@ -83,16 +135,16 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
            (move-entity map 'player :y 1))))))
 
 
-(defun move-entity (map entity &key (x 0) (y 0))
+(defun move-entity (map entity-id &key (x 0) (y 0))
   "Move an entity relative to its current position."
-  (let ((entity-plist (cdr (assoc entity (gethash :entities map)))))
-    (when (< x 0)
-      (setf (getf entity-plist :direction) 'left))
-    (when (> x 0)
-      (setf (getf entity-plist :direction) 'right))
-    (move-entity-to map entity
-                    :x (+ x (getf (getf entity-plist :coords) :x))
-                    :y (+ y (getf (getf entity-plist :coords) :y)))))
+  (when (< x 0)
+    (setf (getf-entity-data map entity-id :direction) 'left))
+  (when (> x 0)
+    (setf (getf-entity-data map entity-id :direction) 'right))
+  (let ((coords (getf-entity-data map entity-id :coords)))
+    (move-entity-to map entity-id
+                    :x (+ x (getf coords :x))
+                    :y (+ y (getf coords :y)))))
 
 
 (defun move-entity-to (map entity &key (x 0) (y 0))
@@ -105,7 +157,7 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
 
 
 ;;; ———————————————————————————————————
-;;; Mapping & map-rendering
+;;; Overworld-drawing: Map-rendering
 ;;; ———————————————————————————————————
 (defun matrix-write-map-chunk (matrix map chunk
                                &key (chunk-width 72) (chunk-height 20))
@@ -125,23 +177,9 @@ alist containing a character (:CHAR) and :X & :Y coordinates."
           (getf cell :char))))
 
 
-(defun cell-at-world-coords-p (map-chunks coords)
-  "Return whether or not there is a cell at the given coordinates."
-  (let ((chunk (world-coords-chunk coords)))
-    (member 't (cdr (assoc chunk map-chunks))
-            :test (lambda (ignored cell)
-                    (plist= (getf cell :coords) coords)))))
-
-
-(defun walkable-tile-p (map x y)
-  "Return whether or not the given coordinates on the map are traversable for an entity."
-  (not (cell-at-world-coords-p (gethash :bump-map map)
-                               (list :x x :y y))))
-
-
 
 ;;; ———————————————————————————————————
-;;; Entity magic (AKA player, NPCs)
+;;; Overworld-drawing: Entity-rendering
 ;;; ———————————————————————————————————
 (defun matrix-write-entities (matrix map)
   "Draw all entities from an alist of entities to the matrix."
@@ -190,30 +228,6 @@ alist containing a character (:CHAR) and :X & :Y coordinates."
 ;;; ———————————————————————————————————
 ;;; Misc. utility
 ;;; ———————————————————————————————————
-(defun entities-near-coords (coords radius entities &key (x-radius radius) (y-radius radius))
-  (remove-if-not
-   (lambda (test-entity)
-     (let ((test-coords (getf (cdr test-entity) :coords)))
-       (and (< (abs (- (getf coords :x)
-                       (getf test-coords :x)))
-               x-radius)
-            (< (abs (- (getf coords :y)
-                       (getf test-coords :y)))
-               y-radius))))
-   entities))
-
-
-(defun entities-near-entity (entity entities)
-  (remove-if
-   (lambda (test-entity)
-     (plist= (cdr entity)
-             (cdr test-entity)))
-   (entities-near-coords (getf (cdr entity) :coords)
-                         (+ (length (getf (cdr entity) :face)) 2)
-                         entities
-                         :y-radius 2)))
-
-
 (defun every-other-element (list)
   "Collect every-other-element of a list. E.g., (1 2 3 4) → (1 3)."
   (when list

@@ -26,6 +26,27 @@
 
 (in-package :flora-search-aurora.overworld)
 
+
+;;; ———————————————————————————————————
+;;; Misc. utility
+;;; ———————————————————————————————————
+(defun every-other-element (list)
+  "Collect every-other-element of a list. E.g., (1 2 3 4) → (1 3)."
+  (when list
+    (cons (car list)
+          (every-other-element (cddr list)))))
+
+
+(defun plist= (a b &key (test #'eql))
+  "Return whether or not two property lists are equal, by comparing values of each pair.
+Uses the keys of plist a."
+  (let ((keys (every-other-element a)))
+    (loop for key in keys
+          do (when (not (apply test (list (getf a key)
+                                          (getf b key))))
+                 (return nil))
+          finally (return 't))))
+
 
 
 ;;; ———————————————————————————————————
@@ -82,25 +103,8 @@
 
 
 ;;; ———————————————————————————————————
-;;; Overworld loop
+;;; Overworld logic
 ;;; ———————————————————————————————————
-(defun overworld-state
-    (matrix &key (map-path nil) (map (load-map map-path)))
-  "Render the given map to the matrix and take user-input — for one frame.
-A state-function for use with STATE-LOOP."
-  (sleep .02)
-  (overworld-state-draw matrix map)
-  (overworld-state-update map))
-
-
-(defun overworld-state-draw (matrix map)
-  "Draw the overworld map to the given matrix.
-A core part of OVERWORLD-STATE."
-  (let* ((chunk (world-coords-chunk (getf-entity-data map 'player :coords))))
-    (matrix-write-map-chunk matrix map chunk)
-    (matrix-write-entities matrix map)))
-
-
 (defun overworld-state-update (map)
   "Do nothing, lol. Core part of OVERWORLD-STATE.
 Returns parameters to be used in the next invocation of OVERWORLD-STATE."
@@ -108,10 +112,6 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
   (list :map map))
 
 
-
-;;; ———————————————————————————————————
-;;; Overworld logic
-;;; ———————————————————————————————————
 (defun process-overworld-input (map)
   "Get and process any keyboard input, modifying the map or entities as necessary."
   (if (listen)
@@ -159,6 +159,14 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
 ;;; ———————————————————————————————————
 ;;; Overworld-drawing: Map-rendering
 ;;; ———————————————————————————————————
+(defun overworld-state-draw (matrix map)
+  "Draw the overworld map to the given matrix.
+A core part of OVERWORLD-STATE."
+  (let* ((chunk (world-coords-chunk (getf-entity-data map 'player :coords))))
+    (matrix-write-map-chunk matrix map chunk)
+    (matrix-write-entities matrix map)))
+
+
 (defun matrix-write-map-chunk (matrix map chunk
                                &key (chunk-width 72) (chunk-height 20))
   "Draw a map’s specific chunk (by its ID) to the matrix."
@@ -226,21 +234,13 @@ alist containing a character (:CHAR) and :X & :Y coordinates."
 
 
 ;;; ———————————————————————————————————
-;;; Misc. utility
+;;; Overworld loop
 ;;; ———————————————————————————————————
-(defun every-other-element (list)
-  "Collect every-other-element of a list. E.g., (1 2 3 4) → (1 3)."
-  (when list
-    (cons (car list)
-          (every-other-element (cddr list)))))
+(defun overworld-state
+    (matrix &key (map-path nil) (map (load-map map-path)))
+  "Render the given map to the matrix and take user-input — for one frame.
+A state-function for use with STATE-LOOP."
+  (sleep .02)
+  (overworld-state-draw matrix map)
+  (overworld-state-update map))
 
-
-(defun plist= (a b &key (test #'eql))
-  "Return whether or not two property lists are equal, by comparing values of each pair.
-Uses the keys of plist a."
-  (let ((keys (every-other-element a)))
-    (loop for key in keys
-          do (when (not (apply test (list (getf a key)
-                                          (getf b key))))
-                 (return nil))
-          finally (return 't))))

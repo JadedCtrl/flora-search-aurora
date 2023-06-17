@@ -18,11 +18,13 @@
 ;;;; the primary gameplay, the RPG-ish-ish bits).
 
 (defpackage :flora-search-aurora.overworld
+  (:nicknames :fsa.o :overworld)
   (:use :cl
-   :flora-search-aurora.input :flora-search-aurora.display
-   :flora-search-aurora.overworld.tiled
-   :flora-search-aurora.ui)
-  (:export #:overworld-state :player))
+   :flora-search-aurora.input :flora-search-aurora.display :flora-search-aurora.ui
+   :flora-search-aurora.overworld.tiled :flora-search-aurora.overworld.util)
+  (:export #:overworld-state
+           #:getf-entity #:getf-entity-data
+           :player))
 
 (in-package :flora-search-aurora.overworld)
 

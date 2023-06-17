@@ -22,7 +22,8 @@
 (load "input.lisp")
 (load "display.lisp")
 (load "ui.lisp")
-(load "tiled.lisp")
+(load "overworld.util.lisp")
+(load "overworld.tiled.lisp")
 (load "overworld.lisp")
 
 (defpackage :flora-search-aurora
@@ -33,11 +34,12 @@
 
 (in-package :flora-search-aurora)
 
+(defun literary-girl-dialogue-2 (map)
+  (print "OWO"))
 
 (defun literary-girl-dialogue (map)
-  (print "uwu"))
-
-
+  (print "uwu")
+  (setf (getf-entity-data map 'literary-girl :interact) "literary-girl-dialogue-2"))
 
 
 (defun state-loop

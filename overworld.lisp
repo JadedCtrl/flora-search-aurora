@@ -22,7 +22,8 @@
   (:use :cl
    :flora-search-aurora.input :flora-search-aurora.display :flora-search-aurora.ui
    :flora-search-aurora.overworld.tiled :flora-search-aurora.overworld.util)
-  (:export #:overworld-state
+  (:export #:overworld-state #:overworld-state-draw
+           #:dialogue-state
            #:getf-entity #:getf-entity-data
            :player))
 
@@ -110,8 +111,7 @@ Uses the keys of plist a."
 (defun overworld-state-update (map)
   "Do nothing, lol. Core part of OVERWORLD-STATE.
 Returns parameters to be used in the next invocation of OVERWORLD-STATE."
-  (process-overworld-input map)
-  (list :map map))
+  (process-overworld-input map))
 
 
 (defun process-overworld-input (map)
@@ -125,16 +125,24 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
                   (interactee (car (entities-near-entity player (gethash :entities map))))
                   (interaction (getf (cdr interactee) :interact)))
              (if interaction
-                 (apply (intern (string-upcase interaction)) (list map)))))
+                 (apply (intern (string-upcase interaction)) (list map))
+                 (list :map map))))
           ;; Simple up-down-left-right movements
           ((plist= input '(:modifier nil :char #\→))
-           (move-entity map 'player :x 1))
+           (move-entity map 'player :x 1)
+           (list :map map))
           ((plist= input '(:modifier nil :char #\←))
-           (move-entity map 'player :x -1))
+           (move-entity map 'player :x -1)
+           (list :map map))
           ((plist= input '(:modifier nil :char #\↑))
-           (move-entity map 'player :y -1))
+           (move-entity map 'player :y -1)
+           (list :map map))
           ((plist= input '(:modifier nil :char #\↓))
-           (move-entity map 'player :y 1))))))
+           (move-entity map 'player :y 1)
+           (list :map map))
+          ('t
+           (list :map map))))
+      (list :map map)))
 
 
 (defun move-entity (map entity-id &key (x 0) (y 0))
@@ -246,3 +254,35 @@ A state-function for use with STATE-LOOP."
   (overworld-state-draw matrix map)
   (overworld-state-update map))
 
+
+
+;;; ———————————————————————————————————
+;;; Dialogue state
+;;; ———————————————————————————————————
+(defun dialogue-state-update (dialogue-list map)
+  (if dialogue-list
+      (let ((speaker (intern (string-upcase (getf (car dialogue-list) :speaker))))
+            (face (getf (car dialogue-list) :face)))
+        (setf (getf-entity-data map speaker :face) face)))
+
+  (cond ((and dialogue-list
+              (listen)
+              (eq (getf (normalize-char-plist (read-char-plist))
+                        :char)
+                  #\return))
+         (list :dialogue (cdr dialogue-list) :map map))
+        (dialogue-list
+         (list :dialogue dialogue-list :map map))
+        ('t
+         (values nil
+                 (list :map map)))))
+
+
+(defun dialogue-state-draw (matrix dialogue-list)
+  (render-line matrix (getf (car dialogue-list) :text) 0 0))
+
+
+(defun dialogue-state (matrix &key dialogue map)
+  (sleep .02)
+  (dialogue-state-draw matrix dialogue)
+  (dialogue-state-update dialogue map))

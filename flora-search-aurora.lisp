@@ -38,8 +38,12 @@
   (print "OWO"))
 
 (defun literary-girl-dialogue (map)
-  (print "uwu")
-  (setf (getf-entity-data map 'literary-girl :interact) "literary-girl-dialogue-2"))
+  (lambda (matrix &key (map map)
+                    (dialogue
+                     `((:speaker "literary-girl" :face "xDx" :text "daddy")
+                       (:speaker "player" :face "<3"  :text "i love u"))))
+    (overworld-state-draw matrix map)
+    (dialogue-state matrix :map map :dialogue dialogue)))
 
 
 (defun state-loop
@@ -61,19 +65,22 @@ If this function returns anything else, then it’ll simply be run again in the 
 Make note to add a delay w SLEEP to your state functions, or… well, y’know. Your computer will
 overheat, or something ¯\_(ツ)_/¯"
   (when states
-   (let ((state-result
-           (apply (car states) (cons matrix state-params)))) ;; Run the latest-added update/draw loop
-     (print-screen-matrix (matrix-delta last-matrix matrix)) ;; Print its results.
-     (force-output)
-     (state-loop
-      (cond ((functionp state-result)
-             (cons state-result states))
-            ((not state-result)
-             (cdr states))
-            ('t states))
-      :last-matrix matrix
-      :state-params (when (listp state-result)
-                      state-result)))))
+    (multiple-value-bind (state-result new-state-params)
+        (apply (car states) (cons matrix state-params)) ;; Run the latest-added update/draw loop
+      (print-screen-matrix (matrix-delta last-matrix matrix)) ;; Print its results.
+      (force-output)
+      (state-loop
+          (cond ((functionp state-result)
+                 (cons state-result states))
+                ((not state-result)
+                 (cdr states))
+                ('t states))
+          :last-matrix matrix
+          :state-params
+          (cond ((not state-result)
+                 new-state-params)
+                ((listp state-result)
+                 state-result))))))
 
 
 (defun make-main-menu-state ()
@@ -124,4 +131,4 @@ with STATE-LOOP."
 ;; — Who’s there?
 ;; — Yo momma!
 ;; — “Yo momma” who?
-;; — Yo momma’s a sweet lady, and I think she’s swell!
+;; — Yo momma’s a sweet lady, and I’d like to take her out for some tea!

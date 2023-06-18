@@ -19,7 +19,9 @@
 
 (defpackage :flora-search-aurora.ui
   (:use :cl :flora-search-aurora.display :flora-search-aurora.input :assoc-utils)
-  (:export #:menu-state #:render-line :label :selection :selected))
+  (:export #:menu-state
+           #:render-line
+           :label :selection :selected))
 
 (in-package :flora-search-aurora.ui)
 
@@ -276,4 +278,3 @@ In addition, the resultant value shall not “pass” zero."
 ;;"---{=============   -------------------"
 ;; | Kill your mom |    Give into despair
 ;; ---{=============   -------------------
-

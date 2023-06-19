@@ -25,12 +25,14 @@
 (load "overworld.util.lisp")
 (load "overworld.tiled.lisp")
 (load "overworld.lisp")
+(load "dialogue.lisp")
 
 (defpackage :flora-search-aurora
   (:export #:main)
   (:use :cl
    :flora-search-aurora.input :flora-search-aurora.display
-   :flora-search-aurora.overworld :flora-search-aurora.ui))
+   :flora-search-aurora.overworld :flora-search-aurora.dialogue
+   :flora-search-aurora.ui))
 
 (in-package :flora-search-aurora)
 
@@ -39,9 +41,9 @@
 
 (defun literary-girl-dialogue (map)
   (lambda (matrix &key (map map)
-                    (dialogue
-                     `((:speaker "literary-girl" :face "xDx" :text "daddy")
-                       (:speaker "player" :face "<3"  :text "i love u"))))
+                    (dialogue (dialogue::dialogue
+                                (dialogue::say "literary-girl" "Oh, hello.")
+                                (dialogue::say "player" "What, no quip?"))))
     (overworld-state-draw matrix map)
     (dialogue-state matrix :map map :dialogue dialogue)))
 
@@ -50,18 +52,19 @@
     (states &key (last-matrix (make-screen-matrix)) (matrix (make-screen-matrix)) (state-params nil))
   "Begin the game’s loop, which executes (henceforthly called) state-functions over and over again
 until Hell freezes over and a new king reigns supreme.
-Given a list of state-functions, states, it will execute the first function.
+Given a list of state-functions, STATES, it will execute the first function.
 Each state-function must take at least a single parameter, a matrix of characters. A state-function
 should edit this matrix in-place, replacing its elements with characters that will later be printed
 to the terminal.
-If this function returns NIL, then it will be removed from state-function list and the next
-function in the list will be run in the next iteration. If no more functions remain, the loop
-terminates.
-If this function returns a list, then the given list will be used as additional parameters to the
-state-function in the next iteration, in addition to the aforementioned matrix.
-If this function returns a function, then the returned function will go to the front of the
-state-function list, and will be ran in the next iteration onward.
-If this function returns anything else, then it’ll simply be run again in the next iteration.
+What the state-function returns is pretty important:
+  * NIL       —  The function is removed from STATES, and so the next function in STATES will start
+                 getting executed instead.
+  * NIL; List —  The function is popped off STATES and the list is used as the new parameters for
+                 the next function in STATES.
+  * Function  —  The function is pushed to the front of STATES, and so is executed instead of the
+                 current function.
+  * List      —  The current function (front of STATES) continues to be executed with the given
+                 list as a parameters list.
 Make note to add a delay w SLEEP to your state functions, or… well, y’know. Your computer will
 overheat, or something ¯\_(ツ)_/¯"
   (when states

@@ -253,36 +253,3 @@ A state-function for use with STATE-LOOP."
   (sleep .02)
   (overworld-state-draw matrix map)
   (overworld-state-update map))
-
-
-
-;;; ———————————————————————————————————
-;;; Dialogue state
-;;; ———————————————————————————————————
-(defun dialogue-state-update (dialogue-list map)
-  (if dialogue-list
-      (let ((speaker (intern (string-upcase (getf (car dialogue-list) :speaker))))
-            (face (getf (car dialogue-list) :face)))
-        (setf (getf-entity-data map speaker :face) face)))
-
-  (cond ((and dialogue-list
-              (listen)
-              (eq (getf (normalize-char-plist (read-char-plist))
-                        :char)
-                  #\return))
-         (list :dialogue (cdr dialogue-list) :map map))
-        (dialogue-list
-         (list :dialogue dialogue-list :map map))
-        ('t
-         (values nil
-                 (list :map map)))))
-
-
-(defun dialogue-state-draw (matrix dialogue-list)
-  (render-line matrix (getf (car dialogue-list) :text) 0 0))
-
-
-(defun dialogue-state (matrix &key dialogue map)
-  (sleep .02)
-  (dialogue-state-draw matrix dialogue)
-  (dialogue-state-update dialogue map))

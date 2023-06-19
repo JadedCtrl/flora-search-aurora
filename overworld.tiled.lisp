@@ -82,7 +82,9 @@ alist of Tiled cell “chunks”."
                                      (cl-tiled:map-tile-width tiled-map)))
                         :y (floor (/ (cl-tiled:object-y tiled-obj)
                                      (cl-tiled:map-tile-height tiled-map))))
-          :face (gethash "face" properties #'string-equal)
+          :face (gethash "normal_face" properties #'string-equal)
+          :normal-face (gethash "normal_face" properties #'string-equal)
+          :talking-face (gethash "talking_face" properties #'string-equal)
           :interact (gethash "interact" properties #'string-equal)
           :direction (if (gethash "facing_right" properties #'string-equal)
                          'right

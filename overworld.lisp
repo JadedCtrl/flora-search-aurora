@@ -18,12 +18,10 @@
 ;;;; the primary gameplay, the RPG-ish-ish bits).
 
 (defpackage :flora-search-aurora.overworld
-  (:nicknames :fsa.o :overworld)
+  (:nicknames :fsa.o :overworld :🌍)
   (:use :cl
-   :flora-search-aurora.input :flora-search-aurora.display :flora-search-aurora.ui
    :flora-search-aurora.overworld.tiled :flora-search-aurora.overworld.util)
   (:export #:overworld-state #:overworld-state-draw
-           #:dialogue-state
            #:getf-entity #:getf-entity-data
            :player))
 
@@ -117,7 +115,7 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
 (defun process-overworld-input (map)
   "Get and process any keyboard input, modifying the map or entities as necessary."
   (if (listen)
-      (let* ((input (normalize-char-plist (read-char-plist))))
+      (let* ((input (⌨:normalize-char-plist (⌨:read-char-plist))))
         (cond
           ;; Interacting with nearby characters/entities
           ((plist= input '(:modifier nil :char #\return))
@@ -222,7 +220,7 @@ alist containing a character (:CHAR) and :X & :Y coordinates."
          (x (if (eq direction 'right)
                 (- (getf screen-coords :x) (floor (/ width 2)) 0)
                 (- (getf screen-coords :x) (floor (/ width 2)) 0))))
-    (render-line matrix face (+ x 1) y)
+    (📋:render-line matrix face (+ x 1) y)
     (ignore-errors (setf (aref matrix y x) #\|))
     (ignore-errors (setf (aref matrix y (+ width x -1))
                          #\|))))

@@ -45,8 +45,8 @@
                     (dialogue (💬:start-dialogue
                                 (💬:say "literary-girl" "Blah blah, testing. A multi-lined one. For real! jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj akls djlaks jdlaksj dlakjsd")
                                 (💬:say "player" "ktp ktp jes jes?"))))
-    (overworld-state-draw matrix map)
-    (dialogue-state matrix :map map :dialogue dialogue)))
+    (🌍:overworld-state-draw matrix map)
+    (💬:dialogue-state matrix :map map :dialogue dialogue)))
 
 
 (defun state-loop
@@ -71,7 +71,7 @@ overheat, or something ¯\_(ツ)_/¯"
   (when states
     (multiple-value-bind (state-result new-state-params)
         (apply (car states) (cons matrix state-params)) ;; Run the latest-added update/draw loop
-      (print-screen-matrix (matrix-delta last-matrix matrix)) ;; Print its results.
+      (✎:print-screen-matrix (✎:matrix-delta last-matrix matrix)) ;; Print its results.
       (force-output)
       (state-loop
           (cond ((functionp state-result)
@@ -97,7 +97,7 @@ overheat, or something ¯\_(ツ)_/¯"
              (FUNCTION . ,#'make-options-menu-state))
             ((LABEL . "QUIT") (RETURN . NIL)))))
     (lambda (matrix)
-      (menu-state matrix main-menu))))
+      (📋:menu-state matrix main-menu))))
 
 
 (defun make-options-menu-state ()
@@ -109,14 +109,14 @@ overheat, or something ¯\_(ツ)_/¯"
             ((LABEL . "GO BACK")
              (RETURN . ,NIL)))))
     (lambda (matrix)
-      (menu-state matrix options-menu))))
+      (📋:menu-state matrix options-menu))))
 
 
 (defun make-main-overworld-state ()
   "Return a state-function for the game’s overworld (the majority of the game), for use
 with STATE-LOOP."
   (lambda (matrix &rest args)
-    (apply #'overworld-state
+    (apply #'🌍:overworld-state
            (append (list matrix)
                    '(:map-path #p"/home/jaidyn/.local/src/games/flora search aurora/res/map.tmx")
                    args))))
@@ -126,8 +126,8 @@ with STATE-LOOP."
   "A pathetic fascimile of a main loop. What does it do? WHAST DOES TI DODOO?"
   (cl-charms:with-curses ()
     (cl-charms:enable-raw-input :interpret-control-characters 't)
-    (hide-cursor)
-    (clear-screen)
+    (✎:hide-cursor)
+    (✎:clear-screen)
     (state-loop (list (make-main-menu-state)))))
 
 

@@ -19,10 +19,9 @@
 
 (defpackage :flora-search-aurora.dialogue
   (:nicknames :fsa.dia :dialogue :💬)
-  (:use :cl
-   :flora-search-aurora.overworld :flora-search-aurora.ui :flora-search-aurora.input)
+  (:use :cl)
   (:export #:dialogue-state
-           #:start-dialogue #:face #:say #:mumble))
+          #:start-dialogue #:face #:say #:mumble))
 
 (in-package :flora-search-aurora.dialogue)
 
@@ -61,7 +60,7 @@
 (defun pressed-enter-p ()
   "Whether or not the enter/return key has been pressed recently."
   (and (listen)
-       (eq (getf (normalize-char-plist (read-char-plist)) :char)
+       (eq (getf (⌨:normalize-char-plist (⌨:read-char-plist)) :char)
            #\return)))
 
 
@@ -71,8 +70,8 @@ If FACE is a string, used that.
 If FACE is 'TALKING-FACE, then use their talking-face (if they have one).
 If FACE is 'NORMAL-FACE, then use their normal-face (if they’ve got one).
 If FACE is NIL… guess what that does. :^)"
-  (let ((talking-face (getf-entity-data map speaker :talking-face))
-        (normal-face (getf-entity-data map speaker :normal-face)))
+  (let ((talking-face (🌍:getf-entity-data map speaker :talking-face))
+        (normal-face (🌍:getf-entity-data map speaker :normal-face)))
     (cond ((and (eq face 'talking-face)
                 talking-face)
            talking-face)
@@ -90,7 +89,7 @@ talking-face or the face given by the dialogue."
          (new-face (appropriate-face map speaker (getf dialogue :face))))
     ;; Replace the face, when appropriate.
     (when new-face
-      (setf (getf-entity-data map speaker :face) new-face))))
+      (setf (🌍:getf-entity-data map speaker :face) new-face))))
 
 
 (defun progress-line-delivery (dialogue)
@@ -133,7 +132,7 @@ Helper function for DIALOGUE-STATE."
         (progress (getf (car dialogue-list) :progress)))
     (when text
       (✎:show-cursor)
-      (render-string-partially matrix text 0 0 :char-count progress))))
+      (📋:render-string-partially matrix text 0 0 :char-count progress))))
 
 
 

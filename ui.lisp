@@ -18,8 +18,8 @@
 ;;;; Let's get to it, we're on a deadline!
 
 (defpackage :flora-search-aurora.ui
-  (:nicknames :fsa.u :ui)
-  (:use :cl :flora-search-aurora.display :flora-search-aurora.input :assoc-utils)
+  (:nicknames :fsa.u :ui :📋)
+  (:use :cl :assoc-utils)
   (:export #:menu-state
            #:render-line #:render-string #:render-string-partially
            :label :selection :selected))
@@ -185,7 +185,7 @@ That is, 0 for non-selected items and 100 for selected items."
 (defun process-menu-input (menu-alist)
   "Get and process any keyboard input, modifying the menu alist as necessary."
   (if (listen)
-      (let* ((input (normalize-char-plist (read-char-plist)))
+      (let* ((input (⌨:normalize-char-plist (⌨:read-char-plist)))
              (selected-item (nth (selected-menu-item-position menu-alist)
                                  menu-alist))
              (func (cdr (assoc 'function selected-item)))

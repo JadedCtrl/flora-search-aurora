@@ -18,7 +18,9 @@
 
 (defpackage :flora-search-aurora.input
   (:use :cl)
-  (:export #:read-char-plist #:normalize-char-plist
+  (:nicknames :fsa.i :input :⌨)
+  (:export #:read-char-plist #:normalize-char-plist #:plist-char-p
+           :control :meta :shift
            +qwerty-layout+ +dvorak-layout+))
 
 (in-package :flora-search-aurora.input)
@@ -93,8 +95,10 @@ characters, like left arrow-key (escaped D) into ← (“LEFTWARDS ARROW”)."
                   (getf char-plist :char))))
 
 
-;;; ~ Utilities ~
-
+
+;;; ———————————————————————————————————
+;;; Misc. utils
+;;; ———————————————————————————————————
 (defun parallel-list-item (item-a list-a list-b &key (test #'eql))
   "Given two parallel lists and an item contained in the first list, return its
 corresponding item in the other list, by index."

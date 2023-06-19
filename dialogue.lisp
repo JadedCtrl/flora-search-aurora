@@ -18,10 +18,11 @@
 ;;;; the primary gameplay, the RPG-ish-ish bits).
 
 (defpackage :flora-search-aurora.dialogue
-  (:nicknames :fsa.d :dialogue)
+  (:nicknames :fsa.dia :dialogue :💬)
   (:use :cl
    :flora-search-aurora.overworld :flora-search-aurora.ui :flora-search-aurora.input)
-  (:export #:dialogue-state #:say))
+  (:export #:dialogue-state
+           #:start-dialogue #:face #:say #:mumble))
 
 (in-package :flora-search-aurora.dialogue)
 
@@ -30,20 +31,9 @@
 ;;; ———————————————————————————————————
 ;;; Dialogue-generation DSL (sorta)
 ;;; ———————————————————————————————————
-(defun dialogue (&rest dialogue-tree)
+(defun start-dialogue (&rest dialogue-tree)
   (reduce (lambda (a b) (append a b))
           dialogue-tree))
-
-
-(defun say (speaker text)
-  (list
-   (list :speaker speaker :text text :face 'talking-face)
-   (car (face speaker 'normal-face))))
-
-
-(defun mumble (speaker text)
-  (list
-   (list :speaker speaker :text text)))
 
 
 (defun face (speaker face)
@@ -51,17 +41,36 @@
    (list :speaker speaker :face face)))
 
 
+(defun say (speaker text)
+  (list
+   (list :speaker speaker :text text :face 'talking-face :progress 0)
+   (car (face speaker 'normal-face))))
+
+
+(defun mumble (speaker text)
+  (list
+   (list :speaker speaker :text text :progress 0)))
+
+
+
+
 
 ;;; ———————————————————————————————————
 ;;; Dialogue logic
 ;;; ———————————————————————————————————
 (defun pressed-enter-p ()
+  "Whether or not the enter/return key has been pressed recently."
   (and (listen)
        (eq (getf (normalize-char-plist (read-char-plist)) :char)
            #\return)))
 
 
 (defun appropriate-face (map speaker face)
+  "Return the face appropriate for the speaker.
+If FACE is a string, used that.
+If FACE is 'TALKING-FACE, then use their talking-face (if they have one).
+If FACE is 'NORMAL-FACE, then use their normal-face (if they’ve got one).
+If FACE is NIL… guess what that does. :^)"
   (let ((talking-face (getf-entity-data map speaker :talking-face))
         (normal-face (getf-entity-data map speaker :normal-face)))
     (cond ((and (eq face 'talking-face)
@@ -74,27 +83,43 @@
            face))))
 
 
-(defun dialogue-state-update (dialogue-list map)
-  "The logic/input-processing helper function for DIALOGUE-STATE."
-  (let* ((speaker (intern (string-upcase (getf (car dialogue-list) :speaker))))
-         (new-face (appropriate-face map speaker
-                                     (getf (car dialogue-list) :face))))
+(defun update-speaking-face (map dialogue)
+  "Given a line (plist) of dialogue, change speaker’s face to either their
+talking-face or the face given by the dialogue."
+  (let* ((speaker (intern (string-upcase (getf dialogue :speaker))))
+         (new-face (appropriate-face map speaker (getf dialogue :face))))
     ;; Replace the face, when appropriate.
     (when new-face
-      (setf (getf-entity-data map speaker :face) new-face)))
-  ;; Progress the dialogue as appropriate.
+      (setf (getf-entity-data map speaker :face) new-face))))
+
+
+(defun progress-line-delivery (dialogue)
+  "Progress the delivery of a line (plist) of dialogue. That is, increment the
+“said character-count” :PROGRESS, which dictates the portion of the message that
+should be printed on the screen at any given moment."
+  (let ((progress (getf dialogue :progress))
+        (text (getf dialogue :text)))
+    (when (and text
+               (< progress (length text)))
+      (incf (getf dialogue :progress)))))
+
+
+(defun dialogue-state-update (map dialogue-list)
+  "The logic/input-processing helper function for DIALOGUE-STATE."
+  (update-speaking-face map (car dialogue-list))
+  (progress-line-delivery (car dialogue-list))
+  ;; Progress to the next line of dialogue as appropriate.
   (let ((text (getf (car dialogue-list) :text)))
     (cond ((or (pressed-enter-p)
                (not text))
            (if (cdr dialogue-list)
-              (list :dialogue (cdr dialogue-list) :map map)
-              (values nil
-                      (list :map map))))
+               (list :dialogue (cdr dialogue-list) :map map)
+               (progn
+                 (✎:hide-cursor)
+                 (values nil
+                         (list :map map)))))
          ((cdr dialogue-list)
-          (list :dialogue dialogue-list :map map))
-         ('t
-          (values nil
-                  (list :map map))))))
+          (list :dialogue dialogue-list :map map)))))
 
 
 
@@ -104,9 +129,11 @@
 (defun dialogue-state-draw (matrix dialogue-list)
   "Draw the dialogue where appropriate.
 Helper function for DIALOGUE-STATE."
-  (let ((text (getf (car dialogue-list) :text)))
+  (let ((text (getf (car dialogue-list) :text))
+        (progress (getf (car dialogue-list) :progress)))
     (when text
-      (render-line matrix text 0 0))))
+      (✎:show-cursor)
+      (render-string-partially matrix text 0 0 :char-count progress))))
 
 
 
@@ -126,4 +153,4 @@ entities as the speakers. Dialogue should be in the format:
 A state-function for use with STATE-LOOP."
   (sleep .02)
   (dialogue-state-draw matrix dialogue)
-  (dialogue-state-update dialogue map))
+  (dialogue-state-update map dialogue))

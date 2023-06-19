@@ -28,6 +28,7 @@
 (load "dialogue.lisp")
 
 (defpackage :flora-search-aurora
+  (:nicknames :fsa :✿)
   (:export #:main)
   (:use :cl
    :flora-search-aurora.input :flora-search-aurora.display
@@ -41,9 +42,9 @@
 
 (defun literary-girl-dialogue (map)
   (lambda (matrix &key (map map)
-                    (dialogue (dialogue::dialogue
-                                (dialogue::say "literary-girl" "Oh, hello.")
-                                (dialogue::say "player" "What, no quip?"))))
+                    (dialogue (💬:start-dialogue
+                                (💬:say "literary-girl" "Blah blah, testing. A multi-lined one. For real! jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj akls djlaks jdlaksj dlakjsd")
+                                (💬:say "player" "ktp ktp jes jes?"))))
     (overworld-state-draw matrix map)
     (dialogue-state matrix :map map :dialogue dialogue)))
 
@@ -56,7 +57,7 @@ Given a list of state-functions, STATES, it will execute the first function.
 Each state-function must take at least a single parameter, a matrix of characters. A state-function
 should edit this matrix in-place, replacing its elements with characters that will later be printed
 to the terminal.
-What the state-function returns is pretty important:
+What the state-function returns is pretty important, having different repercussions:
   * NIL       —  The function is removed from STATES, and so the next function in STATES will start
                  getting executed instead.
   * NIL; List —  The function is popped off STATES and the list is used as the new parameters for
@@ -124,10 +125,10 @@ with STATE-LOOP."
 (defun main ()
   "A pathetic fascimile of a main loop. What does it do? WHAST DOES TI DODOO?"
   (cl-charms:with-curses ()
-   (cl-charms/low-level:curs-set 0) ;; Hide the terminal cursor
-   (cl-charms:enable-raw-input :interpret-control-characters 't)
-   (clear-screen)
-   (state-loop (list (make-main-menu-state)))))
+    (cl-charms:enable-raw-input :interpret-control-characters 't)
+    (hide-cursor)
+    (clear-screen)
+    (state-loop (list (make-main-menu-state)))))
 
 
 (main) ;; — Knock-knock

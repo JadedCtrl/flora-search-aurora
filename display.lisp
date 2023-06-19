@@ -17,9 +17,10 @@
 ;;;; All display-related curses go here.
 
 (defpackage :flora-search-aurora.display
+  (:nicknames :fsa.d :display :✎)
   (:use :cl)
   (:export #:make-screen-matrix #:print-screen-matrix #:matrix-delta
-           #:clear-screen))
+           #:hide-cursor #:show-cursor #:clear-screen))
 
 (in-package :flora-search-aurora.display)
 
@@ -51,7 +52,7 @@ The body has access to 4 variables:
 
 (defun matrix-delta (a b)
   "Given two 2D matrices, return a matrix containing only the cells
-that change between a→b (favouring those in b) — all others are nil."
+that change between A→B (favouring those in B) — all others are nil."
   (let ((delta (make-array (array-dimensions a))))
     (do-for-cell a
       (when (not (eq cell
@@ -66,9 +67,7 @@ that change between a→b (favouring those in b) — all others are nil."
   (do-for-cell matrix
     (when (characterp cell)
       (move-cursor (+ i 1) (+ j 1))
-      (write-char cell)))
-  (destructuring-bind (i j) (array-dimensions matrix)
-      (move-cursor i j)))
+      (write-char cell))))
 
 
 (defun make-screen-matrix ()
@@ -81,6 +80,14 @@ that change between a→b (favouring those in b) — all others are nil."
 ;;; ———————————————————————————————————
 ;;; Misc. utils
 ;;; ———————————————————————————————————
+(defun hide-cursor ()
+  (cl-charms/low-level:curs-set 0))
+
+
+(defun show-cursor ()
+  (cl-charms/low-level:curs-set 1))
+
+
 (defun move-cursor (row column &key (stream *standard-output*))
   "Moves cursor to desired position.
 Borrowed from https://github.com/gorozhin/chlorophyll/

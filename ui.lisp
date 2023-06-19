@@ -18,9 +18,10 @@
 ;;;; Let's get to it, we're on a deadline!
 
 (defpackage :flora-search-aurora.ui
+  (:nicknames :fsa.u :ui)
   (:use :cl :flora-search-aurora.display :flora-search-aurora.input :assoc-utils)
   (:export #:menu-state
-           #:render-line
+           #:render-line #:render-string #:render-string-partially
            :label :selection :selected))
 
 (in-package :flora-search-aurora.ui)
@@ -127,16 +128,31 @@ The item list should be an alist of the following format:
   "Render the given string to the matrix of characters, character-by-character.
 Will line-break or truncate as appropriate and necessary to not exceed the
 positional arguments nor the dimensions of the matrix."
+  (render-string-partially matrix text x y :max-column max-column :max-row max-row
+                           :char-count (length text)))
+
+
+(defun render-string-partially (matrix text x y &key (char-count 0) (max-column 72) (max-row 20))
+  "Partially render the given string to a matrix of characters. Will render only
+a portion of the string, dictated by the CHAR-COUNT.
+See the similar RENDER-STRING function."
   (let* ((dimensions (array-dimensions matrix))
          (max-column (at-most (cadr dimensions) max-column))
-         (max-row (at-most (car dimensions) max-row))
+         (max-write-row (at-most (at-most (car dimensions) max-row)
+                                 (floor (/ char-count max-column))))
+         (max-column-at-max-write-row (- char-count (* max-write-row max-column)))
          (substrings (split-string-by-length text (- max-column x)))
          (row 0))
     (loop while (and (<= (+ y row) max-row)
                      substrings)
-          do
-             (render-line matrix (pop substrings)
-                          x (+ y row))
+          do (cond ((< row max-write-row)
+                    (render-line matrix (pop substrings)
+                                 x (+ y row)))
+                   ((eq row max-write-row)
+                    (render-line matrix (subseq (pop substrings) 0 max-column-at-max-write-row)
+                                 x (+ y row)))
+                   ('t
+                    (pop substrings)))
              (incf row)))
   matrix)
 

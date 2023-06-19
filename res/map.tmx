@@ -98,18 +98,20 @@
  <objectgroup id="7" name="Entities">
   <object id="2" name="Player" type="Entity" x="103" y="368">
    <properties>
-    <property name="face" value="=w="/>
     <property name="facing_right" type="bool" value="true"/>
     <property name="id" value="player"/>
+    <property name="normal_face" value="^_^"/>
+    <property name="talking_face" value="^o^"/>
    </properties>
    <point/>
   </object>
   <object id="4" name="Literary girl" type="Entity" x="317.604" y="366.606">
    <properties>
-    <property name="face" value="owo"/>
     <property name="facing_right" type="bool" value="true"/>
     <property name="id" value="literary-girl"/>
     <property name="interact" value="literary-girl-dialogue"/>
+    <property name="normal_face" value="=_="/>
+    <property name="talking_face" value="=o="/>
    </properties>
    <point/>
   </object>

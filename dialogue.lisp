@@ -131,27 +131,53 @@ should be printed on the screen at any given moment."
 ;;; ———————————————————————————————————
 ;;; Dialogue drawing
 ;;; ———————————————————————————————————
-(defun optimal-speech-layout-horizontally (text coords &key (right-p nil) (width 72) (height 20))
-  (let* ((text-margin (if right-p
-                          (+ (getf coords :x) 3)
-                          0))
-         (text-width (if right-p
-                         (- width text-margin)
+(defun optimal-speech-layout-horizontally (text coords &key (rightp nil) (width 72) (height 20))
+  (let* ((text-x-margin (if rightp
+                            (+ (getf coords :x) 3)
+                            0))
+         (text-width (if rightp
+                         (- width text-x-margin)
                          (- (getf coords :x) 3)))
-         (lines (ignore-errors (…:split-string-by-length text text-width))))
-    (format *error-output* "Margin: ~A Width: ~A Right: ~A" text-margin text-width right-p)
-    (when (and (> text-width 0)
+         (lines (ignore-errors (…:split-string-by-length text text-width)))
+         (text-height (length lines)))
+    (when (and lines (>= height text-height)
                lines)
       (let ((y (…:at-least 0 (- (getf coords :y)
                                 (floor (/ (length lines) 2))
                                 1)))
-            (x (if (and (not right-p)
+            (x (if (and (not rightp)
                         (eq (length lines) 1))
                    (- text-width (length text))
-                   text-margin)))
-        (list (list :x x :y y)
-              (+ x text-width)
-              height)))))
+                   text-x-margin)))
+        (list (list :x x :y y) ;; Coords
+              (+ x text-width) ;; Max column
+              height)))))      ;; Max row
+
+
+(defun optimal-speech-layout-vertical (text coords &key (downp nil) (width 72) (height 20))
+  (let* ((text-y-margin (if downp
+                            (+ (getf coords :y) 1)
+                            (- (getf coords :y) 2)))
+         (text-height (if downp
+                          (- height text-y-margin)
+                          (- text-y-margin 1)))
+         (text-width (floor (* width 3/5))) ;; Too wide’s illegible! So ⅗-screen.
+         (lines (ignore-errors (…:split-string-by-length text text-width))))
+    (when (and lines (>= text-height (length lines)))
+      (let ((y (…:at-least
+                 0
+                 (if downp
+                     text-y-margin
+                     (- text-y-margin (length lines)))))
+            (x (…:at-least
+                 0
+                 (- (getf coords :x)
+                    (if (eq (length lines) 1)
+                        (floor (/ (length (car lines)) 2))
+                        (floor (/ text-width 2)))))))
+        (list (list :x x :y y)       ;; Coords
+              (+ x text-width)       ;; Max column
+              (+ y text-height)))))) ;; Max row
 
 
 (defun optimal-speech-layout (map dialogue &key (width 72) (height 20))
@@ -159,7 +185,8 @@ should be printed on the screen at any given moment."
          (direction (🌍:getf-entity-data map speaker-id :direction))
          (text (getf dialogue :text))
          (coords (🌍:world-coords->screen-coords (🌍:getf-entity-data map speaker-id :coords))))
-    (optimal-speech-layout-horizontally text coords :right-p 't :width width :height height)))
+    (or (optimal-speech-layout-horizontally text coords :rightp 't :width width :height height)
+        (optimal-speech-layout-vertical text coords :downp nil :width width :height height))))
 
 
 (defun render-dialogue-block (matrix map dialogue)

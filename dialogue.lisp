@@ -135,23 +135,27 @@ should be printed on the screen at any given moment."
   (let* ((text-x-margin (if rightp
                             (+ (getf coords :x) 3)
                             0))
-         (text-width (if rightp
-                         (- width text-x-margin)
-                         (- (getf coords :x) 3)))
+         (text-width (…:at-most (floor (* width 3/5)) ;; Not _too_ wide!
+                              (if rightp
+                                  (- width text-x-margin)
+                                  (- (getf coords :x) 3))))
          (lines (ignore-errors (…:split-string-by-length text text-width)))
          (text-height (length lines)))
-    (when (and lines (>= height text-height)
-               lines)
+    ;; When this layout is valid…
+    (when (and lines
+               (>= height text-height) ;; If the text’ll fit on screen
+               (> text-width 10))      ;; If the text is wide enough to be legible
       (let ((y (…:at-least 0 (- (getf coords :y)
-                                (floor (/ (length lines) 2))
-                                1)))
+                                (if (eq (length lines) 1)  ;; Align toward the speaker’s face
+                                    1 0)
+                               (floor (/ (length lines) 2)))))
             (x (if (and (not rightp)
                         (eq (length lines) 1))
                    (- text-width (length text))
                    text-x-margin)))
-        (list (list :x x :y y) ;; Coords
-              (+ x text-width) ;; Max column
-              height)))))      ;; Max row
+       (list (list :x x :y y) ;; Coords
+             (+ x text-width) ;; Max column
+             height)))))      ;; Max row
 
 
 (defun optimal-speech-layout-vertical (text coords &key (downp nil) (width 72) (height 20))
@@ -163,6 +167,7 @@ should be printed on the screen at any given moment."
                           (- text-y-margin 1)))
          (text-width (floor (* width 3/5))) ;; Too wide’s illegible! So ⅗-screen.
          (lines (ignore-errors (…:split-string-by-length text text-width))))
+    ;; When the text can be printed with this layout…
     (when (and lines (>= text-height (length lines)))
       (let ((y (…:at-least
                  0
@@ -183,10 +188,20 @@ should be printed on the screen at any given moment."
 (defun optimal-speech-layout (map dialogue &key (width 72) (height 20))
   (let* ((speaker-id (dialogue-speaker dialogue))
          (direction (🌍:getf-entity-data map speaker-id :direction))
+         (playerp (eq speaker-id 'player))
+         (leftp (not (eq direction '🌍:right)))
          (text (getf dialogue :text))
          (coords (🌍:world-coords->screen-coords (🌍:getf-entity-data map speaker-id :coords))))
-    (or (optimal-speech-layout-horizontally text coords :rightp 't :width width :height height)
-        (optimal-speech-layout-vertical text coords :downp nil :width width :height height))))
+    (format *error-output* "AAA ~A - ~A - ~A" leftp direction 'RIGHT)
+    (or (optimal-speech-layout-horizontally text coords :width width :height height
+                                                        :rightp leftp)
+        (optimal-speech-layout-vertical text coords :width width :height height
+                                                    :downp playerp)
+        (optimal-speech-layout-horizontally text coords :width width :height height
+                                                        :rightp (not leftp))
+        (optimal-speech-layout-vertical text coords :width width :height height
+                                                    :downp  (not playerp)))))
+
 
 
 (defun render-dialogue-block (matrix map dialogue)
@@ -227,3 +242,7 @@ A state-function for use with STATE-LOOP."
   (sleep .05)
   (dialogue-state-draw matrix map dialogue)
   (dialogue-state-update map dialogue))
+
+
+;; Split a banana in two, bisection-fruit,
+;; Yummy-yummy, toot-toot~ 🎵

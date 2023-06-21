@@ -51,6 +51,12 @@
    (list :speaker speaker :text text :progress 0)))
 
 
+
+;;; ———————————————————————————————————
+;;; Accessors
+;;; ———————————————————————————————————
+(defun dialogue-speaker (dialogue)
+  (intern (string-upcase (getf dialogue :speaker))))
 
 
 
@@ -100,7 +106,7 @@ should be printed on the screen at any given moment."
         (text (getf dialogue :text)))
     (when (and text
                (< progress (length text)))
-      (incf (getf dialogue :progress)))))
+      (incf (getf dialogue :progress) 1))))
 
 
 (defun dialogue-state-update (map dialogue-list)
@@ -125,14 +131,55 @@ should be printed on the screen at any given moment."
 ;;; ———————————————————————————————————
 ;;; Dialogue drawing
 ;;; ———————————————————————————————————
-(defun dialogue-state-draw (matrix dialogue-list)
+(defun optimal-speech-layout-horizontally (text coords &key (right-p nil) (width 72) (height 20))
+  (let* ((text-margin (if right-p
+                          (+ (getf coords :x) 3)
+                          0))
+         (text-width (if right-p
+                         (- width text-margin)
+                         (- (getf coords :x) 3)))
+         (lines (ignore-errors (…:split-string-by-length text text-width))))
+    (format *error-output* "Margin: ~A Width: ~A Right: ~A" text-margin text-width right-p)
+    (when (and (> text-width 0)
+               lines)
+      (let ((y (…:at-least 0 (- (getf coords :y)
+                                (floor (/ (length lines) 2))
+                                1)))
+            (x (if (and (not right-p)
+                        (eq (length lines) 1))
+                   (- text-width (length text))
+                   text-margin)))
+        (list (list :x x :y y)
+              (+ x text-width)
+              height)))))
+
+
+(defun optimal-speech-layout (map dialogue &key (width 72) (height 20))
+  (let* ((speaker-id (dialogue-speaker dialogue))
+         (direction (🌍:getf-entity-data map speaker-id :direction))
+         (text (getf dialogue :text))
+         (coords (🌍:world-coords->screen-coords (🌍:getf-entity-data map speaker-id :coords))))
+    (optimal-speech-layout-horizontally text coords :right-p 't :width width :height height)))
+
+
+(defun render-dialogue-block (matrix map dialogue)
+  (let* ((progress (getf dialogue :progress))
+         (text (getf dialogue :text))
+         (optimal-layout (when text (optimal-speech-layout map dialogue))))
+    (when (and text optimal-layout)
+      (📋:render-string-partially
+       matrix text (first optimal-layout)
+       :max-column (second optimal-layout)
+       :max-row (third optimal-layout)
+       :char-count progress))))
+
+
+(defun dialogue-state-draw (matrix map dialogue-list)
   "Draw the dialogue where appropriate.
 Helper function for DIALOGUE-STATE."
-  (let ((text (getf (car dialogue-list) :text))
-        (progress (getf (car dialogue-list) :progress)))
-    (when text
-      (✎:show-cursor)
-      (📋:render-string-partially matrix text 0 0 :char-count progress))))
+  (when (getf (car dialogue-list) :text)
+    (✎:show-cursor)
+    (render-dialogue-block matrix map (car dialogue-list))))
 
 
 
@@ -150,6 +197,6 @@ entities as the speakers. Dialogue should be in the format:
     :speaker \"papa\"
    ...))
 A state-function for use with STATE-LOOP."
-  (sleep .02)
-  (dialogue-state-draw matrix dialogue)
+  (sleep .05)
+  (dialogue-state-draw matrix map dialogue)
   (dialogue-state-update map dialogue))

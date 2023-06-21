@@ -73,7 +73,7 @@ A core part of #'menu-state."
 'selected' form. If selected is a non-zero number below 100, then that percent
 of the box will be displayed as selected/highlighted. This percent is from
 left-to-right, unless negative — in which case, right-to-left."
-  (render-string matrix text (+ x 1) (+ 1 y)
+  (render-string matrix text (list :x (+ x 1) :y (+ 1 y))
                  :max-column (- (+ x width) 1)
                  :max-row (- (+ y height) 2))
   ;; Render the normal top and bottom bars.
@@ -86,8 +86,8 @@ left-to-right, unless negative — in which case, right-to-left."
   (if (and selection
            (not (eq selection 0)))
       (let* ((bar-width
-               (at-most width (ceiling (* width (* (abs selection)
-                                                   .01)))))
+               (…:at-most width (ceiling (* width (* (abs selection)
+                                                     .01)))))
              (bar-start (if (> 0 selection) (- width bar-width) 0)))
         (dotimes (i bar-width)
           (setf (aref matrix y (+ x bar-start i)) #\=)
@@ -112,7 +112,7 @@ The item list should be an alist of the following format:
        (let* ((label (cdr (assoc 'label item)))
               (selection (or (cdr (assoc 'selection item))
                              0))
-              (width (at-most max-item-width
+              (width (…:at-most max-item-width
                               (+ (length label) 2))))
          (render-menu-item matrix label x y
                            :width width
@@ -124,33 +124,41 @@ The item list should be an alist of the following format:
   matrix)
 
 
-(defun render-string (matrix text x y &key (max-column 72) (max-row 20))
+(defun render-string (matrix text coords &key (max-column 72) (max-row 20))
   "Render the given string to the matrix of characters, character-by-character.
 Will line-break or truncate as appropriate and necessary to not exceed the
 positional arguments nor the dimensions of the matrix."
-  (render-string-partially matrix text x y :max-column max-column :max-row max-row
+  (render-string-partially matrix text coords :max-column max-column :max-row max-row
                            :char-count (length text)))
 
 
-(defun render-string-partially (matrix text x y &key (char-count 0) (max-column 72) (max-row 20))
+(defun render-string-partially (matrix text coords &key (char-count 0) (max-column 72) (max-row 20))
   "Partially render the given string to a matrix of characters. Will render only
 a portion of the string, dictated by the CHAR-COUNT.
 See the similar RENDER-STRING function."
-  (let* ((dimensions (array-dimensions matrix))
-         (max-column (at-most (cadr dimensions) max-column))
-         (max-write-row (at-most (at-most (car dimensions) max-row)
-                                 (floor (/ char-count max-column))))
-         (max-column-at-max-write-row (- char-count (* max-write-row max-column)))
-         (substrings (split-string-by-length text (- max-column x)))
+  (let* ((x (getf coords :x))
+         (y (getf coords :y))
+         (dimensions (array-dimensions matrix))
+         (max-column (…:at-most (cadr dimensions) max-column))
+         (row-width (- max-column x))
+         (max-write-row (…:at-most (…:at-most (car dimensions) max-row)
+                                   (floor (/ char-count row-width))))
+         (row-width-at-max-write-row
+           (…:at-most row-width
+                      (- char-count (* max-write-row row-width))))
+         (substrings (…:split-string-by-length text row-width))
          (row 0))
     (loop while (and (<= (+ y row) max-row)
                      substrings)
           do (cond ((< row max-write-row)
                     (render-line matrix (pop substrings)
                                  x (+ y row)))
+                   ;; At the last line, write only up til the :CHAR-COUNT
                    ((eq row max-write-row)
-                    (render-line matrix (subseq (pop substrings) 0 max-column-at-max-write-row)
-                                 x (+ y row)))
+                    (render-line
+                     matrix
+                     (subseq (pop substrings) 0 row-width-at-max-write-row)
+                     x (+ y row)))
                    ('t
                     (pop substrings)))
              (incf row)))
@@ -251,42 +259,14 @@ That is, 0 for non-selected items and 100 for selected items."
 ;;; ———————————————————————————————————
 ;;; Misc. utils
 ;;; ———————————————————————————————————
-(defun split-string-by-length (string line-length &key (substrings '()))
-  "Given a string, split it into a list of substrings all with lengths
-equal or lower to the given length."
-  (if (> (length string) line-length)
-      (split-string-by-length
-       (subseq string line-length)
-       line-length
-       :substrings (append substrings
-                           `(,(subseq string 0 line-length))))
-      (append substrings `(,string))))
-
-
-(defun at-most (maximum num)
-  "This function returns at most every hope and dream you've ever had, and at
-minimum returns your more pitiful of moments."
-  (if (> num maximum)
-      maximum
-      num))
-
-
-(defun at-least (minimum num)
-  "This function returns at least every hope and dream you've ever had, and at
-maximum returns your more pitiful of moments."
-  (if (< num minimum)
-      minimum
-      num))
-
-
 (defun gravitate-toward (goal num delta)
   "Either add to a number, or subtract from it; whichever brings it closer to zero.
 In addition, the resultant value shall not “pass” zero."
   (cond
     ((< num goal)
-     (at-most goal (+ num delta)))
+     (…:at-most goal (+ num delta)))
     ((> num goal)
-     (at-least goal (- num delta)))
+     (…:at-least goal (- num delta)))
     ('t
      goal)))
 

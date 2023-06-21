@@ -22,6 +22,7 @@
   (:use :cl
    :flora-search-aurora.overworld.tiled :flora-search-aurora.overworld.util)
   (:export #:overworld-state #:overworld-state-draw
+           #:world-coords->screen-coords
            #:getf-entity #:getf-entity-data
            :player))
 

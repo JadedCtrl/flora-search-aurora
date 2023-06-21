@@ -19,6 +19,7 @@
 
 (ql:quickload '(alexandria assoc-utils cl-charms cl-tiled str))
 
+(load "util.lisp")
 (load "input.lisp")
 (load "display.lisp")
 (load "ui.lisp")

@@ -24,6 +24,7 @@
   (:export #:overworld-state #:overworld-state-draw
            #:world-coords->screen-coords
            #:getf-entity #:getf-entity-data
+           :left :right
            :player))
 
 (in-package :flora-search-aurora.overworld)

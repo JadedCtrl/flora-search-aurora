@@ -28,7 +28,23 @@
 
 
 ;;; ———————————————————————————————————
-;;; Dialogue-generation DSL (sorta)
+;;; Misc. utilities
+;;; ———————————————————————————————————
+(defun pressed-enter-p ()
+  "Whether or not the enter/return key has been pressed recently.
+Man, today’s a good day. Well, it wasn’t great, too be honest. Kind of bad,
+I slightly humiliated myself a tiny bit. But wow, I’m having such nice tea!
+Programming with nice tea! What a nice day this is. If you happen to be
+reading this, I hope your day is going well too!
+If not, have some tea on me: I’m paying. =w="
+  (and (listen)
+       (eq (getf (⌨:normalize-char-plist (⌨:read-char-plist)) :char)
+           #\return)))
+
+
+
+;;; ———————————————————————————————————
+;;; Dialogue-generation helpers
 ;;; ———————————————————————————————————
 (defun start-dialogue (&rest dialogue-tree)
   (reduce (lambda (a b) (append a b))
@@ -56,6 +72,8 @@
 ;;; Accessors
 ;;; ———————————————————————————————————
 (defun dialogue-speaker (dialogue)
+  "Get the DIALOGUE-speaker’s corresponding identifying symbol.
+Because they’re stored in strings. So we gotta, like, unstringify. Ya dig?"
   (intern (string-upcase (getf dialogue :speaker))))
 
 
@@ -63,13 +81,6 @@
 ;;; ———————————————————————————————————
 ;;; Dialogue logic
 ;;; ———————————————————————————————————
-(defun pressed-enter-p ()
-  "Whether or not the enter/return key has been pressed recently."
-  (and (listen)
-       (eq (getf (⌨:normalize-char-plist (⌨:read-char-plist)) :char)
-           #\return)))
-
-
 (defun appropriate-face (map speaker face)
   "Return the face appropriate for the speaker.
 If FACE is a string, used that.
@@ -110,19 +121,27 @@ should be printed on the screen at any given moment."
 
 
 (defun dialogue-state-update (map dialogue-list)
-  "The logic/input-processing helper function for DIALOGUE-STATE."
+  "The logic/input-processing helper function for DIALOGUE-STATE.
+Progress through the lines of dialogue when the user hits ENTER, etc.
+Returns the state for use with STATE-LOOP, pay attention!"
   (update-speaking-face map (car dialogue-list))
   (progress-line-delivery (car dialogue-list))
   ;; Progress to the next line of dialogue as appropriate.
-  (let ((text (getf (car dialogue-list) :text)))
-    (cond ((or (pressed-enter-p)
-               (not text))
+  (let* ((text (getf (car dialogue-list) :text))
+         (finished-printing-p (eq (length text)
+                                  (getf (car dialogue-list) :progress)))
+         (did-press-enter-p (pressed-enter-p)))
+    (cond ((or (not text)
+               (and did-press-enter-p finished-printing-p))
            (if (cdr dialogue-list)
-               (list :dialogue (cdr dialogue-list) :map map)
-               (progn
-                 (✎:hide-cursor)
-                 (values nil
-                         (list :map map)))))
+              (list :dialogue (cdr dialogue-list) :map map)
+              (progn
+                (✎:hide-cursor)
+                (values nil
+                        (list :map map)))))
+          ((and did-press-enter-p (not finished-printing-p))
+           (setf (getf (car dialogue-list) :progress) (length text))
+           (list :dialogue dialogue-list :map map))
          ((cdr dialogue-list)
           (list :dialogue dialogue-list :map map)))))
 
@@ -131,7 +150,13 @@ should be printed on the screen at any given moment."
 ;;; ———————————————————————————————————
 ;;; Dialogue drawing
 ;;; ———————————————————————————————————
-(defun optimal-speech-layout-horizontally (text coords &key (rightp nil) (width 72) (height 20))
+(defun optimal-text-placement-horizontally (text coords &key (rightp nil) (width 72) (height 20))
+  "Given a horizontal direction (RIGHTP defined or nil) and a focal point COORDS,
+return the parameters of a text-box that can optimally fit the given TEXT in the
+direction specified relative to the focal point. If a legible position can’t be
+found, just give up! Return nil.
+Otherwise, return a list list with the coordinates, max column, and max row — for
+use with RENDER-STRING."
   (let* ((text-x-margin (if rightp
                             (+ (getf coords :x) 3)
                             0))
@@ -158,7 +183,12 @@ should be printed on the screen at any given moment."
              height)))))      ;; Max row
 
 
-(defun optimal-speech-layout-vertical (text coords &key (downp nil) (width 72) (height 20))
+(defun optimal-text-placement-vertically (text coords &key (downp nil) (width 72) (height 20))
+  "Given a vertical direction (DOWNP defined or nil) and a focal point COORDS,)
+return the parameters of a text-box that can optimally fit the given TEXT in the
+direction specified relative to the focal point. Return nil if no such placement
+is found, otherwise return a list of the coordinates, max-column, and max-row
+(for use with RENDER-STRING)."
   (let* ((text-y-margin (if downp
                             (+ (getf coords :y) 1)
                             (- (getf coords :y) 2)))
@@ -186,25 +216,34 @@ should be printed on the screen at any given moment."
 
 
 (defun optimal-speech-layout (map dialogue &key (width 72) (height 20))
+  "Given a line of DIALOGUE and MAP data, return the ideal “text-box” for the
+text. This tries to place the text on the screen without covering up anything
+important, if possible.
+The data returned is a list of the box’es top-left coordinate, max-column,
+and max-row; for use with RENDER-STRING. Like so:
+  ((:x X :y Y) MAX-COLUMN MAX-ROW)"
   (let* ((speaker-id (dialogue-speaker dialogue))
          (direction (🌍:getf-entity-data map speaker-id :direction))
          (playerp (eq speaker-id 'player))
          (leftp (not (eq direction '🌍:right)))
          (text (getf dialogue :text))
          (coords (🌍:world-coords->screen-coords (🌍:getf-entity-data map speaker-id :coords))))
-    (format *error-output* "AAA ~A - ~A - ~A" leftp direction 'RIGHT)
-    (or (optimal-speech-layout-horizontally text coords :width width :height height
+    ;; Ideally, place text-box behind the speaker; otherwise, place it above (NPC) or below (player).
+    (or (optimal-text-placement-horizontally text coords :width width :height height
                                                         :rightp leftp)
-        (optimal-speech-layout-vertical text coords :width width :height height
+        (optimal-text-placement-vertically text coords :width width :height height
                                                     :downp playerp)
-        (optimal-speech-layout-horizontally text coords :width width :height height
-                                                        :rightp (not leftp))
-        (optimal-speech-layout-vertical text coords :width width :height height
-                                                    :downp  (not playerp)))))
-
+        ;; … Worst-case scenario, just do whatever’ll fit :w:”
+        (optimal-text-placement-vertically text coords :width width :height height
+                                            :downp  (not playerp))
+        (optimal-text-palcement-horizontally text coords :width width :height height
+                                                        :rightp (not leftp)))))
 
 
 (defun render-dialogue-block (matrix map dialogue)
+  "Render a bit of DIALOGUE to the MATRIX, in an intelligent fashion; that is,
+make it pretty, dang it! >O<
+☆:.｡.o(≧▽≦)o.｡.:☆"
   (let* ((progress (getf dialogue :progress))
          (text (getf dialogue :text))
          (optimal-layout (when text (optimal-speech-layout map dialogue))))
@@ -229,13 +268,13 @@ Helper function for DIALOGUE-STATE."
 ;;; Dialogue loop
 ;;; ———————————————————————————————————
 (defun dialogue-state (matrix &key dialogue map)
-  "Render a bit of dialogue to the screen, using :FLORA-SEARCH-AURORA.OVERWORLD
+  "Render a bit of DIALOGUE to the screen, using :FLORA-SEARCH-AURORA.OVERWORLD
 entities as the speakers. Dialogue should be in the format:
   ((:text \"Hello, papa!\"
     :speaker \"son\"        ;; The entity’s ID (if applicable)
     :face \"owo\")         ;; If you want their face to change
    (:face \"=w=\" :speaker 'son) ;; change their face back when done talking
-   (:text \"Hello, you little gremlin! <3\"
+   (:text \"My dearest son, it’s been so long~!\"
     :speaker \"papa\"
    ...))
 A state-function for use with STATE-LOOP."

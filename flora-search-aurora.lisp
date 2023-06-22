@@ -88,31 +88,6 @@ overheat, or something ¯\_(ツ)_/¯"
                  state-result))))))
 
 
-(defun make-main-menu-state ()
-  "Return a state-function for the game’s main menu, for use with STATE-LOOP."
-  (let ((main-menu
-          `(((LABEL . "PLAY")
-             (SELECTION . 100) (SELECTED . T)
-             (FUNCTION . ,#'make-main-overworld-state))
-            ((LABEL . "SUBMENU")
-             (FUNCTION . ,#'make-options-menu-state))
-            ((LABEL . "QUIT") (RETURN . NIL)))))
-    (lambda (matrix)
-      (📋:menu-state matrix main-menu))))
-
-
-(defun make-options-menu-state ()
-  "Return a state-function for the options menu, for use with STATE-LOOP."
-  (let ((options-menu
-          `(((LABEL . "IDK")
-             (SELECTION . 100) (SELECTED . T)
-             (FUNCTION . ,(lambda () (print "¯\_(ツ)_/¯"))))
-            ((LABEL . "GO BACK")
-             (RETURN . ,NIL)))))
-    (lambda (matrix)
-      (📋:menu-state matrix options-menu))))
-
-
 (defun make-main-overworld-state ()
   "Return a state-function for the game’s overworld (the majority of the game), for use
 with STATE-LOOP."
@@ -123,13 +98,23 @@ with STATE-LOOP."
                    args))))
 
 
+(defparameter *submenu* `(((label . "IDK") (selection . 100) (selected t))
+                          ((label . "GO BACK") (return . nil))))
+
+
+(defparameter *main-menu* `(((label . "PLAY") (selection . 100) (selected . t)
+                             (return . ,(make-main-overworld-state)))
+                            ((label . "SUBMENU") (return . ,(📋:make-menu-state *submenu*)))
+                            ((label . "QUIT") (return . nil))))
+
+
 (defun main ()
   "A pathetic fascimile of a main loop. What does it do? WHAST DOES TI DODOO?"
   (cl-charms:with-curses ()
     (cl-charms:enable-raw-input :interpret-control-characters 't)
     (✎:hide-cursor)
     (✎:clear-screen)
-    (state-loop (list (make-main-menu-state)))))
+    (state-loop (list (📋:make-menu-state *main-menu*)))))
 
 
 (main) ;; — Knock-knock

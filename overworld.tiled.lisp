@@ -63,17 +63,6 @@ alist of Tiled cell “chunks”."
      :groups chunks)))
 
 
-(defun object-layer-entities (layer &optional (entities '()))
-  "Convert all objects in an object layer into entity plists."
-  (append
-   entities
-   (mapcar
-    (lambda (object)
-      (tiled-object->entity object
-                      (cl-tiled:layer-map layer)))
-    (layer-objects layer))))
-
-
 (defun tiled-object->entity (tiled-obj tiled-map)
   "Convert a Tiled object into an entity plist."
   (let ((properties (cl-tiled:properties tiled-obj)))
@@ -89,6 +78,17 @@ alist of Tiled cell “chunks”."
           :direction (if (gethash "facing_right" properties #'string-equal)
                          'right
                          'left))))
+
+
+(defun object-layer-entities (layer &optional (entity-chunks '()))
+  "Convert all objects in an object layer into entity plists."
+  (let ((entities (mapcar (lambda (object) (tiled-object->entity object (cl-tiled:layer-map layer)))
+                          (layer-objects layer))))
+    (collect-items-into-groups
+     entities
+     (lambda (entity)
+       (world-coords-chunk (getf (cdr entity) :coords)))
+     :groups entity-chunks)))
 
 
 

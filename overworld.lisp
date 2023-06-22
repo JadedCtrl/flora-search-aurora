@@ -57,12 +57,15 @@ Uses the keys of plist a."
 ;;; ———————————————————————————————————
 (defmacro getf-entity (map entity-id)
   "Get an entity from the map-data, using its ID."
-  `(assoc ,entity-id (gethash :entities ,map)))
+  `(mapcan (lambda (chunk) (assoc ,entity-id (cdr chunk)))
+           (gethash :entities ,map)))
+
 
 (defmacro getf-entity-data (map entity-id key)
   "Get a specific piece of data from the given entity's property-list."
-  `(getf (cdr (assoc ,entity-id (gethash :entities ,map))) ,key))
-;;  `(getf (cdr (getf-entity map entity-id)) key))
+  `(getf (cdr (mapcan (lambda (chunk) (assoc ,entity-id (cdr chunk)))
+                      (gethash :entities ,map)))
+         ,key))
 
 
 (defun entities-near-coords (coords radius entities &key (x-radius radius) (y-radius radius))
@@ -76,7 +79,7 @@ Uses the keys of plist a."
             (< (abs (- (getf coords :y)
                        (getf test-coords :y)))
                y-radius))))
-   entities))
+   (cdr (assoc (world-coords-chunk coords) entities))))
 
 
 (defun entities-near-entity (entity entities)
@@ -159,10 +162,21 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
 
 (defun move-entity-to (map entity &key (x 0) (y 0))
   "Move the given entity to the given coordinates."
-  (let ((entity-plist (cdr (assoc entity (gethash :entities map)))))
+  (let ((old-chunk (world-coords-chunk (getf-entity-data map entity :coords)))
+        (new-chunk (world-coords-chunk (list :x x :y y))))
+    ;; Change the entity’s world coordinates…
     (when (walkable-tile-p map x y)
-      (setf (getf (getf entity-plist :coords) :x) x)
-      (setf (getf (getf entity-plist :coords) :y) y))))
+      (setf (getf (getf-entity-data map entity :coords) :x) x)
+      (setf (getf (getf-entity-data map entity :coords) :y) y))
+    ;; If the entity’s moved into a different screen-chunk (and so into a different
+    ;; sub-alist of MAP hash-table’s :entities), move its list into the new chunk’s.
+    (when (not (eq old-chunk new-chunk))
+      ;; Add it to the new chunk list…
+      (setf (assoc-utils:aget (assoc-utils:aget (gethash :entities map) new-chunk) entity)
+            (cdr (getf-entity map entity)))
+      ;; Delete it from the old list…
+      (alexandria:deletef (assoc-utils:aget (gethash :entities map) old-chunk) entity
+                          :test (lambda (id alist) (eq id (car alist)))))))
 
 
 
@@ -174,7 +188,7 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
 A core part of OVERWORLD-STATE."
   (let* ((chunk (world-coords-chunk (getf-entity-data map 'player :coords))))
     (matrix-write-map-chunk matrix map chunk)
-    (matrix-write-entities matrix map)))
+    (matrix-write-entities matrix map chunk)))
 
 
 (defun matrix-write-map-chunk (matrix map chunk
@@ -199,11 +213,11 @@ alist containing a character (:CHAR) and :X & :Y coordinates."
 ;;; ———————————————————————————————————
 ;;; Overworld-drawing: Entity-rendering
 ;;; ———————————————————————————————————
-(defun matrix-write-entities (matrix map)
+(defun matrix-write-entities (matrix map chunk)
   "Draw all entities from an alist of entities to the matrix."
   (mapcar (lambda (entity-assoc)
             (matrix-write-entity matrix (cdr entity-assoc)))
-   (gethash :entities map)))
+   (cdr (assoc chunk (gethash :entities map)))))
 
 
 (defun matrix-write-entity (matrix entity-plist)

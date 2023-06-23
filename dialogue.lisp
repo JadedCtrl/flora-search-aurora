@@ -21,7 +21,8 @@
   (:nicknames :fsa.dia :dialogue :💬)
   (:use :cl)
   (:export #:dialogue-state
-          #:start-dialogue #:face #:say #:mumble #:move))
+           #:start-dialogue #:face #:say #:mumble #:move
+           :normal-face :talking-face))
 
 (in-package :flora-search-aurora.dialogue)
 
@@ -56,20 +57,22 @@ If not, have some tea on me: I’m paying. =w="
    (list :speaker speaker :face face)))
 
 
-(defun say (speaker text)
+(defun say (speaker &rest text)
   (list
-   (list :speaker speaker :text text :face 'talking-face :progress 0)
+   (list :speaker speaker :face 'talking-face :progress 0
+         :text (or (getf text (…:system-language)) (getf text :en)))
    (car (face speaker 'normal-face))))
 
 
-(defun mumble (speaker text)
+(defun mumble (speaker &rest text)
   (list
-   (list :speaker speaker :text text :progress 0)))
+   (list :speaker speaker :progress 0
+         :text (or (getf text (…:system-language)) (getf text :en)))))
 
 
-(defun move (speaker world-coords)
+(defun move (speaker world-coords &key (delay .05))
   (list
-   (list :speaker speaker :coords world-coords)))
+   (list :speaker speaker :coords world-coords :delay delay)))
 
 
 
@@ -140,7 +143,8 @@ coordinates listed in the DIALOGUE’s :COORDS property. … If applicable, ofc.
                ('t 0))
       :y (cond ((< (getf target-coords :y) (getf speaker-coords :y)) -1)
                ((> (getf target-coords :y) (getf speaker-coords :y)) 1)
-               ('t 0))))
+               ('t 0)))
+     (sleep (or (getf dialogue :delay) 0)))
     finished-moving-p))
 
 
@@ -279,8 +283,8 @@ and max-row; for use with RENDER-STRING. Like so:
         ;; … Worst-case scenario, just do whatever’ll fit :w:”
         (optimal-text-placement-vertically text coords :width width :height height
                                             :downp  (not playerp))
-        (optimal-text-palcement-horizontally text coords :width width :height height
-                                                        :rightp (not leftp)))))
+        (optimal-text-placement-horizontally text coords :width width :height height
+                                                         :rightp (not leftp)))))
 
 
 (defun render-dialogue-block (matrix map dialogue)

@@ -38,17 +38,25 @@
 
 (in-package :flora-search-aurora)
 
+
 (defun literary-girl-dialogue-2 (map)
   (print "OWO"))
 
+
 (defun literary-girl-dialogue (map)
-  (lambda (matrix &key (map map)
-                    (dialogue (💬:start-dialogue
-                                (💬:say "literary-girl" "Blah blah, testing. A multi-lined one. For real! jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj akls djlaks jdlaksj dlakjsd")
-                                (💬:say "player" "ktp ktp jes jes?")
-                                (💬:move "player" '(:x 30 :y 10)))))
-    (🌍:overworld-state-draw matrix map)
-    (💬:dialogue-state matrix :map map :dialogue dialogue)))
+  (let
+      ((dialogue
+         (💬:start-dialogue
+          (💬:mumble "literary-girl" :en "...")
+          (💬:say "player"        :eo "Kielas apud la mar'?"
+                                  :en "How's the view?")
+          (💬:face "player" "<.<")
+          (💬:say "literary-girl" :eo "Kielas apud la ruinoj de via viv'?"
+                                  :en "How's your trainwreck of a life?")
+          (💬:face "player" '💬:normal-face))))
+    (lambda (matrix &key (map map) (dialogue dialogue))
+       (🌍:overworld-state-draw matrix map)
+       (💬:dialogue-state matrix :map map :dialogue dialogue))))
 
 
 (defun state-loop
@@ -107,6 +115,8 @@ with STATE-LOOP."
                              (return . ,(make-main-overworld-state)))
                             ((label . "SUBMENU") (return . ,(📋:make-menu-state *submenu*)))
                             ((label . "QUIT") (return . nil))))
+
+
 
 
 (defun main ()

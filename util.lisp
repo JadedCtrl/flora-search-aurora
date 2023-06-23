@@ -20,7 +20,7 @@
 (defpackage :flora-search-aurora.util
   (:nicknames :fsa.ut :util :…)
   (:use :cl :assoc-utils)
-  (:export #:split-string-by-length #:plist= #:at-least #:at-most))
+  (:export #:split-string-by-length #:plist= #:at-least #:at-most #:system-language))
 
 (in-package :flora-search-aurora.util)
 
@@ -69,3 +69,12 @@ minimum returns your more pitiful of moments."
   (if (> num maximum)
       maximum
       num))
+
+
+(defun system-language ()
+  "Return the system language, if among the supported; otherwise, EN-glish."
+  (let ((lang (subseq (uiop:getenv "LANG") 0 2)))
+   (cond
+     ((string-equal lang "eo") :eo)
+     ((string-equal lang "en") :en)
+     ('t :en))))

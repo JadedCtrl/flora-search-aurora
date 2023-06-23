@@ -21,7 +21,7 @@
   (:nicknames :fsa.o :overworld :🌍)
   (:use :cl
    :flora-search-aurora.overworld.tiled :flora-search-aurora.overworld.util)
-  (:export #:overworld-state #:overworld-state-draw
+  (:export #:overworld-state #:make-overworld-state #:overworld-state-draw
            #:world-coords->screen-coords
            #:getf-entity #:getf-entity-data
            #:move-entity-to #:move-entity
@@ -250,3 +250,11 @@ A state-function for use with STATE-LOOP."
   (sleep .02)
   (overworld-state-draw matrix map)
   (overworld-state-update map))
+
+
+(defun make-overworld-state (map-path)
+  "Return a state-function for a a map, for use with STATE-LOOP."
+  (lambda (matrix &rest args)
+    (apply #'🌍:overworld-state
+           (append (list matrix :map-path map-path)
+                   args))))

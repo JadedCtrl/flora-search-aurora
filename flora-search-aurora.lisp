@@ -27,6 +27,7 @@
 (load "overworld.tiled.lisp")
 (load "overworld.lisp")
 (load "dialogue.lisp")
+(load "engine.lisp")
 
 (defpackage :flora-search-aurora
   (:nicknames :fsa :✿)
@@ -39,72 +40,19 @@
 (in-package :flora-search-aurora)
 
 
-(defun literary-girl-dialogue-2 (map)
-  (print "OWO"))
+(defparameter *literary-girl-dialogue*
+  (💬:start-dialogue
+   (💬:mumble "literary-girl" :en "...")
+   (💬:say "player"        :eo "Kielas apud la mar'?"
+                           :en "How's the view?")
+   (💬:face "player" "<.<")
+   (💬:say "literary-girl" :eo "Kielas apud la ruinoj de via viv'?"
+                           :en "How's your trainwreck of a life?")
+   (💬:face "player" '💬:normal-face)))
 
 
 (defun literary-girl-dialogue (map)
-  (let
-      ((dialogue
-         (💬:start-dialogue
-          (💬:mumble "literary-girl" :en "...")
-          (💬:say "player"        :eo "Kielas apud la mar'?"
-                                  :en "How's the view?")
-          (💬:face "player" "<.<")
-          (💬:say "literary-girl" :eo "Kielas apud la ruinoj de via viv'?"
-                                  :en "How's your trainwreck of a life?")
-          (💬:face "player" '💬:normal-face))))
-    (lambda (matrix &key (map map) (dialogue dialogue))
-       (🌍:overworld-state-draw matrix map)
-       (💬:dialogue-state matrix :map map :dialogue dialogue))))
-
-
-(defun state-loop
-    (states &key (last-matrix (make-screen-matrix)) (matrix (make-screen-matrix)) (state-params nil))
-  "Begin the game’s loop, which executes (henceforthly called) state-functions over and over again
-until Hell freezes over and a new king reigns supreme.
-Given a list of state-functions, STATES, it will execute the first function.
-Each state-function must take at least a single parameter, a matrix of characters. A state-function
-should edit this matrix in-place, replacing its elements with characters that will later be printed
-to the terminal.
-What the state-function returns is pretty important, having different repercussions:
-  * NIL       —  The function is removed from STATES, and so the next function in STATES will start
-                 getting executed instead.
-  * NIL; List —  The function is popped off STATES and the list is used as the new parameters for
-                 the next function in STATES.
-  * Function  —  The function is pushed to the front of STATES, and so is executed instead of the
-                 current function.
-  * List      —  The current function (front of STATES) continues to be executed with the given
-                 list as a parameters list.
-Make note to add a delay w SLEEP to your state functions, or… well, y’know. Your computer will
-overheat, or something ¯\_(ツ)_/¯"
-  (when states
-    (multiple-value-bind (state-result new-state-params)
-        (apply (car states) (cons matrix state-params)) ;; Run the latest-added update/draw loop
-      (✎:print-screen-matrix (✎:matrix-delta last-matrix matrix)) ;; Print its results.
-      (force-output)
-      (state-loop
-          (cond ((functionp state-result)
-                 (cons state-result states))
-                ((not state-result)
-                 (cdr states))
-                ('t states))
-          :last-matrix matrix
-          :state-params
-          (cond ((not state-result)
-                 new-state-params)
-                ((listp state-result)
-                 state-result))))))
-
-
-(defun make-main-overworld-state ()
-  "Return a state-function for the game’s overworld (the majority of the game), for use
-with STATE-LOOP."
-  (lambda (matrix &rest args)
-    (apply #'🌍:overworld-state
-           (append (list matrix)
-                   '(:map-path #p"/home/jaidyn/.local/src/games/flora search aurora/res/map.tmx")
-                   args))))
+  (make-dialogue-state map *literary-girl-dialogue*))
 
 
 (defparameter *submenu* `(((LABEL :en "IDK") (selection . 100) (selected t))
@@ -113,7 +61,8 @@ with STATE-LOOP."
 
 (defparameter *main-menu* `(((LABEL :en "PLAY" :eo "EKLUDI")
                              (selection . 100) (selected . t)
-                             (return . ,(make-main-overworld-state)))
+                             (return . ,(🌍:make-overworld-state
+                                         (format nil "~Ares/map.tmx" (uiop:getcwd)))))
                             ((LABEL :en "SUBMENU" :eo "SUBMENUO")
                              (return . ,(📋:make-menu-state *submenu*)))
                             ((LABEL :en "QUIT" :eo "REZIGNI")
@@ -121,12 +70,10 @@ with STATE-LOOP."
 
 
 (defun main ()
-  "A pathetic fascimile of a main loop. What does it do? WHAST DOES TI DODOO?"
-  (cl-charms:with-curses ()
-    (cl-charms:enable-raw-input :interpret-control-characters 't)
-    (✎:hide-cursor)
-    (✎:clear-screen)
-    (state-loop (list (📋:make-menu-state *main-menu*)))))
+  "A pathetic fascimile of a main loop. What does it do? WHAST DOES TI DODOO?
+What a mysteryyy! You’ll have to check out the engine to uncover it.
+engine.lisp, that is. Cheers! :D"
+    (⚙:main (list (📋:make-menu-state *main-menu*))))
 
 
 (main) ;; — Knock-knock

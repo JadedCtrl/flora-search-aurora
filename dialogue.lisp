@@ -20,7 +20,7 @@
 (defpackage :flora-search-aurora.dialogue
   (:nicknames :fsa.dia :dialogue :💬)
   (:use :cl)
-  (:export #:dialogue-state
+  (:export #:dialogue-state #:make-dialogue-state
            #:start-dialogue #:face #:say #:mumble #:move
            :normal-face :talking-face))
 
@@ -328,6 +328,13 @@ A state-function for use with STATE-LOOP."
   (sleep .05)
   (dialogue-state-draw matrix map dialogue)
   (dialogue-state-update map dialogue))
+
+
+(defun make-dialogue-state (map dialogue-list)
+  "Return a state-function for a section of dialogue, for use with STATE-LOOP."
+  (lambda (matrix &key (map map) (dialogue dialogue-list))
+    (🌍:overworld-state-draw matrix map)
+    (dialogue-state matrix :map map :dialogue dialogue-list)))
 
 
 ;; Split a banana in two, bisection-fruit,

@@ -45,7 +45,8 @@
   (lambda (matrix &key (map map)
                     (dialogue (💬:start-dialogue
                                 (💬:say "literary-girl" "Blah blah, testing. A multi-lined one. For real! jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj akls djlaks jdlaksj dlakjsd")
-                                (💬:say "player" "ktp ktp jes jes?"))))
+                                (💬:say "player" "ktp ktp jes jes?")
+                                (💬:move "player" '(:x 30 :y 10)))))
     (🌍:overworld-state-draw matrix map)
     (💬:dialogue-state matrix :map map :dialogue dialogue)))
 

@@ -21,7 +21,7 @@
   (:nicknames :fsa.dia :dialogue :💬)
   (:use :cl)
   (:export #:dialogue-state
-          #:start-dialogue #:face #:say #:mumble))
+          #:start-dialogue #:face #:say #:mumble #:move))
 
 (in-package :flora-search-aurora.dialogue)
 
@@ -67,6 +67,11 @@ If not, have some tea on me: I’m paying. =w="
    (list :speaker speaker :text text :progress 0)))
 
 
+(defun move (speaker world-coords)
+  (list
+   (list :speaker speaker :coords world-coords)))
+
+
 
 ;;; ———————————————————————————————————
 ;;; Accessors
@@ -100,8 +105,8 @@ If FACE is NIL… guess what that does. :^)"
 
 
 (defun update-speaking-face (map dialogue)
-  "Given a line (plist) of dialogue, change speaker’s face to either their
-talking-face or the face given by the dialogue."
+  "Given a line (plist) of DIALOGUE, change speaker’s face to either their
+talking-face or the face given by the DIALOGUE."
   (let* ((speaker (intern (string-upcase (getf dialogue :speaker))))
          (new-face (appropriate-face map speaker (getf dialogue :face))))
     ;; Replace the face, when appropriate.
@@ -110,7 +115,7 @@ talking-face or the face given by the dialogue."
 
 
 (defun progress-line-delivery (dialogue)
-  "Progress the delivery of a line (plist) of dialogue. That is, increment the
+  "Progress the delivery of a line (plist) of DIALOGUE. That is, increment the
 “said character-count” :PROGRESS, which dictates the portion of the message that
 should be printed on the screen at any given moment."
   (let ((progress (getf dialogue :progress))
@@ -120,6 +125,32 @@ should be printed on the screen at any given moment."
       (incf (getf dialogue :progress) 1))))
 
 
+(defun progress-movement (map dialogue)
+  "Move the entity by one tile in the targeted position — that is, the
+coordinates listed in the DIALOGUE’s :COORDS property. … If applicable, ofc."
+  (let* ((speaker (dialogue-speaker dialogue))
+         (target-coords (getf dialogue :coords))
+         (speaker-coords (🌍:getf-entity-data map speaker :coords))
+         (finished-moving-p (if target-coords (…:plist= speaker-coords target-coords) 't)))
+    (when (not finished-moving-p)
+     (🌍:move-entity
+      map speaker
+      :x (cond ((< (getf target-coords :x) (getf speaker-coords :x)) -1)
+               ((> (getf target-coords :x) (getf speaker-coords :x)) 1)
+               ('t 0))
+      :y (cond ((< (getf target-coords :y) (getf speaker-coords :y)) -1)
+               ((> (getf target-coords :y) (getf speaker-coords :y)) 1)
+               ('t 0))))
+    finished-moving-p))
+
+
+(defun finished-printing-p (dialogue)
+  "Whether or not a line of dialogue has been completely printed to the screen."
+  (or (not (getf dialogue :text))
+      (eq (length (getf dialogue :text))
+          (getf dialogue :progress))))
+
+
 (defun dialogue-state-update (map dialogue-list)
   "The logic/input-processing helper function for DIALOGUE-STATE.
 Progress through the lines of dialogue when the user hits ENTER, etc.
@@ -127,23 +158,35 @@ Returns the state for use with STATE-LOOP, pay attention!"
   (update-speaking-face map (car dialogue-list))
   (progress-line-delivery (car dialogue-list))
   ;; Progress to the next line of dialogue as appropriate.
-  (let* ((text (getf (car dialogue-list) :text))
-         (finished-printing-p (eq (length text)
-                                  (getf (car dialogue-list) :progress)))
-         (did-press-enter-p (pressed-enter-p)))
-    (cond ((or (not text)
-               (and did-press-enter-p finished-printing-p))
-           (if (cdr dialogue-list)
-              (list :dialogue (cdr dialogue-list) :map map)
-              (progn
-                (✎:hide-cursor)
-                (values nil
-                        (list :map map)))))
-          ((and did-press-enter-p (not finished-printing-p))
-           (setf (getf (car dialogue-list) :progress) (length text))
-           (list :dialogue dialogue-list :map map))
-         ((cdr dialogue-list)
-          (list :dialogue dialogue-list :map map)))))
+  (let* ((dialogue (car dialogue-list))
+         (text (getf dialogue :text))
+         (did-press-enter-p (pressed-enter-p))
+         (did-finish-printing-p (finished-printing-p dialogue))
+         (did-finish-moving-p (progress-movement map dialogue)))
+    ;; Only show the cursor when rendering text!
+    (if did-finish-moving-p
+        (✎:show-cursor)
+        (✎:hide-cursor))
+    (cond
+      ;; When enter’s hit and most everything is done (rendering text, etc),
+      ;; progress the dialogue.
+      ((or (and did-press-enter-p did-finish-printing-p did-finish-moving-p)
+           (and (not text) did-finish-moving-p))
+       (if (cdr dialogue-list)
+          (list :dialogue (cdr dialogue-list) :map map)
+          (progn
+            (✎:hide-cursor)
+            (values nil
+                    (list :map map)))))
+      ;; Allow interupting text-printing to end it!
+      ((and did-press-enter-p (not did-finish-printing-p))
+       (setf (getf (car dialogue-list) :progress) (length text))
+       (list :dialogue dialogue-list :map map))
+      ;; If no input, keep steady!
+      ((or (not did-finish-printing-p)
+           (not did-finish-moving-p)
+           (cdr dialogue-list))
+       (list :dialogue dialogue-list :map map)))))
 
 
 

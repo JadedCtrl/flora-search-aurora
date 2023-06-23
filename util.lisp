@@ -20,7 +20,7 @@
 (defpackage :flora-search-aurora.util
   (:nicknames :fsa.ut :util :…)
   (:use :cl :assoc-utils)
-  (:export #:split-string-by-length #:at-least #:at-most))
+  (:export #:split-string-by-length #:plist= #:at-least #:at-most))
 
 (in-package :flora-search-aurora.util)
 
@@ -35,6 +35,24 @@ equal or lower to the given length."
        :substrings (append substrings
                            `(,(subseq string 0 line-length))))
       (append substrings `(,string))))
+
+
+(defun every-other-element (list)
+  "Collect every-other-element of a list. E.g., (1 2 3 4) → (1 3)."
+  (when list
+    (cons (car list)
+          (every-other-element (cddr list)))))
+
+
+(defun plist= (a b &key (test #'eql))
+  "Return whether or not two property lists are equal, by comparing values of each pair.
+Uses the keys of plist a."
+  (let ((keys (every-other-element a)))
+    (loop for key in keys
+          do (when (not (apply test (list (getf a key)
+                                          (getf b key))))
+                 (return nil))
+          finally (return 't))))
 
 
 (defun at-least (minimum num)

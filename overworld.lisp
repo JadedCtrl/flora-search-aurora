@@ -24,32 +24,11 @@
   (:export #:overworld-state #:overworld-state-draw
            #:world-coords->screen-coords
            #:getf-entity #:getf-entity-data
+           #:move-entity-to #:move-entity
            :left :right
            :player))
 
 (in-package :flora-search-aurora.overworld)
-
-
-;;; ———————————————————————————————————
-;;; Misc. utility
-;;; ———————————————————————————————————
-(defun every-other-element (list)
-  "Collect every-other-element of a list. E.g., (1 2 3 4) → (1 3)."
-  (when list
-    (cons (car list)
-          (every-other-element (cddr list)))))
-
-
-(defun plist= (a b &key (test #'eql))
-  "Return whether or not two property lists are equal, by comparing values of each pair.
-Uses the keys of plist a."
-  (let ((keys (every-other-element a)))
-    (loop for key in keys
-          do (when (not (apply test (list (getf a key)
-                                          (getf b key))))
-                 (return nil))
-          finally (return 't))))
-
 
 
 ;;; ———————————————————————————————————
@@ -86,7 +65,7 @@ Uses the keys of plist a."
   "Return a list of entities near the given entity — that is, within touching-distance."
   (remove-if
    (lambda (test-entity)
-     (plist= (cdr entity)
+     (…:plist= (cdr entity)
              (cdr test-entity)))
    (entities-near-coords (getf (cdr entity) :coords)
                          (+ (length (getf (cdr entity) :face)) 2)
@@ -98,7 +77,7 @@ Uses the keys of plist a."
   (let ((chunk (world-coords-chunk coords)))
     (member 't (cdr (assoc chunk map-chunks))
             :test (lambda (ignored cell)
-                    (plist= (getf cell :coords) coords)))))
+                    (…:plist= (getf cell :coords) coords)))))
 
 
 (defun walkable-tile-p (map x y)
@@ -123,24 +102,26 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
       (let* ((input (⌨:normalize-char-plist (⌨:read-char-plist))))
         (cond
           ;; Interacting with nearby characters/entities
-          ((plist= input '(:modifier nil :char #\return))
+          ((…:plist= input '(:modifier nil :char #\return))
            (let* ((player (getf-entity map 'player))
                   (interactee (car (entities-near-entity player (gethash :entities map))))
                   (interaction (getf (cdr interactee) :interact)))
              (if interaction
                  (apply (intern (string-upcase interaction)) (list map))
                  (list :map map))))
+          ;; The pause-menu…
+;;          ((plist = input '(:modifier nil :char #\Esc)))
           ;; Simple up-down-left-right movements
-          ((plist= input '(:modifier nil :char #\→))
+          ((…:plist= input '(:modifier nil :char #\→))
            (move-entity map 'player :x 1)
            (list :map map))
-          ((plist= input '(:modifier nil :char #\←))
+          ((…:plist= input '(:modifier nil :char #\←))
            (move-entity map 'player :x -1)
            (list :map map))
-          ((plist= input '(:modifier nil :char #\↑))
+          ((…:plist= input '(:modifier nil :char #\↑))
            (move-entity map 'player :y -1)
            (list :map map))
-          ((plist= input '(:modifier nil :char #\↓))
+          ((…:plist= input '(:modifier nil :char #\↓))
            (move-entity map 'player :y 1)
            (list :map map))
           ('t

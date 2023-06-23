@@ -20,7 +20,7 @@
 (defpackage :flora-search-aurora.ui
   (:nicknames :fsa.u :ui :📋)
   (:use :cl :assoc-utils)
-  (:export #:menu-state
+  (:export #:menu-state #:make-menu-state
            #:render-line #:render-string #:render-string-partially
            :label :selection :selected))
 
@@ -29,7 +29,13 @@
 
 ;;; ———————————————————————————————————
 ;;; Menu loops
-;;; ———————————————————————————————————
+;;; ——————————————————————————————————
+(defun make-menu-state (menu-list)
+  "Return a state-function for the game’s main menu, for use with STATE-LOOP."
+  (lambda (matrix)
+    (📋:menu-state matrix menu-list)))
+
+
 (defun menu-state (matrix menu-alist)
   "Render a menu in menu-alist format to the given matrix, and process user-input.
 A state-function for use with the #'state-loop."

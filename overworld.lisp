@@ -176,7 +176,9 @@ A core part of OVERWORLD-STATE."
                                &key (chunk-width 72) (chunk-height 20))
   "Draw a map’s specific chunk (by its ID) to the matrix."
   (mapcar (lambda (cell)
-            (matrix-write-cell matrix cell))
+            (if (or (not (getf cell :lang))
+                    (eq (getf cell :lang) (…:system-language)))
+                (matrix-write-cell matrix cell)))
           (cdr (assoc chunk (gethash :tiles map)))))
 
 

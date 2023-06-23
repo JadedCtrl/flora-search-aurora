@@ -20,7 +20,10 @@
 (defpackage :flora-search-aurora.util
   (:nicknames :fsa.ut :util :…)
   (:use :cl :assoc-utils)
-  (:export #:split-string-by-length #:plist= #:at-least #:at-most #:system-language))
+  (:export #:split-string-by-length
+           #:plist=
+           #:at-least #:at-most
+           #:system-language #:langcode->keysym))
 
 (in-package :flora-search-aurora.util)
 
@@ -71,10 +74,17 @@ minimum returns your more pitiful of moments."
       num))
 
 
+(defun langcode->keysym (str)
+  "Given a language’s code (es/cz/it/etc.), return a corresponding key symbol,
+if the language is among the supported. Otherwise, nil."
+  (when (stringp str)
+    (let ((lang (string-downcase (subseq str 0 2))))
+      (cond
+        ((string-equal lang "eo") :eo)
+        ((string-equal lang "en") :en)))))
+
+
 (defun system-language ()
   "Return the system language, if among the supported; otherwise, EN-glish."
-  (let ((lang (subseq (uiop:getenv "LANG") 0 2)))
-   (cond
-     ((string-equal lang "eo") :eo)
-     ((string-equal lang "en") :en)
-     ('t :en))))
+  (or (langcode->keysym (uiop:getenv "LANG"))
+      :en))

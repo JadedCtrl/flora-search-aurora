@@ -19,7 +19,7 @@
 
 (defpackage :flora-search-aurora.overworld.tiled
   (:nicknames :fsa.o.t :overworld.tiled)
-  (:use :cl
+  (:use :cl :anaphora-basic
    :flora-search-aurora.overworld.util)
   (:export #:load-map))
 
@@ -66,16 +66,16 @@ alist of Tiled cell “chunks”."
 (defun tiled-object->entity (tiled-obj tiled-map)
   "Convert a Tiled object into an entity plist."
   (let ((properties (cl-tiled:properties tiled-obj)))
-    (list (intern (string-upcase (gethash "id" properties #'string-equal)))
+    (list (intern (string-upcase (gethash "id" properties)))
           :coords (list :x (floor (/ (cl-tiled:object-x tiled-obj)
                                      (cl-tiled:map-tile-width tiled-map)))
                         :y (floor (/ (cl-tiled:object-y tiled-obj)
                                      (cl-tiled:map-tile-height tiled-map))))
-          :face (gethash "normal_face" properties #'string-equal)
-          :normal-face (gethash "normal_face" properties #'string-equal)
-          :talking-face (gethash "talking_face" properties #'string-equal)
-          :interact (gethash "interact" properties #'string-equal)
-          :direction (if (gethash "facing_right" properties #'string-equal)
+          :face (gethash "normal_face" properties)
+          :normal-face (gethash "normal_face" properties)
+          :talking-face (gethash "talking_face" properties)
+          :interact (gethash "interact" properties)
+          :direction (if (gethash "facing_right" properties)
                          'right
                          'left))))
 
@@ -95,22 +95,32 @@ alist of Tiled cell “chunks”."
 ;;; ———————————————————————————————————
 ;;; Tile-layer parsing (graphics)
 ;;; ———————————————————————————————————
-(defun tiled-cell->cell (tiled-cell)
+(defun tiled-cell->cell (tiled-cell &key (language nil))
   "Convert a Tiled cell into a cell plist."
   (list :coords (list :x (cl-tiled:cell-column tiled-cell)
                       :y (cl-tiled:cell-row tiled-cell))
-        :char (tile-character (cl-tiled:cell-tile tiled-cell))))
+        :char (tile-character (cl-tiled:cell-tile tiled-cell))
+        :lang language))
+
+
+(defun tiled-layer-cells (layer)
+  "Given a Tiled layer, return all of its cells in our custom cell plist-format."
+  (let ((layer-lang
+          (…:langcode->keysym
+            (gethash "language" (cl-tiled:properties layer)))))
+    (mapcar (lambda (tiled-cell)
+              (tiled-cell->cell tiled-cell :language layer-lang))
+            (cl-tiled:layer-cells layer))))
 
 
 (defun tile-layer-chunks (layer &optional (chunks '()))
   "Given a Tiled tile-layer (that is, graphics of the map), parse it into an
 alist of Tiled cell “chunks”."
-  (let ((cells (mapcar #'tiled-cell->cell (cl-tiled:layer-cells layer))))
-    (collect-items-into-groups
-     cells
-     (lambda (cell)
-       (world-coords-chunk (getf cell :coords)))
-     :groups chunks)))
+  (collect-items-into-groups
+    (tiled-layer-cells layer)
+    (lambda (cell)
+      (world-coords-chunk (getf cell :coords)))
+    :groups chunks))
 
 
 (defun layer-objects (layer)
@@ -144,7 +154,8 @@ with 15 characters-per-line."
     (mapcar (lambda (layer)
               (typecase layer
                 (cl-tiled.data-types:tile-layer
-                 (when (gethash "colliding" (cl-tiled:properties layer) #'string-equal)
+                 ;; Add to the bump-map if the layer is colliding
+                 (when (gethash "colliding" (cl-tiled:properties layer))
                    (setf bump-map (tile-layer-chunks layer bump-map)))
                  (setf tile-chunks (tile-layer-chunks layer tile-chunks)))
                 (cl-tiled.data-types:object-layer

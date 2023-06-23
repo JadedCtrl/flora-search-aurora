@@ -111,11 +111,12 @@ left-to-right, unless negative — in which case, right-to-left."
   "Render several menu items to the matrix, starting at the given x/y coordinates,
 maximum width for any given item, and the height of all items.
 The item list should be an alist of the following format:
-   (((LABEL . “FOO”)(SELECTED . T)(SELECTION . 100)) ((LABEL . “BAR”)(SELECTION . -20)) ⋯)"
+   (((LABEL :en “BIRD” :eo “BIRDO”)(SELECTED . T)(SELECTION . 100))
+    ((LABEL :en “BAR” :eo “BARO”)(SELECTION . -20)) ⋯)"
   (let ((x x))
     (mapcar
      (lambda (item)
-       (let* ((label (cdr (assoc 'label item)))
+       (let* ((label (…:getf-lang (cdr (assoc 'label item))))
               (selection (or (cdr (assoc 'selection item))
                              0))
               (width (…:at-most max-item-width

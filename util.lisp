@@ -23,7 +23,7 @@
   (:export #:split-string-by-length
            #:plist=
            #:at-least #:at-most
-           #:system-language #:langcode->keysym))
+           #:system-language #:langcode->keysym #:getf-lang))
 
 (in-package :flora-search-aurora.util)
 
@@ -88,3 +88,10 @@ if the language is among the supported. Otherwise, nil."
   "Return the system language, if among the supported; otherwise, EN-glish."
   (or (langcode->keysym (uiop:getenv "LANG"))
       :en))
+
+
+(defun getf-lang (plist &optional (language (system-language)) (fallback-lang :en))
+  "With a plist containing keys of language-codes, return the property either fitting the
+preferred LANGUAGE, or the backup FALLBACK-LANG (if LANGUAGE’s is NIL)."
+  (or (getf plist language)
+      (getf plist fallback-lang)))

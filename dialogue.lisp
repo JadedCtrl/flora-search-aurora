@@ -60,14 +60,14 @@ If not, have some tea on me: I’m paying. =w="
 (defun say (speaker &rest text)
   (list
    (list :speaker speaker :face 'talking-face :progress 0
-         :text (or (getf text (…:system-language)) (getf text :en)))
+         :text (…:getf-lang text))
    (car (face speaker 'normal-face))))
 
 
 (defun mumble (speaker &rest text)
   (list
    (list :speaker speaker :progress 0
-         :text (or (getf text (…:system-language)) (getf text :en)))))
+         :text (…:getf-lang text))))
 
 
 (defun move (speaker world-coords &key (delay .05))

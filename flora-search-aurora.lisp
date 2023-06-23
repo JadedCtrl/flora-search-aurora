@@ -17,7 +17,7 @@
 ;;;; A simple TUI-game made for the text-flavoured LibreJam of 2023-06!
 ;;;; See: https://jamgaroo.xyz/jams/2
 
-(ql:quickload '(alexandria assoc-utils cl-charms cl-tiled str))
+(ql:quickload '(alexandria anaphora assoc-utils cl-charms cl-tiled str))
 
 (load "util.lisp")
 (load "input.lisp")
@@ -107,16 +107,17 @@ with STATE-LOOP."
                    args))))
 
 
-(defparameter *submenu* `(((label . "IDK") (selection . 100) (selected t))
-                          ((label . "GO BACK") (return . nil))))
+(defparameter *submenu* `(((LABEL :en "IDK") (selection . 100) (selected t))
+                          ((LABEL :en "GO BACK") (return . nil))))
 
 
-(defparameter *main-menu* `(((label . "PLAY") (selection . 100) (selected . t)
+(defparameter *main-menu* `(((LABEL :en "PLAY" :eo "EKLUDI")
+                             (selection . 100) (selected . t)
                              (return . ,(make-main-overworld-state)))
-                            ((label . "SUBMENU") (return . ,(📋:make-menu-state *submenu*)))
-                            ((label . "QUIT") (return . nil))))
-
-
+                            ((LABEL :en "SUBMENU" :eo "SUBMENUO")
+                             (return . ,(📋:make-menu-state *submenu*)))
+                            ((LABEL :en "QUIT" :eo "REZIGNI")
+                             (return . nil))))
 
 
 (defun main ()

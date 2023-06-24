@@ -68,7 +68,7 @@
      (…:plist= (cdr entity)
              (cdr test-entity)))
    (entities-near-coords (getf (cdr entity) :coords)
-                         (+ (length (getf (cdr entity) :face)) 2)
+                         (+ (length (getf (cdr entity) :face)) 6)
                          entities
                          :y-radius 2)))
 

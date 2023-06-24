@@ -275,16 +275,16 @@ and max-row; for use with RENDER-STRING. Like so:
          (leftp (not (eq direction '🌍:right)))
          (text (getf dialogue :text))
          (coords (🌍:world-coords->screen-coords (🌍:getf-entity-data map speaker-id :coords))))
-    ;; Ideally, place text-box behind the speaker; otherwise, place it above (NPC) or below (player).
-    (or (optimal-text-placement-horizontally text coords :width width :height height
-                                                        :rightp leftp)
-        (optimal-text-placement-vertically text coords :width width :height height
-                                                    :downp playerp)
-        ;; … Worst-case scenario, just do whatever’ll fit :w:”
-        (optimal-text-placement-vertically text coords :width width :height height
-                                            :downp  (not playerp))
+    ;; Ideally, place text-box above/below (NPC/player); otherwise, place it behind speaker
+    (or (optimal-text-placement-vertically text coords :width width :height height
+                                                       :downp playerp)
         (optimal-text-placement-horizontally text coords :width width :height height
-                                                         :rightp (not leftp)))))
+                                                        :rightp leftp)
+        ;; … Worst-case scenario, just do whatever’ll fit :w:”
+        (optimal-text-placement-horizontally text coords :width width :height height
+                                                         :rightp (not leftp))
+        (optimal-text-placement-vertically text coords :width width :height height
+                                             :downp  (not playerp)))))
 
 
 (defun render-dialogue-block (matrix map dialogue)

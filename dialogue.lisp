@@ -57,17 +57,19 @@ If not, have some tea on me: I’m paying. =w="
    (list :speaker speaker :face face)))
 
 
-(defun say (speaker &rest text)
+(defun say (speaker &rest keys)
   (list
-   (list :speaker speaker :face 'talking-face :progress 0
-         :text (…:getf-lang text))
+   (list :speaker speaker :progress 0
+         :face (or (getf keys :face) 'talking-face)
+         :text (…:getf-lang keys))
    (car (face speaker 'normal-face))))
 
 
-(defun mumble (speaker &rest text)
+(defun mumble (speaker &rest keys)
   (list
    (list :speaker speaker :progress 0
-         :text (…:getf-lang text))))
+         :text (…:getf-lang keys)
+         :face (getf keys :face))))
 
 
 (defun move (speaker world-coords &key (delay .05))
@@ -168,7 +170,7 @@ Returns the state for use with STATE-LOOP, pay attention!"
          (did-finish-printing-p (finished-printing-p dialogue))
          (did-finish-moving-p (progress-movement map dialogue)))
     ;; Only show the cursor when rendering text!
-    (if did-finish-moving-p
+    (if (or did-finish-moving-p (not did-finish-printing-p))
         (✎:show-cursor)
         (✎:hide-cursor))
     (cond
@@ -187,9 +189,7 @@ Returns the state for use with STATE-LOOP, pay attention!"
        (setf (getf (car dialogue-list) :progress) (length text))
        (list :dialogue dialogue-list :map map))
       ;; If no input, keep steady!
-      ((or (not did-finish-printing-p)
-           (not did-finish-moving-p)
-           (cdr dialogue-list))
+      ('t
        (list :dialogue dialogue-list :map map)))))
 
 
@@ -334,7 +334,7 @@ A state-function for use with STATE-LOOP."
   "Return a state-function for a section of dialogue, for use with STATE-LOOP."
   (lambda (matrix &key (map map) (dialogue dialogue-list))
     (🌍:overworld-state-draw matrix map)
-    (dialogue-state matrix :map map :dialogue dialogue-list)))
+    (dialogue-state matrix :map map :dialogue dialogue)))
 
 
 ;; Split a banana in two, bisection-fruit,

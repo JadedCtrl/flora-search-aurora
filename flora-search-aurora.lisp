@@ -40,19 +40,87 @@
 (in-package :flora-search-aurora)
 
 
-(defparameter *literary-girl-dialogue*
-  (💬:start-dialogue
-   (💬:mumble "literary-girl" :en "...")
-   (💬:say "player"        :eo "Kielas apud la mar'?"
-                           :en "How's the view?")
-   (💬:face "player" "<.<")
-   (💬:say "literary-girl" :eo "Kielas apud la ruinoj de via viv'?"
-                           :en "How's your trainwreck of a life?")
-   (💬:face "player" '💬:normal-face)))
+(defmacro getf-act (map act)
+  `(getf (gethash :acts ,map) ,act))
 
 
-(defun literary-girl-dialogue (map)
-  (make-dialogue-state map *literary-girl-dialogue*))
+(defmacro getf-know (map idea)
+  `(getf (gethash :knows ,map) ,idea))
+
+
+(defun childhood-friend-greetings (map)
+  (if (getf-act map :sasha-greetings)
+    (incf (getf-act map :sasha-greetings))
+    (setf (getf-act map :sasha-greetings) 0))
+  (let ((sasha "childhood-friend"))
+    (case (getf-act map :sasha-greetings)
+       (0
+        (💬:start-dialogue
+         (💬:mumble sasha    :en "...")
+         (💬:say    "player" :eo "Kielas apud la mar'?"
+                             :en "How's the view?")
+         (💬:face   "player" "<.<")
+         (💬:say    sasha    :eo "Kielas apud la ruinoj de via viv'?"
+                             :en "How's your trainwreck of a life?")
+         (💬:face   "player" '💬:normal-face)))
+       (1
+        (start-dialogue
+         (mumble "player"  :en "...")
+         (face   "player"  "<w<")
+         (say    sasha     :eo "Kial vi restas? Ĉu tiom solecas ke nur ideas ĝeni min?"
+                           :en "Why are you still here? Are you so lonely you've only got me to bother?")
+         (mumble "player"  :eo "(Ŝi parolas pri si mem, ĉu ne?)"
+                           :en "(She's projecting, isn't she?)"
+                           :face ":w:")))
+       (2
+        (start-dialogue
+         (say    "player"  :eo "Nu... Vi staris tie ĉi senmove dum la pastintaj tri tagoj..."
+                           :en "So... You've stood around here for three days already, you've hardly moved..."
+                           :face ":o:")
+         (face   "player"  ":w:")
+         (say    sasha     :eo "Pŝ! Do?! Mi simple havas multajn pripensindaĵojn! Mi tiom multe okupiĝas!"
+                           :en "Pff! So what?! My mind's just busy! I've got a lot going on right now!"
+                           :face "vov")
+         (say    sasha     :eo "Ne ŝajnigu vin supera al mi, dum vi mem senespere sencelas!!"
+                           :en "Don't act all haughty when you're such an aimless loser yourself!!"
+                           :face ">o<")
+         (mumble "player"  :eo "Eee.. pardonu."
+                           :en "Well... sorry.")))
+       (3
+        (start-dialogue
+         (say    "player"  :eo "Nu, vere, mia celo sufiĉe klaras al mi. Jam baldaŭ redungiĝos."
+                           :en "I'm not too aimless, actually. I've got good job prospects, right about now."
+                           :face "<w<")
+         (say    sasha     :eo "Mi tute ne prizorgas."
+                           :en "I really don't care."))))))
+
+
+(defun childhood-friend-partings ()
+  (let ((partings
+          '((:eo "Nu? Ĝis! Adiaŭ!"
+             :en "Well? Bye! Ta-ta!")
+            (:eo "Ve! Eĉ via rigardo sentas strange!"
+             :en "God! The way you look at me gives me the creeps!")
+            (:eo "Lasu! Min! Sooooola!"
+             :en "Leave me! The hell! Alooooone!")
+            (:eo "Subvermo!"
+             :en "Worm!"))))
+    (start-dialogue
+      (apply #'say (append '("childhood-friend")
+                           (nth (random (length partings)) partings))))))
+
+
+(defun childhood-friend-dialogue (map)
+  (let ((greetings (getf-act map :sasha-greetings)))
+    (cond ((or (not greetings)
+               (< greetings 3))
+           (childhood-friend-greetings map))
+          ('t
+           (childhood-friend-partings)))))
+
+
+(defun childhood-friend-interact (map)
+  (make-dialogue-state map (childhood-friend-dialogue map)))
 
 
 (defparameter *submenu* `(((LABEL :en "IDK") (selection . 100) (selected t))

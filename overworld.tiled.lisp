@@ -148,6 +148,7 @@ with 15 characters-per-line."
   :TILES, an alist of visible tiles (keyed by chunk).
   :ENTITIES, a list of entity plists."
   (let ((tile-chunks '())
+        (top-tiles '())
         (bump-map '())
         (entities '())
         (hash (make-hash-table)))
@@ -157,11 +158,14 @@ with 15 characters-per-line."
                  ;; Add to the bump-map if the layer is colliding
                  (when (gethash "colliding" (cl-tiled:properties layer))
                    (setf bump-map (tile-layer-chunks layer bump-map)))
-                 (setf tile-chunks (tile-layer-chunks layer tile-chunks)))
+                 (if (gethash "top-layer" (cl-tiled:properties layer))
+                     (setf top-tiles   (tile-layer-chunks layer top-tiles))
+                     (setf tile-chunks (tile-layer-chunks layer tile-chunks))))
                 (cl-tiled.data-types:object-layer
                  (setf entities (object-layer-entities layer entities)))))
             (cl-tiled:map-layers (cl-tiled:load-map map-file)))
     (setf (gethash :tiles hash) tile-chunks)
+    (setf (gethash :top-tiles hash) top-tiles)
     (setf (gethash :bump-map hash) bump-map)
     (setf (gethash :entities hash) entities)
     hash))

@@ -168,18 +168,19 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
   "Draw the overworld map to the given matrix.
 A core part of OVERWORLD-STATE."
   (let* ((chunk (world-coords-chunk (getf-entity-data map 'player :coords))))
-    (matrix-write-map-chunk matrix map chunk)
-    (matrix-write-entities matrix map chunk)))
+    (matrix-write-tiles matrix (gethash :tiles map) chunk)
+    (matrix-write-entities matrix map chunk)
+    (matrix-write-tiles matrix (gethash :top-tiles map) chunk)))
 
 
-(defun matrix-write-map-chunk (matrix map chunk
-                               &key (chunk-width 72) (chunk-height 20))
+(defun matrix-write-tiles (matrix tiles chunk
+                           &key (chunk-width 72) (chunk-height 20))
   "Draw a map’s specific chunk (by its ID) to the matrix."
   (mapcar (lambda (cell)
             (if (or (not (getf cell :lang))
                     (eq (getf cell :lang) (…:system-language)))
                 (matrix-write-cell matrix cell)))
-          (cdr (assoc chunk (gethash :tiles map)))))
+          (cdr (assoc chunk tiles))))
 
 
 (defun matrix-write-cell (matrix cell)
@@ -194,7 +195,7 @@ alist containing a character (:CHAR) and :X & :Y coordinates."
 
 
 ;;; ———————————————————————————————————
-;;; Overworld-drawing: Entity-rendering
+;;; Overworld-drawing: Person-rendering
 ;;; ———————————————————————————————————
 (defun matrix-write-entities (matrix map chunk)
   "Draw all entities from an alist of entities to the matrix."

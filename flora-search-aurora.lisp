@@ -63,31 +63,30 @@
          (💬:mumble sasha    :en "...")
          (💬:say    "player" :eo "Kielas apud la mar'?"
                              :en "How's the view?")
-         (💬:face   "player" "<.<")
+         (💬:face   "player" "<.<" "<o<")
          (💬:say    sasha    :eo "Kielas apud la ruinoj de via viv'?"
-                             :en "How's your trainwreck of a life?")
-         (💬:face   "player" '💬:normal-face)))
+                             :en "How's your trainwreck of a life?")))
        (1
         (start-dialogue
          (mumble "player"  :en "...")
          (face   "player"  "<w<")
          (say    sasha     :eo "Kial vi restas? Ĉu tiom solecas ke nur ideas ĝeni min?"
                            :en "Why are you still here? Are you so lonely you've only got me to bother?")
+         (face   "player"  ":w:" ":u:")
          (mumble "player"  :eo "(Ŝi parolas pri si mem, ĉu ne?)"
-                           :en "(She's projecting, isn't she?)"
-                           :face ":w:")))
+                           :en "(She's projecting, isn't she?)")))
        (2
         (start-dialogue
+         (face   "player"  ":w:" ":o:")
          (say    "player"  :eo "Nu... Vi staris tie ĉi senmove dum la pastintaj tri tagoj..."
-                           :en "So... You've stood around here for three days already, you've hardly moved..."
-                           :face ":o:")
-         (face   "player"  ":w:")
+                           :en "So... You've stood around here for three days already, you've hardly moved...")
          (say    sasha     :eo "Pŝ! Do?! Mi simple havas multajn pripensindaĵojn! Mi tiom multe okupiĝas!"
                            :en "Pff! So what?! My mind's just busy! I've got a lot going on right now!"
                            :face "vov")
          (say    sasha     :eo "Ne ŝajnigu vin supera al mi, dum vi mem senespere sencelas!!"
                            :en "Don't act all haughty when you're such an aimless loser yourself!!"
                            :face ">o<")
+         (face   "player"  "=w=" "=u=")
          (mumble "player"  :eo "Eee.. pardonu."
                            :en "Well... sorry.")))
        (3
@@ -146,7 +145,7 @@
             (:eo "Lasu panjon instrui vin *hik* boooone"
              :en "Let momma show you a good *hic* timeee")
             (:eo "kaj mi diris RIKAŜIKA! DIN-DON!"
-             :en "and then I said BAZINGA! CA-CHOW!"))))
+             :en "and I said BAZINGA! CA-CHOW!"))))
     (start-dialogue
       (apply #'say (append '("boozy-lady")
                            (nth (random (length messages)) messages))))))
@@ -181,20 +180,22 @@
          (face   gambler "xD ")
          (mumble gambler :en "Hahaha... haha.")
          (say    gambler :eo "Kia spektalo! Hahaha!"
-                           :en "Good one! Hahaha!"
-                           :face "xDD")
+                         :en "Good one! Hahaha!"
+                         :face "xDD")
          (say    gambler :en "Hahahaha! Hahahahaha!"
-                            :face "x'D")
-         (face   gambler ">V<")
+                         :face "x'D")
+         (face   'player "^^'")
+         (face   gambler ">V<" ">O<")
          (say    gambler :eo "Tiom amuze! Bona ŝerco!"
                          :en "Shit that's funny!"
                          :face ">V<")
+         (face   'player "^^\"")
          (say    gambler :eo "Mi tute ruinigis mian vivon! MDR!"
                          :en "I totally fucked my life! LMAO!"
                          :face ">V<")
-         (say    gambler :en "HAHAHAHAHAHAHAHAHAHAAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAAHAHAHAHAHAHAHAHAHAHAHAHA"
-                         :face ">O<")
-         (face   gambler "=w=")
+         (face   'player "o-o" "ouo")
+         (say    gambler :en "HAHAHAHAHAHAHAHAHAHAAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAAHAHAHAHAHAHAHAHAHAHAHAHA")
+         (face   gambler "=w=" "=w=")
          (mumble gambler :en "...")
          (mumble gambler :eo "Fek'."
                          :en "Fuck.")))
@@ -217,7 +218,8 @@
          (say gambler :eo "... danke al kiu mia filino povas edukiĝi bone."
                       :en "... thanks to which my daughter can receive a good education.")
          (say gambler :eo "Kial mi vetis la monprunton tie ĉi?! Fek!!"
-                      :en "Why'd I bet the payment here?! FUCK!!")))
+                      :en "Why'd I bet the payment here?! FUCK!!"
+                      :face ">O<")))
        (2
         (start-dialogue
          (say gambler :eo "Nu, ĉio enordas! Ni simple perdos la domon, jen ĉio."
@@ -234,14 +236,16 @@
                       :en "No life!")))
        (3
         (start-dialogue
-         (say gambler :eo "Mi cedu al la mallumo! Tro malfruas al mi!"
-                      :en "I'm giving into the void! It's too late for me!")
-         (say gambler :eo "Mi memmortigu, ĉu ne, kara amiko? Ĉu neeee?"
-                      :en "I should let go, right, pal? Righttt?")
-         (say 'player :eo "Ja ne! Je la dioj! Sinjoro, restas al vi fuĝvojo, sendube!"
-                      :en "Of course not! Jesus! Guy, there's still hope for you, somewhere!")
-         (say gambler :eo "Mi ideas IAN fuĝvojon..."
-                      :en "Five feet under, maybe..."))))))
+         (say  gambler :eo "Mi cedu al la vakuo. Tre komfortas ĉe la fundo, kamarado."
+                       :en "I'm giving into the void. It's quite peaceful down here, pal.")
+         (say  gambler :eo "Mi lasu min falu entute, ĉu ne, kara amiko? Ĉu neee?"
+                       :en "I should let go, right, pal? Righttt?")
+         (face 'player ";w;" ";o;")
+         (say  'player :eo "Ne tro senesperu -- sinjoro, restas al vi fuĝvojo, sendube!"
+                       :en "Guy, there's still hope for you, somewhere!")
+         (face gambler "=v=" "=v=")
+         (say  gambler :eo "Mi ideas IAN fuĝvojon..."
+                       :en "Five feet under, maybe..."))))))
 
 
 (defun bad-gambler-partings (&optional map)

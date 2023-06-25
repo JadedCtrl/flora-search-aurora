@@ -52,9 +52,21 @@ If not, have some tea on me: I’m paying. =w="
           dialogue-tree))
 
 
-(defun face (speaker face)
-  (list
-   (list :speaker speaker :face face)))
+(defun face (speaker face &optional (talking-face nil))
+  (if talking-face
+      (list
+       (list :speaker speaker
+             :face face
+             :set :normal-face
+             :to face)
+       (list :speaker speaker
+             :set :talking-face
+             :to talking-face))
+      (list
+       (list :speaker speaker
+             :face face
+             :set :normal-face
+             :to face))))
 
 
 (defun say (speaker &rest keys)
@@ -62,7 +74,7 @@ If not, have some tea on me: I’m paying. =w="
    (list :speaker speaker :progress 0
          :face (or (getf keys :face) 'talking-face)
          :text (…:getf-lang keys))
-   (car (face speaker 'normal-face))))
+   (list :speaker speaker :face 'normal-face)))
 
 
 (defun mumble (speaker &rest keys)
@@ -119,6 +131,18 @@ talking-face or the face given by the DIALOGUE."
       (setf (🌍:getf-entity-data map speaker :face) new-face))))
 
 
+(defun update-entity-data (map dialogue)
+  "Given a plist of DIALOGUE, update an arbitrary bit of data in the speaker's
+data, using :SET and :TO of the DIALOGUE."
+  (let* ((speaker (intern (string-upcase (getf dialogue :speaker))))
+         (key (getf dialogue :set))
+         (data (getf dialogue :to)))
+    (when (and key data)
+      (format *error-output*  "[~A] ~A → ~A???~%" dialogue key data)
+      (setf (🌍:getf-entity-data map speaker key) data)
+      (format *error-output* "~A!!!!~%" (🌍:getf-entity-data map speaker :normal-face)))))
+
+
 (defun progress-line-delivery (dialogue)
   "Progress the delivery of a line (plist) of DIALOGUE. That is, increment the
 “said character-count” :PROGRESS, which dictates the portion of the message that
@@ -162,6 +186,7 @@ coordinates listed in the DIALOGUE’s :COORDS property. … If applicable, ofc.
 Progress through the lines of dialogue when the user hits ENTER, etc.
 Returns the state for use with STATE-LOOP, pay attention!"
   (update-speaking-face map (car dialogue-list))
+  (update-entity-data map (car dialogue-list))
   (progress-line-delivery (car dialogue-list))
   ;; Progress to the next line of dialogue as appropriate.
   (let* ((dialogue (car dialogue-list))

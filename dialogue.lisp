@@ -262,7 +262,7 @@ direction specified relative to the focal point. Return nil if no such placement
 is found, otherwise return a list of the coordinates, max-column, and max-row
 (for use with RENDER-STRING)."
   (let* ((text-y-margin (if downp
-                            (+ (getf coords :y) 1)
+                            (+ (getf coords :y) 2)
                             (- (getf coords :y) 2)))
          (text-height (if downp
                           (- height text-y-margin)
@@ -296,7 +296,7 @@ and max-row; for use with RENDER-STRING. Like so:
   ((:x X :y Y) MAX-COLUMN MAX-ROW)"
   (let* ((speaker-id (dialogue-speaker dialogue))
          (direction (🌍:getf-entity-data map speaker-id :direction))
-         (playerp (eq speaker-id 'player))
+         (playerp (eq speaker-id '🌍:player))
          (leftp (not (eq direction '🌍:right)))
          (text (getf dialogue :text))
          (coords (🌍:world-coords->screen-coords (🌍:getf-entity-data map speaker-id :coords))))

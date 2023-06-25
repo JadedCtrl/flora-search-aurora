@@ -70,7 +70,7 @@
    (entities-near-coords (getf (cdr entity) :coords)
                          (+ (length (getf (cdr entity) :face)) 6)
                          entities
-                         :y-radius 2)))
+                         :y-radius 4)))
 
 (defun cell-at-world-coords-p (map-chunks coords)
   "Return whether or not there is a cell at the given coordinates."

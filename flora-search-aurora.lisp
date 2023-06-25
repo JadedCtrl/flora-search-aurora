@@ -165,6 +165,28 @@
                         :en "It's so embarrasing..."))))
 
 
+(defun casino-attendant-interact (map)
+  (make-dialogue-state
+   map
+   (start-dialogue
+    (say "casino-attendant" :eo "Bonvenon, estimata sinjoro!"
+                            :en "Welcome in, good sir!")
+    (say "casino-attendant" :eo "Ĝuu la ludadon, kaj sorto ridetu al vi!"
+                            :en "Have fun; may lady luck blow you a kiss!"))))
+
+
+(defun casino-bartender-interact (map)
+  (make-dialogue-state
+   map
+   (start-dialogue
+    (say "casino-bartender" :eo "Pffff, ŝi tiom amuzas!"
+                            :en "Pffff, this broad's a riot!"
+                            :face "xD ~")
+    (say "casino-bartender" :eo "Fojfoje mi ja ŝatas mian fakon, mdr."
+                            :en "Sometimes I really do like my job. lol"
+                            :face "=w=~"))))
+
+
 
 ;;; ———————————————————————————————————
 ;;; Destitute Gambler arc
@@ -217,8 +239,8 @@
                       :en "... that's a non-profit school for disabled kids.")
          (say gambler :eo "... danke al kiu mia filino povas edukiĝi bone."
                       :en "... thanks to which my daughter can receive a good education.")
-         (say gambler :eo "Kial mi vetis la monprunton tie ĉi?! Fek!!"
-                      :en "Why'd I bet the payment here?! FUCK!!"
+         (say gambler :eo "Kial mi forĵetis la monon tie ĉi?! FEK'!!"
+                      :en "Why'd I waste it all here?! FUCK!!"
                       :face ">O<")))
        (2
         (start-dialogue

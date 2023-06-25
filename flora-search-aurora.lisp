@@ -1,4 +1,4 @@
-;;;; Copyright © 2023, Jaidyn Ann <jadedctrl@posteo.at>
+ ;;;; Copyright © 2023, Jaidyn Ann <jadedctrl@posteo.at>
 ;;;;
 ;;;; This program is free software: you can redistribute it and/or
 ;;;; modify it under the terms of the GNU General Public License as
@@ -46,6 +46,13 @@
 
 (defmacro getf-know (map idea)
   `(getf (gethash :knows ,map) ,idea))
+
+
+
+;;; ———————————————————————————————————
+;;; The Outside World™
+;;; ———————————————————————————————————
+(defparameter *outdoors-map* (overworld.tiled:load-map (format nil "~Ares/map.tmx" (uiop:getcwd))))
 
 
 
@@ -128,6 +135,21 @@
 
 
 ;;; ———————————————————————————————————
+;;; Casino!
+;;; ———————————————————————————————————
+(defparameter *casino-map* (overworld.tiled:load-map (format nil "~Ares/casino.tmx" (uiop:getcwd))))
+
+
+(defun casino-entrance-trigger (&optional map)
+    (list :map *casino-map*))
+
+
+(defun casino-exit-trigger (&optional map)
+  (list :map *outdoors-map*))
+
+
+
+;;; ———————————————————————————————————
 ;;; Random casino NPCs
 ;;; ———————————————————————————————————
 (defun boozy-lady-dialogue (&optional map)
@@ -187,8 +209,10 @@
                             :face "=w=~"))))
 
 
-(defun bruh-trigger (&optional map)
-  (print "YAAAAAAA"))
+
+
+
+
 
 
 

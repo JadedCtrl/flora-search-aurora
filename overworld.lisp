@@ -100,6 +100,14 @@ rectangle as defined by its TOP-LEFT-CORNER & BOTTOM-RIGHT-CORNER."
                                (list :x x :y y))))
 
 
+(defun trigger-at-coords (map world-coords)
+  (let ((chunk (world-coords-chunk world-coords)))
+    (loop for trigger in (cdr (assoc chunk (gethash :triggers map)))
+           do (when (within-rectangle world-coords
+                                       (getf trigger :coords) (getf trigger :bottom-coords))
+                (return trigger)))))
+
+
 
 ;;; ———————————————————————————————————
 ;;; Overworld logic
@@ -127,40 +135,39 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
 ;;          ((plist = input '(:modifier nil :char #\Esc)))
           ;; Simple up-down-left-right movements
           ((…:plist= input '(:modifier nil :char #\→))
-           (move-entity map 'player :x 1)
-           (list :map map))
+           (move-player map :Δx 1))
           ((…:plist= input '(:modifier nil :char #\←))
-           (move-entity map 'player :x -1)
-           (list :map map))
+           (move-player map :Δx -1))
           ((…:plist= input '(:modifier nil :char #\↑))
-           (move-entity map 'player :y -1)
-           (list :map map))
+           (move-player map :Δy -1))
           ((…:plist= input '(:modifier nil :char #\↓))
-           (move-entity map 'player :y 1)
-           (list :map map))
+           (move-player map :Δy 1))
           ('t
            (list :map map))))
       (list :map map)))
 
 
-(defun move-entity (map entity-id &key (x 0) (y 0))
+(defun move-player (map &key (Δx 0) (Δy 0))
+  (move-entity map 'player :Δx Δx :Δy Δy)
+  (let* ((coords (getf-entity-data map 'player :coords))
+         (trigger (trigger-at-coords map (list :x (getf coords :x) :y (getf coords :y)))))
+    (if (and trigger (getf trigger :function))
+        (apply (intern (string-upcase (getf trigger :function)))
+               (list map))
+        (list :map map))))
+
+
+
+(defun move-entity (map entity-id &key (Δx 0) (Δy 0))
   "Move an entity relative to its current position."
-  (when (< x 0)
+  (when (< Δx 0)
     (setf (getf-entity-data map entity-id :direction) 'left))
-  (when (> x 0)
+  (when (> Δx 0)
     (setf (getf-entity-data map entity-id :direction) 'right))
   (let ((coords (getf-entity-data map entity-id :coords)))
     (move-entity-to map entity-id
-                    :x (+ x (getf coords :x))
-                    :y (+ y (getf coords :y)))))
-
-
-(defun trigger-at-coords (map world-coords)
-  (let ((chunk (world-coords-chunk world-coords)))
-    (loop for trigger in (cdr (assoc chunk (gethash :triggers map)))
-           do (when (within-rectangle world-coords
-                                       (getf trigger :coords) (getf trigger :bottom-coords))
-                (return trigger)))))
+                    :x (+ Δx (getf coords :x))
+                    :y (+ Δy (getf coords :y)))))
 
 
 (defun move-entity-to (map entity &key (x 0) (y 0))
@@ -179,13 +186,7 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
             (cdr (getf-entity map entity)))
       ;; Delete it from the old list…
       (alexandria:deletef (assoc-utils:aget (gethash :entities map) old-chunk) entity
-                          :test (lambda (id alist) (eq id (car alist)))))
-    ;; If moving the player-character, check for triggers! (Traps)
-    (when (eq entity 'player)
-      (let ((trigger (trigger-at-coords map (list :x x :y y))))
-        (if (and trigger (getf trigger :function))
-            (apply (intern (string-upcase (getf trigger :function)))
-                   (list map)))))))
+                          :test (lambda (id alist) (eq id (car alist)))))))
 
 
 

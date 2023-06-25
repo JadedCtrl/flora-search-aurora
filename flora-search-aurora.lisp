@@ -187,6 +187,10 @@
                             :face "=w=~"))))
 
 
+(defun bruh-trigger (&optional map)
+  (print "YAAAAAAA"))
+
+
 
 ;;; ———————————————————————————————————
 ;;; Destitute Gambler arc

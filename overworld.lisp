@@ -32,6 +32,19 @@
 
 
 ;;; ———————————————————————————————————
+;;; Misc. Utils
+;;; ———————————————————————————————————
+(defun within-rectangle (point top-left-corner bottom-right-corner)
+  "With three coordinate plists, determine whether or not POINT resides within a
+rectangle as defined by its TOP-LEFT-CORNER & BOTTOM-RIGHT-CORNER."
+  (and (<= (getf point :x) (getf bottom-right-corner :x))
+       (>= (getf point :x) (getf top-left-corner :x))
+       (<= (getf point :y) (getf bottom-right-corner :y))
+       (>= (getf point :y) (getf top-left-corner :y))))
+
+
+
+;;; ———————————————————————————————————
 ;;; Accessors
 ;;; ———————————————————————————————————
 (defmacro getf-entity (map entity-id)
@@ -71,6 +84,7 @@
                          (+ (length (getf (cdr entity) :face)) 6)
                          entities
                          :y-radius 4)))
+
 
 (defun cell-at-world-coords-p (map-chunks coords)
   "Return whether or not there is a cell at the given coordinates."
@@ -141,6 +155,14 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
                     :y (+ y (getf coords :y)))))
 
 
+(defun trigger-at-coords (map world-coords)
+  (let ((chunk (world-coords-chunk world-coords)))
+    (loop for trigger in (cdr (assoc chunk (gethash :triggers map)))
+           do (when (within-rectangle world-coords
+                                       (getf trigger :coords) (getf trigger :bottom-coords))
+                (return trigger)))))
+
+
 (defun move-entity-to (map entity &key (x 0) (y 0))
   "Move the given entity to the given coordinates."
   (let ((old-chunk (world-coords-chunk (getf-entity-data map entity :coords)))
@@ -157,7 +179,13 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
             (cdr (getf-entity map entity)))
       ;; Delete it from the old list…
       (alexandria:deletef (assoc-utils:aget (gethash :entities map) old-chunk) entity
-                          :test (lambda (id alist) (eq id (car alist)))))))
+                          :test (lambda (id alist) (eq id (car alist)))))
+    ;; If moving the player-character, check for triggers! (Traps)
+    (when (eq entity 'player)
+      (let ((trigger (trigger-at-coords map (list :x x :y y))))
+        (if (and trigger (getf trigger :function))
+            (apply (intern (string-upcase (getf trigger :function)))
+                   (list map)))))))
 
 
 

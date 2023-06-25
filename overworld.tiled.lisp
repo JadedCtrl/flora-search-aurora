@@ -30,65 +30,92 @@
 ;;; Misc. utility
 ;;; ———————————————————————————————————
 (defun collect-items-into-groups (list key-function &key (groups '()))
-  "Given a LIST of items and a function categorizing an individual item
+  "Given a LIST of items and a KEY-FUNCTION categorizing an individual item
 (returning a “category” symbol for any given item), return an sorted
-associative list."
+associative list built upon GROUPS.
+If NIL is returned from KEY-FUNCTION, the given item is thrown out."
   (loop for item in list
         do (let ((key (apply key-function (list item))))
-             (setf (assoc-utils:aget groups key)
-                   (append (assoc-utils:aget groups key)
-                           (list item)))))
+             (when key
+               (setf (assoc-utils:aget groups key)
+                     (append (assoc-utils:aget groups key)
+                             (list item))))))
   groups)
+
+
+(defun tiled-coords->world-coords (x y tiled-map)
+  "Given X & Y coordinates with a parsed Tiled map, return the appropriate
+character-scale world coordinates in plist form."
+  (list :x (floor (/ x (cl-tiled:map-tile-width tiled-map)))
+        :y (floor (/ y (cl-tiled:map-tile-height tiled-map)))))
 
 
 
 ;;; ———————————————————————————————————
-;;; Tile-layer parsing (graphics)
+;;; Object-layer (Persons/Triggers)
 ;;; ———————————————————————————————————
-(defun tiled-cell->cell (tiled-cell)
-  "Convert a Tiled cell into a cell plist."
-  (list :coords (list :x (cl-tiled:cell-column tiled-cell)
-                      :y (cl-tiled:cell-row tiled-cell))
-        :char (tile-character (cl-tiled:cell-tile tiled-cell))))
-
-
-(defun tile-layer-chunks (layer &optional (chunks '()))
-  "Given a Tiled tile-layer (that is, graphics of the map), parse it into an
-alist of Tiled cell “chunks”."
-  (let ((cells (mapcar #'tiled-cell->cell (cl-tiled:layer-cells layer))))
-    (collect-items-into-groups
-     cells
-     (lambda (cell)
-       (world-coords-chunk (getf cell :coords)))
-     :groups chunks)))
+(defun tiled-rectangle-p (tiled-obj)
+  "Whether or not a Tiled object is a valid rectangle."
+  (and (> (cl-tiled:rect-width tiled-obj) 0)
+       (> (cl-tiled:rect-height tiled-obj) 0)))
 
 
 (defun tiled-object->entity (tiled-obj tiled-map)
   "Convert a Tiled object into an entity plist."
   (let ((properties (cl-tiled:properties tiled-obj)))
-    (list (intern (string-upcase (gethash "id" properties)))
-          :coords (list :x (floor (/ (cl-tiled:object-x tiled-obj)
-                                     (cl-tiled:map-tile-width tiled-map)))
-                        :y (floor (/ (cl-tiled:object-y tiled-obj)
-                                     (cl-tiled:map-tile-height tiled-map))))
-          :face (gethash "normal_face" properties)
-          :normal-face (gethash "normal_face" properties)
-          :talking-face (gethash "talking_face" properties)
-          :interact (gethash "interact" properties)
-          :direction (if (gethash "facing_right" properties)
-                         'right
-                         'left))))
+    (when (not (tiled-rectangle-p tiled-obj))
+      (list (intern (string-upcase (gethash "id" properties)))
+            :coords (tiled-coords->world-coords (cl-tiled:object-x tiled-obj)
+                                                (cl-tiled:object-y tiled-obj)
+                                                tiled-map)
+            :face (gethash "normal_face" properties)
+            :normal-face (gethash "normal_face" properties)
+            :talking-face (gethash "talking_face" properties)
+            :interact (gethash "interact" properties)
+            :direction (if (gethash "facing_right" properties)
+                           'right
+                           'left)))))
+
+
+
+(defun tiled-object->trigger (tiled-obj tiled-map)
+  "Convert a Tiled object into a “trigger” plist. That is, a rectangle with
+a :FUNCTION to be triggered when it’s stepped upon."
+  (when (tiled-rectangle-p tiled-obj)
+    (let ((obj-x (cl-tiled:object-x tiled-obj))
+          (obj-y (cl-tiled:object-y tiled-obj))
+          (obj-width (cl-tiled:rect-width tiled-obj))
+          (obj-height (cl-tiled:rect-height tiled-obj)))
+      (list
+       :coords (tiled-coords->world-coords obj-x obj-y tiled-map)
+       :width obj-width
+       :height obj-height
+       :bottom-coords (tiled-coords->world-coords (+ obj-x obj-width) (+ obj-y obj-height) tiled-map)
+       :function (gethash "function" (cl-tiled:properties tiled-obj))))))
 
 
 (defun object-layer-entities (layer &optional (entity-chunks '()))
-  "Convert all objects in an object layer into entity plists."
+  "Convert all point objects in an object layer into entity plists."
   (let ((entities (mapcar (lambda (object) (tiled-object->entity object (cl-tiled:layer-map layer)))
                           (layer-objects layer))))
     (collect-items-into-groups
      entities
      (lambda (entity)
-       (world-coords-chunk (getf (cdr entity) :coords)))
+       (when entity
+         (world-coords-chunk (getf (cdr entity) :coords))))
      :groups entity-chunks)))
+
+
+(defun object-layer-triggers (layer &optional (trigger-chunks '()))
+  "Convert all rectangle objects in an object layer into trigger plists."
+  (let ((triggers (mapcar (lambda (object) (tiled-object->trigger object (cl-tiled:layer-map layer)))
+                          (layer-objects layer))))
+    (collect-items-into-groups
+     triggers
+     (lambda (trigger)
+       (when trigger
+         (world-coords-chunk (getf trigger :coords))))
+     :groups trigger-chunks)))
 
 
 
@@ -151,6 +178,7 @@ with 15 characters-per-line."
         (top-tiles '())
         (bump-map '())
         (entities '())
+        (triggers '())
         (hash (make-hash-table)))
     (mapcar (lambda (layer)
               (typecase layer
@@ -162,10 +190,12 @@ with 15 characters-per-line."
                      (setf top-tiles   (tile-layer-chunks layer top-tiles))
                      (setf tile-chunks (tile-layer-chunks layer tile-chunks))))
                 (cl-tiled.data-types:object-layer
+                 (setf triggers (object-layer-triggers layer triggers))
                  (setf entities (object-layer-entities layer entities)))))
             (cl-tiled:map-layers (cl-tiled:load-map map-file)))
     (setf (gethash :tiles hash) tile-chunks)
     (setf (gethash :top-tiles hash) top-tiles)
     (setf (gethash :bump-map hash) bump-map)
     (setf (gethash :entities hash) entities)
+    (setf (gethash :triggers hash) triggers)
     hash))

@@ -62,21 +62,22 @@ character-scale world coordinates in plist form."
 
 (defun tiled-object->entity (tiled-obj tiled-map)
   "Convert a Tiled object into an entity plist."
-  (let ((properties (cl-tiled:properties tiled-obj)))
-    (when (not (tiled-rectangle-p tiled-obj))
-      (list (intern (string-upcase (gethash "id" properties)))
-            :coords (tiled-coords->world-coords (cl-tiled:object-x tiled-obj)
-                                                (cl-tiled:object-y tiled-obj)
-                                                tiled-map)
-            :face (gethash "normal_face" properties)
-            :normal-face (gethash "normal_face" properties)
-            :talking-face (gethash "talking_face" properties)
-            :avatar (gethash "avatar" properties)
-            :interact (gethash "interact" properties)
-            :direction (if (gethash "facing_right" properties)
-                           'right
-                           'left)))))
-
+  (when (not (tiled-rectangle-p tiled-obj))
+    (let ((properties (cl-tiled:properties tiled-obj)))
+      (append
+       (list (intern (string-upcase (gethash "id" properties))))
+       (loop for key being the hash-keys in properties
+             for val being the hash-values in properties
+             collect (intern (string-upcase key) "KEYWORD")
+             collect val)
+       (list
+        :face (gethash "normal-face" properties)
+        :coords (tiled-coords->world-coords (cl-tiled:object-x tiled-obj)
+                                            (cl-tiled:object-y tiled-obj)
+                                            tiled-map)
+        :direction (if (gethash "facing-right" properties)
+                       'right
+                       'left))))))
 
 
 (defun tiled-object->trigger (tiled-obj tiled-map)

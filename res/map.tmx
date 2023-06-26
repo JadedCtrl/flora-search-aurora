@@ -239,20 +239,20 @@
  <objectgroup id="7" name="Entities">
   <object id="2" name="Player" type="Person" x="465" y="306.667">
    <properties>
-    <property name="facing_right" type="bool" value="true"/>
+    <property name="facing-right" type="bool" value="true"/>
     <property name="id" value="player"/>
-    <property name="normal_face" value="^_^"/>
-    <property name="talking_face" value="^o^"/>
+    <property name="normal-face" value="^_^"/>
+    <property name="talking-face" value="^o^"/>
    </properties>
    <point/>
   </object>
   <object id="4" name="Sasha (Childhood friend)" type="Person" x="412.587" y="165.924">
    <properties>
-    <property name="facing_right" type="bool" value="false"/>
+    <property name="facing-right" type="bool" value="false"/>
     <property name="id" value="childhood-friend"/>
     <property name="interact" value="childhood-friend-interact"/>
-    <property name="normal_face" value="=_="/>
-    <property name="talking_face" value="=o="/>
+    <property name="normal-face" value="=_="/>
+    <property name="talking-face" value="=o="/>
    </properties>
    <point/>
   </object>

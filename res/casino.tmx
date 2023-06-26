@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="left-down" width="72" height="41" tilewidth="17" tileheight="17" infinite="0" nextlayerid="7" nextobjectid="10">
+<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="left-down" width="72" height="41" tilewidth="17" tileheight="17" infinite="0" nextlayerid="7" nextobjectid="11">
  <tileset firstgid="1" source="font.tsx"/>
  <layer id="4" name="Background" width="72" height="41">
   <data encoding="csv">
@@ -145,66 +145,73 @@
  <objectgroup id="3" name="Entities">
   <object id="1" name="Player" type="Person" x="604.788" y="657.818">
    <properties>
-    <property name="facing_right" type="bool" value="true"/>
+    <property name="facing-right" type="bool" value="true"/>
     <property name="id" value="player"/>
-    <property name="normal_face" value="^_^"/>
-    <property name="talking_face" value="^o^"/>
+    <property name="normal-face" value="^_^"/>
+    <property name="talking-face" value="^o^"/>
    </properties>
    <point/>
   </object>
   <object id="2" name="Boozy Bird" type="Person" x="230.833" y="49.3333">
    <properties>
-    <property name="facing_right" type="bool" value="false"/>
+    <property name="facing-right" type="bool" value="false"/>
     <property name="id" value="boozy-lady"/>
     <property name="interact" value="boozy-lady-interact"/>
-    <property name="normal_face" value="=///="/>
-    <property name="talking_face" value="=///="/>
+    <property name="normal-face" value="=///="/>
+    <property name="talking-face" value="=///="/>
    </properties>
    <point/>
   </object>
   <object id="3" name="Boozy Friend" type="Person" x="210" y="100">
    <properties>
-    <property name="facing_right" type="bool" value="false"/>
+    <property name="facing-right" type="bool" value="false"/>
     <property name="id" value="boozy-friend"/>
     <property name="interact" value="boozy-friend-interact"/>
-    <property name="normal_face" value="&lt;s&lt;"/>
-    <property name="talking_face" value="&lt;o&lt;"/>
+    <property name="normal-face" value="&lt;s&lt;"/>
+    <property name="talking-face" value="&lt;o&lt;"/>
    </properties>
    <point/>
   </object>
-  <object id="4" name="Bad Gambler" type="Person" x="211.333" y="181.333">
+  <object id="4" name="Bad Gambler" type="Person" x="213.175" y="219.086">
    <properties>
     <property name="facing_right" type="bool" value="false"/>
     <property name="id" value="bad-gambler"/>
     <property name="interact" value="bad-gambler-interact"/>
-    <property name="normal_face" value=";~:"/>
-    <property name="talking_face" value="&gt;o&lt;"/>
+    <property name="normal-face" value=";~:"/>
+    <property name="talking-face" value="&gt;o&lt;"/>
    </properties>
    <point/>
   </object>
   <object id="5" name="Desk Attendant" type="Person" x="602" y="520.667">
    <properties>
-    <property name="facing_right" type="bool" value="false"/>
+    <property name="facing-right" type="bool" value="false"/>
     <property name="id" value="casino-attendant"/>
     <property name="interact" value="casino-attendant-interact"/>
-    <property name="normal_face" value="^3^"/>
-    <property name="talking_face" value="^O^"/>
+    <property name="normal-face" value="^3^"/>
+    <property name="talking-face" value="^O^"/>
    </properties>
    <point/>
   </object>
-  <object id="6" name="Bartender" type="Person" x="76" y="214">
+  <object id="6" name="Bartender" type="Person" x="75.9405" y="164.485">
    <properties>
-    <property name="facing_right" type="bool" value="false"/>
+    <property name="facing-right" type="bool" value="false"/>
     <property name="id" value="casino-bartender"/>
     <property name="interact" value="casino-bartender-interact"/>
-    <property name="normal_face" value="uvu~"/>
+    <property name="normal-face" value="uvu~"/>
    </properties>
    <point/>
   </object>
-  <object id="8" name="BRUH" type="Trigger" x="578.776" y="663.718" width="66.8802" height="14.6666">
+  <object id="8" name="Exit" type="Trigger" x="578.776" y="663.718" width="66.8802" height="14.6666">
    <properties>
     <property name="function" value="casino-exit-trigger"/>
    </properties>
+  </object>
+  <object id="10" name="Ring" type="Entity" x="603.68" y="620.126">
+   <properties>
+    <property name="id" value="ring"/>
+    <property name="interact" value="ring-interact"/>
+   </properties>
+   <point/>
   </object>
  </objectgroup>
 </map>

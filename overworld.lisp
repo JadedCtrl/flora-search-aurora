@@ -22,6 +22,7 @@
   (:use :cl
    :flora-search-aurora.overworld.tiled :flora-search-aurora.overworld.util)
   (:export #:overworld-state #:make-overworld-state #:overworld-state-draw
+           #:merge-maps
            #:world-coords->screen-coords
            #:getf-entity #:getf-entity-data
            #:move-entity-to #:move-entity
@@ -301,3 +302,15 @@ A state-function for use with STATE-LOOP."
     (apply #'🌍:overworld-state
            (append (list matrix :map-path map-path)
                    args))))
+
+
+(defun merge-maps (map-a map-b)
+  "Copy data that should be persistent between maps from map-a to map-b."
+  (setf (gethash :acts map-b) (gethash :acts map-a))
+  (setf (gethash :knows map-b) (gethash :knows map-a))
+  (mapcar
+   (lambda (player-key)
+     (setf (getf-entity-data map-b 'player player-key)
+           (getf-entity-data map-a 'player player-key)))
+   '(:face :normal-face :talking-face))
+  map-b)

@@ -141,11 +141,11 @@
 
 
 (defun casino-entrance-trigger (&optional map)
-    (list :map *casino-map*))
+    (list :map (🌍:merge-maps map *casino-map*)))
 
 
 (defun casino-exit-trigger (&optional map)
-  (list :map *outdoors-map*))
+  (list :map (🌍:merge-maps map *outdoors-map*)))
 
 
 

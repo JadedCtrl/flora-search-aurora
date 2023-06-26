@@ -235,8 +235,21 @@ alist containing a character (:CHAR) and :X & :Y coordinates."
 
 (defun matrix-write-entity (matrix entity-plist)
   "Render an entity-plist to the matrix."
-  (matrix-write-entity-head matrix entity-plist)
-  (matrix-write-entity-legs matrix entity-plist))
+  (when (getf entity-plist :face)
+    (matrix-write-entity-head matrix entity-plist)
+    (matrix-write-entity-legs matrix entity-plist))
+  (when (getf entity-plist :avatar)
+    (matrix-write-entity-avatar matrix entity-plist)))
+
+
+(defun matrix-write-entity-avatar (matrix entity-plist)
+  "Draw an “avatar” entity; that is, not a person, but a random item."
+  (let* ((screen-coords (world-coords->screen-coords (getf entity-plist :coords)))
+         (avatar (getf entity-plist :avatar))
+         (width (length avatar))
+         (y (getf screen-coords :y))
+         (x (- (getf screen-coords :x) (floor (/ width 2)))))
+    (📋:render-line matrix avatar x y)))
 
 
 (defun matrix-write-entity-head (matrix entity-plist)

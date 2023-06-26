@@ -71,6 +71,7 @@ character-scale world coordinates in plist form."
             :face (gethash "normal_face" properties)
             :normal-face (gethash "normal_face" properties)
             :talking-face (gethash "talking_face" properties)
+            :avatar (gethash "avatar" properties)
             :interact (gethash "interact" properties)
             :direction (if (gethash "facing_right" properties)
                            'right

@@ -1,4 +1,4 @@
- ;;;; Copyright © 2023, Jaidyn Ann <jadedctrl@posteo.at>
+;;;; Copyright © 2023, Jaidyn Ann <jadedctrl@posteo.at>
 ;;;;
 ;;;; This program is free software: you can redistribute it and/or
 ;;;; modify it under the terms of the GNU General Public License as
@@ -40,12 +40,66 @@
 (in-package :flora-search-aurora)
 
 
+(defmacro aget-item (map item)
+  `(assoc-utils:aget (gethash :items ,map) ,item))
+
+
 (defmacro getf-act (map act)
   `(getf (gethash :acts ,map) ,act))
 
 
 (defmacro getf-know (map idea)
   `(getf (gethash :knows ,map) ,idea))
+
+
+
+
+;;; ———————————————————————————————————
+;;; Trans-map entity interactions
+;;; ———————————————————————————————————
+(defun take-item (map entity-id)
+  "Take an entity from the MAP :ENTITIES and place it in the player’s pockets.
+That is, into MAP’s :ITEMS."
+  (let ((item-plist (cdr (getf-entity map entity-id))))
+    (when item-plist
+      (setf (aget-item map entity-id) item-plist)
+      (removef-entity map entity-id))))
+
+
+(defun take-item-dialogue (item-plist)
+  "Return some dialogue expressing surprise/dread or whatever at the collection
+of a new item. The attributes set for the entity item should be:
+  ID
+  NAME-[EO|EN]
+  DESC-[EO|EN]
+  ADJECTIVE-[EO|EN]
+  REACTION-FACE
+  REACTION-TALKING
+All are optional, save ID."
+  (start-dialogue
+   (face 'player (or (getf item-plist :reaction-face) "^_^")
+                 (or (getf item-plist :reaction-talking) "^o^"))
+   (mumble 'player :en (format nil "(Hey, it's a ~A! ~A!)"
+                               (or (getf item-plist :name-en) (getf item-plist :id))
+                               (or (getf item-plist :adjective-en) "Nice"))
+                   :eo (format nil "(Ho, jen ~A! ~A!)"
+                               (or (getf item-plist :name-eo) (getf item-plist :id))
+                               (or (getf item-plist :adjective-eo) "Interese")))
+   (mumble 'player :en (if (getf item-plist :desc-en)
+                           (format nil "~~~~ ~A ~~~~" (getf item-plist :desc-en))
+                           "(I'm glad I found it.)")
+                   :eo (if (getf item-plist :desc-eo)
+                           (format nil "~~~~ ~A ~~~~" (getf item-plist :desc-eo))
+                           "(Kia bonŝanco!)"))))
+
+
+(defun take-item-interact (map interactee-id)
+  "Try to “pick up” the interactee entity, then have the player react to the
+pickup. See TAKE-ITEM-DIALOGUE for customizing the reaction dialogue.
+Should be the `interact` function for takeable items."
+  (let ((item-plist (cdr (getf-entity map interactee-id))))
+    (when (take-item map interactee-id)
+      (make-dialogue-state map (take-item-dialogue item-plist)))))
 
 
 
@@ -129,7 +183,7 @@
            (childhood-friend-partings)))))
 
 
-(defun childhood-friend-interact (map)
+(defun childhood-friend-interact (map &optional interactee-id)
   (make-dialogue-state map (childhood-friend-dialogue map)))
 
 
@@ -152,7 +206,7 @@
 ;;; ———————————————————————————————————
 ;;; Random casino NPCs
 ;;; ———————————————————————————————————
-(defun boozy-lady-dialogue (&optional map)
+(defun boozy-lady-dialogue ()
   (let ((messages
           '((:eo "SaaaAAAl' belul', ĉu vjifik...vekfj/?"
              :en "HeeeEey sweet-cheeks, u wan sum..?")
@@ -173,11 +227,11 @@
                            (nth (random (length messages)) messages))))))
 
 
-(defun boozy-lady-interact (map)
-  (make-dialogue-state map (boozy-lady-dialogue map)))
+(defun boozy-lady-interact (map &optional interactee-id)
+  (make-dialogue-state map (boozy-lady-dialogue)))
 
 
-(defun boozy-friend-interact (map)
+(defun boozy-friend-interact (map &optional interactee-id)
   (make-dialogue-state
    map
    (start-dialogue
@@ -187,7 +241,7 @@
                         :en "It's so embarrasing..."))))
 
 
-(defun casino-attendant-interact (map)
+(defun casino-attendant-interact (map &optional interactee-id)
   (make-dialogue-state
    map
    (start-dialogue
@@ -197,7 +251,7 @@
                             :en "Have fun; may lady luck blow you a kiss!"))))
 
 
-(defun casino-bartender-interact (map)
+(defun casino-bartender-interact (map &optional interactee-id)
   (make-dialogue-state
    map
    (start-dialogue
@@ -292,7 +346,7 @@
                        :en "Five feet under, maybe..."))))))
 
 
-(defun bad-gambler-partings (&optional map)
+(defun bad-gambler-partings (map)
   (let ((messages
           '((:eo "... kaj ŝiaj mamoj tiom belis..."
              :en "... her titties were so nice, too...")
@@ -320,7 +374,7 @@
            (bad-gambler-partings)))))
 
 
-(defun bad-gambler-interact (map)
+(defun bad-gambler-interact (map &optional interactee-id)
   (make-dialogue-state map (bad-gambler-dialogue map)))
 
 
@@ -334,8 +388,7 @@
 
 (defparameter *main-menu* `(((LABEL :en "PLAY" :eo "EKLUDI")
                              (selection . 100) (selected . t)
-                             (return . ,(🌍:make-overworld-state
-                                         (format nil "~Ares/casino.tmx" (uiop:getcwd)))))
+                             (return . ,(🌍:make-overworld-state *casino-map*)))
                             ((LABEL :en "SUBMENU" :eo "SUBMENUO")
                              (return . ,(📋:make-menu-state *submenu*)))
                             ((LABEL :en "QUIT" :eo "REZIGNI")

@@ -24,7 +24,7 @@
   (:export #:overworld-state #:make-overworld-state #:overworld-state-draw
            #:merge-maps
            #:world-coords->screen-coords
-           #:getf-entity #:getf-entity-data
+           #:getf-entity #:getf-entity-data #:removef-entity
            #:move-entity-to #:move-entity
            :left :right
            :player))
@@ -44,6 +44,13 @@ rectangle as defined by its TOP-LEFT-CORNER & BOTTOM-RIGHT-CORNER."
        (>= (getf point :y) (getf top-left-corner :y))))
 
 
+(defmacro remove-from-alistf (key alist)
+  "Remove the given item from an associative list destructively."
+  `(alexandria:removef
+    ,alist ,key
+    :test (lambda (key item) (eq key (car item)))))
+
+
 
 ;;; ———————————————————————————————————
 ;;; Accessors
@@ -59,6 +66,15 @@ rectangle as defined by its TOP-LEFT-CORNER & BOTTOM-RIGHT-CORNER."
   `(getf (cdr (mapcan (lambda (chunk) (assoc ,entity-id (cdr chunk)))
                       (gethash :entities ,map)))
          ,key))
+
+
+(defun removef-entity (map entity-id)
+  "Remove an entity of the given ID from the map entirely. Nuke ‘em!
+Literally kill them, show no mercy, dig your sharp nails into their fleshy
+stomache and PULL HARD, show NO REMORSE. RAAAAAA 🗡🩸"
+  (mapcar (lambda (chunk-alist)
+            (overworld::remove-from-alistf entity-id (cdr chunk-alist)))
+          (gethash :entities map)))
 
 
 (defun entities-near-coords (coords radius entities &key (x-radius radius) (y-radius radius))
@@ -128,9 +144,10 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
           ((…:plist= input '(:modifier nil :char #\return))
            (let* ((player (getf-entity map 'player))
                   (interactee (car (entities-near-entity player (gethash :entities map))))
+                  (interactee-id (car interactee))
                   (interaction (getf (cdr interactee) :interact)))
              (if interaction
-                 (apply (intern (string-upcase interaction)) (list map))
+                 (apply (intern (string-upcase interaction)) (list map interactee-id))
                  (list :map map))))
           ;; The pause-menu…
 ;;          ((plist = input '(:modifier nil :char #\Esc)))
@@ -288,7 +305,7 @@ alist containing a character (:CHAR) and :X & :Y coordinates."
 ;;; Overworld loop
 ;;; ———————————————————————————————————
 (defun overworld-state
-    (matrix &key (map-path nil) (map (load-map map-path)))
+    (matrix &key map)
   "Render the given map to the matrix and take user-input — for one frame.
 A state-function for use with STATE-LOOP."
   (sleep .02)
@@ -296,12 +313,12 @@ A state-function for use with STATE-LOOP."
   (overworld-state-update map))
 
 
-(defun make-overworld-state (map-path)
+(defun make-overworld-state (map)
   "Return a state-function for a a map, for use with STATE-LOOP."
-  (lambda (matrix &rest args)
+  (lambda (matrix &key (map map))
     (apply #'🌍:overworld-state
-           (append (list matrix :map-path map-path)
-                   args))))
+           (list matrix :map map))))
+
 
 
 (defun merge-maps (map-a map-b)

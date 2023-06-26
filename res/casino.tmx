@@ -208,8 +208,15 @@
   </object>
   <object id="10" name="Ring" type="Entity" x="603.68" y="620.126">
    <properties>
+    <property name="adjective-en" value="pretty"/>
+    <property name="adjective-eo" value="bele"/>
+    <property name="avatar" value="~o~"/>
+    <property name="desc-en" value="It shines in the moonlight, as all else is gone."/>
     <property name="id" value="ring"/>
-    <property name="interact" value="ring-interact"/>
+    <property name="interact" value="take-item-interact"/>
+    <property name="name-en" value="ring"/>
+    <property name="name-eo" value="ringo"/>
+    <property name="reaction-face" value="&gt;_&lt;"/>
    </properties>
    <point/>
   </object>

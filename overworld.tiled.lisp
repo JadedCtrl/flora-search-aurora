@@ -18,7 +18,7 @@
 ;;;; used by the overworld.
 
 (defpackage :flora-search-aurora.overworld.tiled
-  (:nicknames :fsa.o.t :overworld.tiled)
+  (:nicknames :fsa.o.t :overworld.tiled :🌍.🀨)
   (:use :cl :anaphora-basic
    :flora-search-aurora.overworld.util)
   (:export #:load-map))

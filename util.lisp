@@ -22,6 +22,7 @@
   (:use :cl :assoc-utils)
   (:export #:split-string-by-length
            #:plist=
+           #:incf-0
            #:at-least #:at-most
            #:system-language #:langcode->keysym #:getf-lang))
 
@@ -56,6 +57,13 @@ Uses the keys of plist a."
                                           (getf b key))))
                  (return nil))
           finally (return 't))))
+
+
+(defmacro incf-0 (place &optional (Δ 1))
+  "INCF the given PLACE, if it’s a number. If not a number, then set it to zero."
+  `(if (numberp ,place)
+       (incf ,place ,Δ)
+       (setf ,place 0)))
 
 
 (defun at-least (minimum num)

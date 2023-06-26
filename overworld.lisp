@@ -25,6 +25,7 @@
            #:merge-maps
            #:world-coords->screen-coords
            #:getf-entity #:getf-entity-data #:removef-entity
+           #:aget-item #:getf-act #:getf-know
            #:move-entity-to #:move-entity
            :left :right
            :player))
@@ -77,6 +78,31 @@ stomache and PULL HARD, show NO REMORSE. RAAAAAA 🗡🩸"
           (gethash :entities map)))
 
 
+(defmacro aget-item (map item)
+  "Get an item from the MAP’s :ITEMS alist. That is, an item in user’s inventory.
+Members of :ITEMS will not be persistent beween play-throughs; the user has to
+get everything again."
+  `(assoc-utils:aget (gethash :items ,map) ,item))
+
+
+(defmacro getf-act (map act)
+  "Get an ACT from the MAP’s :ACTS plist. That is, some marker indicating that
+the user has done something. Just like :ITEMS, these are not persistent through
+replays of the game."
+  `(getf (gethash :acts ,map) ,act))
+
+
+(defmacro getf-know (map idea)
+  "Get an item from the MAP’s :KNOWS plist. That is, some marker indicating that
+the user knows something. Unlike :ITEMS and :ACTS, these _are_ persistent through
+replays of the game."
+  `(getf (gethash :knows ,map) ,idea))
+
+
+
+;;; ———————————————————————————————————
+;;; Item searching/testing
+;;; ———————————————————————————————————
 (defun entities-near-coords (coords radius entities &key (x-radius radius) (y-radius radius))
   "Return a list of entity-plists that are near the given coordinates within the given RADIUS."
   (remove-if-not
@@ -92,7 +118,7 @@ stomache and PULL HARD, show NO REMORSE. RAAAAAA 🗡🩸"
 
 
 (defun entities-near-entity (entity entities)
-  "Return a list of entities near the given entity — that is, within touching-distance."
+  "Return a new list of entities near the given ENTITY — that is, within touching-distance."
   (remove-if
    (lambda (test-entity)
      (…:plist= (cdr entity)
@@ -104,7 +130,7 @@ stomache and PULL HARD, show NO REMORSE. RAAAAAA 🗡🩸"
 
 
 (defun cell-at-world-coords-p (map-chunks coords)
-  "Return whether or not there is a cell at the given coordinates."
+  "Return whether or not there is a cell at the given COORDS."
   (let ((chunk (world-coords-chunk coords)))
     (member 't (cdr (assoc chunk map-chunks))
             :test (lambda (ignored cell)
@@ -112,27 +138,54 @@ stomache and PULL HARD, show NO REMORSE. RAAAAAA 🗡🩸"
 
 
 (defun walkable-tile-p (map x y)
-  "Return whether or not the given coordinates on the map are traversable for an entity."
+  "Return whether or not the given coordinates on the MAP are traversable for an entity."
   (not (cell-at-world-coords-p (gethash :bump-map map)
                                (list :x x :y y))))
 
 
 (defun trigger-at-coords (map world-coords)
+  "Return a “Trigger”-rectangle from MAP that’d be triggered at the given coords."
   (let ((chunk (world-coords-chunk world-coords)))
     (loop for trigger in (cdr (assoc chunk (gethash :triggers map)))
-           do (when (within-rectangle world-coords
-                                       (getf trigger :coords) (getf trigger :bottom-coords))
-                (return trigger)))))
+          do (when (within-rectangle world-coords
+                                     (getf trigger :coords) (getf trigger :bottom-coords))
+               (return trigger)))))
 
 
 
 ;;; ———————————————————————————————————
 ;;; Overworld logic
 ;;; ———————————————————————————————————
-(defun overworld-state-update (map)
+(defun overworld-state-update (map Δt)
   "Do nothing, lol. Core part of OVERWORLD-STATE.
 Returns parameters to be used in the next invocation of OVERWORLD-STATE."
+  (process-overworld-time map Δt)
   (process-overworld-input map))
+
+
+(defun seconds->game-datetime (seconds &key (game-day-length 240))
+  "Convert real-world SECONDS into a datetime plist, calculating with
+GAME-DAY-LENGTH as as the seconds-per-day.
+Returns a plist of properties :DAY, :HOUR, and :MINUTE, all numbers."
+  (let* ((game-days (floor (/ seconds game-day-length))) ;; Days passed in game-time
+         (seconds (floor (- seconds (* game-days game-day-length)))) ;; Keep hour below 24!
+         (real-day-length 1440)) ;; You know what I mean <w<
+    (multiple-value-bind (hour minutes-fraction)
+        (floor (/ (* seconds (/ real-day-length game-day-length))
+                  60))
+      (list :day game-days :hour hour
+            :minute (floor (* 60 minutes-fraction))))))
+
+
+(defun process-overworld-time (map Δt)
+  "Do nothing, lol. Core part of OVERWORLD-STATE.
+Returns parameters to be used in the next invocation of OVERWORLD-STATE."
+  (let* ((time (…:incf-0 (gethash :seconds map) Δt))
+         (game-datetime (seconds->game-datetime time)))
+    ;; Go through the day-update procedures!
+    (when (not (eq (getf game-datetime :day)
+                   (gethash :day map)))
+        (setf (gethash :day map) (getf game-datetime :day)))))
 
 
 (defun process-overworld-input (map)
@@ -173,7 +226,6 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
         (apply (intern (string-upcase (getf trigger :function)))
                (list map))
         (list :map map))))
-
 
 
 (defun move-entity (map entity-id &key (Δx 0) (Δy 0))
@@ -217,9 +269,15 @@ A core part of OVERWORLD-STATE."
   (let* ((chunk (world-coords-chunk (getf-entity-data map 'player :coords))))
     (matrix-write-tiles matrix (gethash :tiles map) chunk)
     (matrix-write-entities matrix map chunk)
+    (when (gethash :seconds map)
+      (matrix-write-datetime matrix (seconds->game-datetime (gethash :seconds map))))
     (matrix-write-tiles matrix (gethash :top-tiles map) chunk)))
 
 
+
+;;; ———————————————————————————————————
+;;; Overworld-drawing: Map-tiles
+;;; ———————————————————————————————————
 (defun matrix-write-tiles (matrix tiles chunk
                            &key (chunk-width 72) (chunk-height 20))
   "Draw a map’s specific chunk (by its ID) to the matrix."
@@ -302,15 +360,35 @@ alist containing a character (:CHAR) and :X & :Y coordinates."
 
 
 ;;; ———————————————————————————————————
+;;; Overworld-drawing: The date
+;;; ———————————————————————————————————
+(defun game-datetime->string (date-plist &optional (year 2006))
+  (format nil
+          (…:getf-lang '(:en "~A ~A ~A ~2,'0d:~2,'0d"
+                         :eo "~A ~A ~Aa ~2,'0d:~2,'0d"))
+          year
+          (…:getf-lang '(:en "Jun" :eo "Jun"))
+          (+ (getf date-plist :day) 3)
+          (getf date-plist :hour)
+          (getf date-plist :minute)))
+
+
+(defun matrix-write-datetime (matrix datetime)
+  (let ((string (game-datetime->string datetime)))
+    (📋:render-line matrix string (- 71 (length string)) 19)))
+
+
+
+;;; ———————————————————————————————————
 ;;; Overworld loop
 ;;; ———————————————————————————————————
 (defun overworld-state
-    (matrix &key map)
+    (matrix &key map (Δt .02))
   "Render the given map to the matrix and take user-input — for one frame.
 A state-function for use with STATE-LOOP."
-  (sleep .02)
+  (sleep Δt)
   (overworld-state-draw matrix map)
-  (overworld-state-update map))
+  (overworld-state-update map Δt))
 
 
 (defun make-overworld-state (map)
@@ -320,11 +398,14 @@ A state-function for use with STATE-LOOP."
            (list matrix :map map))))
 
 
-
 (defun merge-maps (map-a map-b)
   "Copy data that should be persistent between maps from map-a to map-b."
-  (setf (gethash :acts map-b) (gethash :acts map-a))
-  (setf (gethash :knows map-b) (gethash :knows map-a))
+  ;; Copy over important game-data from map-a.
+  (mapcar
+   (lambda (map-key)
+     (setf (gethash map-key map-b) (gethash map-key map-a)))
+   '(:acts :knows :items :seconds :day))
+  ;; Copy specific bits of player data from map-a’s :ENTITIES.
   (mapcar
    (lambda (player-key)
      (setf (getf-entity-data map-b 'player player-key)

@@ -40,16 +40,6 @@
 (in-package :flora-search-aurora)
 
 
-(defmacro aget-item (map item)
-  `(assoc-utils:aget (gethash :items ,map) ,item))
-
-
-(defmacro getf-act (map act)
-  `(getf (gethash :acts ,map) ,act))
-
-
-(defmacro getf-know (map idea)
-  `(getf (gethash :knows ,map) ,idea))
 
 
 
@@ -114,9 +104,7 @@ Should be the `interact` function for takeable items."
 ;;; Childhood friend (Sasha) arc
 ;;; ———————————————————————————————————
 (defun childhood-friend-greetings (map)
-  (if (getf-act map :sasha-greetings)
-    (incf (getf-act map :sasha-greetings))
-    (setf (getf-act map :sasha-greetings) 0))
+  (…:incf-0 (getf-act map :sasha-greetings))
   (let ((sasha "childhood-friend"))
     (case (getf-act map :sasha-greetings)
        (0
@@ -268,9 +256,7 @@ Should be the `interact` function for takeable items."
 ;;; Destitute Gambler arc
 ;;; ———————————————————————————————————
 (defun bad-gambler-greetings (map)
-  (if (getf-act map :gambler-greetings)
-    (incf (getf-act map :gambler-greetings))
-    (setf (getf-act map :gambler-greetings) 0))
+  (…:incf-0 (getf-act map :gambler-greetings))
   (let ((gambler "bad-gambler"))
     (case (getf-act map :gambler-greetings)
        (0

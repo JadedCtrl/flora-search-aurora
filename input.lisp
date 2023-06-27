@@ -19,12 +19,15 @@
 (defpackage :flora-search-aurora.input
   (:use :cl)
   (:nicknames :fsa.i :input :⌨)
-  (:export #:read-char-plist #:normalize-char-plist #:plist-char-p
+  (:export #:read-char-plist #:read-gamefied-char-plist
+           #:normalize-char-plist #:gameify-char-plist
+           #:plist-char-p
            :control :meta :shift
-           +qwerty-layout+ +dvorak-layout+))
+           +qwerty-layout+ +dvorak-layout+
+           +arrows-game-layout+ +wasd-game-layout+ +ijkl-game-layout+
+           :↑ :← :→ :↓ :🆗 :❎))
 
 (in-package :flora-search-aurora.input)
-
 
 ;; Yup, they're hardcoded like this. Horrid, ain't it? ^_^
 (defvar +qwerty-layout+
@@ -32,10 +35,29 @@
     #\a #\A #\s #\S #\d #\D #\f #\F #\g #\G #\h #\H #\j #\J #\k #\K #\l #\L #\; #\: #\' #\"
     #\z #\Z #\x #\X #\c #\C #\v #\V #\b #\B #\n #\N #\m #\M #\, #\< #\. #\> #\/ #\?))
 
+
 (defvar +dvorak-layout+
   '(#\' #\" #\, #\< #\. #\> #\p #\P #\y #\Y #\f #\F #\g #\G #\c #\C #\r #\R #\l #\L #\/ #\? #\= #\+
     #\a #\A #\o #\O #\e #\E #\u #\U #\i #\I #\d #\D #\h #\H #\t #\T #\n #\N #\s #\S #\- #\_
     #\; #\: #\q #\Q #\j #\J #\k #\K #\x #\X #\b #\B #\m #\M #\w #\W #\v #\V #\z #\Z))
+
+
+(defvar +arrows-game-layout+
+  '((#\↑ . ↑)(#\← . ←)(#\↓ . ↓)(#\→ . →)
+    (#\a . 🆗)(#\z . 🆗)(#\space . 🆗)(#\return . 🆗)
+    (#\s . ❎)(#\x . ❎)(#\Esc . ❎)))
+
+
+(defvar +wasd-game-layout+
+  '((#\w . ↑)(#\a . ←)(#\s . ↓)(#\d . →)
+    (#\j . 🆗)(#\← . 🆗)(#\space . 🆗)(#\return . 🆗)
+    (#\k . ❎)(#\↓ . ❎)(#\Esc . ❎)))
+
+
+(defvar +ijkl-game-layout+
+  '((#\i . ↑)(#\j . ←)(#\k . ↓)(#\l . →)
+    (#\a . 🆗)(#\z . 🆗)(#\← . 🆗)(#\space . 🆗)(#\return . 🆗)
+    (#\s . ❎)(#\x . ❎)(#\↓ . ❎)(#\Esc . ❎)))
 
 
 (defun read-char-plist (&optional (stream *standard-input*))
@@ -65,7 +87,7 @@ docstring of #'escape-code-to-character for more info."
 
 
 (defun normalize-char-plist (char-plist &optional (layout +qwerty-layout+))
-  "Given a character input property list (as received from read-char-plist),
+  "Given a character input property list (as received from READ-CHAR-PLIST),
 massage the output into parsable, deescaped, QWERTY-according format."
   (let ((normalized (deescape-char-plist char-plist)))
     (setf (getf normalized :char)
@@ -79,6 +101,26 @@ massage the output into parsable, deescaped, QWERTY-according format."
 Not at all comprehensive, but probably-mostly-just-good-enough. ¯\_ (ツ)_/¯"
   (or (parallel-list-item char layout +qwerty-layout+)
       char))
+
+
+(defun read-gamefied-char-plist
+    (&optional (stream *standard-input*) (layout +qwerty-layout+) (game-layout +arrows-game-layout+))
+  "Read a character directly from standard-input, then translating its character into the QWERTY
+equivalent, then parsing that character into semantic meaning. Results in a plist like so:
+   (:char #\w :semantic ↑ :modifier nil :escaped nil)"
+  (gameify-char-plist (normalize-char-plist (read-char-plist stream) layout)
+                      game-layout))
+
+
+(defun gameify-char-plist (char-plist &optional (game-layout +arrows-game-layout+))
+  "Given a character input plist (as received by READ-CHAR-PLIST), return a
+char plist containing a :FUNCTION property, which contains one of several
+semantic symbols that match up for menus/gameplay: ↑, →, ←, ↓, 🆗, or ❎."
+  (let ((semantic-value (cdr (assoc (getf char-plist :char) game-layout))))
+    (if semantic-value
+        (append (list :semantic semantic-value) char-plist)
+        char-plist)))
+
 
 
 (defun deescape-char-plist (char-plist)

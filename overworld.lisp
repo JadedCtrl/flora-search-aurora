@@ -174,9 +174,6 @@ Used primarily in moving between different maps in an overworld state."
   map-b)
 
 
-
-
-
 
 ;;; ———————————————————————————————————
 ;;; Overworld logic
@@ -216,10 +213,10 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
 (defun process-overworld-input (map)
   "Get and process any keyboard input, modifying the map or entities as necessary."
   (if (listen)
-      (let* ((input (⌨:normalize-char-plist (⌨:read-char-plist))))
-        (cond
+      (let* ((input (⌨:read-gamefied-char-plist)))
+        (case (getf input :semantic)
           ;; Interacting with nearby characters/entities
-          ((…:plist= input '(:modifier nil :char #\return))
+          ('⌨:🆗
            (let* ((player (getf-entity map 'player))
                   (interactee (car (entities-near-entity player (gethash :entities map))))
                   (interactee-id (car interactee))
@@ -230,15 +227,15 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
           ;; The pause-menu…
 ;;          ((plist = input '(:modifier nil :char #\Esc)))
           ;; Simple up-down-left-right movements
-          ((…:plist= input '(:modifier nil :char #\→))
+          ('⌨:→
            (move-player map :Δx 1))
-          ((…:plist= input '(:modifier nil :char #\←))
+          ('⌨:→
            (move-player map :Δx -1))
-          ((…:plist= input '(:modifier nil :char #\↑))
+          ('⌨:↑
            (move-player map :Δy -1))
-          ((…:plist= input '(:modifier nil :char #\↓))
+          ('⌨:↓
            (move-player map :Δy 1))
-          ('t
+          (otherwise
            (list :map map))))
       (list :map map)))
 

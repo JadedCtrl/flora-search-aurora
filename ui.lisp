@@ -200,17 +200,19 @@ That is, 0 for non-selected items and 100 for selected items."
 (defun process-menu-input (menu-alist)
   "Get and process any keyboard input, modifying the menu alist as necessary."
   (if (listen)
-      (let* ((input (⌨:normalize-char-plist (⌨:read-char-plist)))
+      (let* ((input (⌨:read-gamefied-char-plist))
              (selected-item (nth (selected-menu-item-position menu-alist)
                                  menu-alist))
              (func (cdr (assoc 'function selected-item)))
              (return-val (assoc 'return selected-item)))
-        (case (getf input :char)
-          (#\→ (progn (select-right-menu-item menu-alist)
-                      't))
-          (#\← (progn (select-left-menu-item menu-alist)
-                      't))
-          (#\return
+        (case (getf input :semantic)
+          ('⌨:→ (progn (select-right-menu-item menu-alist)
+                       't))
+          ('⌨:← (progn (select-left-menu-item menu-alist)
+                       't))
+          ('⌨:❎
+           nil)
+          ('⌨:🆗
            (cond ((and func return-val)
                   (apply func '())
                   (cdr return-val))

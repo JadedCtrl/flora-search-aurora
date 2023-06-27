@@ -39,8 +39,9 @@ Programming with nice tea! What a nice day this is. If you happen to be
 reading this, I hope your day is going well too!
 If not, have some tea on me: I’m paying. =w="
   (and (listen)
-       (eq (getf (⌨:normalize-char-plist (⌨:read-char-plist)) :char)
-           #\return)))
+       (let ((input (getf (⌨:read-gamefied-char-plist) :semantic)))
+         (or (eq input '⌨:🆗)
+             (eq input '⌨:❎)))))
 
 
 
@@ -138,9 +139,10 @@ data, using :SET and :TO of the DIALOGUE."
          (key (getf dialogue :set))
          (data (getf dialogue :to)))
     (when (and key data)
-      (format *error-output*  "[~A] ~A → ~A???~%" dialogue key data)
-      (setf (🌍:getf-entity-data map speaker key) data)
-      (format *error-output* "~A!!!!~%" (🌍:getf-entity-data map speaker :normal-face)))))
+      (setf (🌍:getf-entity-data map speaker key) data))))
+;;      (format *error-output*  "[~A] ~A → ~A???~%" dialogue key data)
+
+;;      (format *error-output* "~A!!!!~%" (🌍:getf-entity-data map speaker :normal-face)))))
 
 
 (defun progress-line-delivery (dialogue)

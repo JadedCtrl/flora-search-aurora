@@ -250,7 +250,7 @@
    <properties>
     <property name="facing-right" type="bool" value="false"/>
     <property name="id" value="childhood-friend"/>
-    <property name="interact" value="childhood-friend-interact"/>
+    <property name="interact" value="✿:childhood-friend-interact"/>
     <property name="normal-face" value="=_="/>
     <property name="talking-face" value="=o="/>
    </properties>
@@ -258,7 +258,7 @@
   </object>
   <object id="10" name="Exit" type="Trigger" x="576.601" y="340.729" width="22.3792" height="15.3923">
    <properties>
-    <property name="function" value="casino-entrance-trigger"/>
+    <property name="function" value="✿:casino-entrance-trigger"/>
    </properties>
   </object>
  </objectgroup>

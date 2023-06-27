@@ -65,7 +65,7 @@ character-scale world coordinates in plist form."
   (when (not (tiled-rectangle-p tiled-obj))
     (let ((properties (cl-tiled:properties tiled-obj)))
       (append
-       (list (intern (string-upcase (gethash "id" properties))))
+       (list (string->symbol (gethash "id" properties)))
        (loop for key being the hash-keys in properties
              for val being the hash-values in properties
              collect (intern (string-upcase key) "KEYWORD")

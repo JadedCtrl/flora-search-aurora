@@ -23,17 +23,30 @@
           #:world-coords->screen-coords
           #:world-coords-chunk
           #:map->plist #:plist->map
+          #:string->symbol
           #:save-map-to-file))
 
 (in-package :flora-search-aurora.overworld.util)
 
 
 (defun coords->symbol (x y)
-  (intern (format nil "~A,~A" x y)))
+  (intern (format nil "~A,~A" x y) "KEYWORD"))
 
 
 (defun symbol->coords (coords-symbol)
   (str:split #\, (symbol-name coords-symbol)))
+
+
+(defun string->symbol (string)
+  "Given a STRING with an optionally defined package (e.g., “package:symbol”),
+return it as an appopriate symbol."
+  (let* ((split (str:split ":" (string-upcase string)))
+         (package (when (eq (length split) 2)
+                    (car split)))
+         (symbol (or (cadr split) (car split))))
+    (if package
+        (intern symbol package)
+        (intern symbol))))
 
 
 (defun world-coords->screen-coords (world-coords &key (chunk-width 72) (chunk-height 20))

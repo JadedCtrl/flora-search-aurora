@@ -3,6 +3,12 @@
 (load "overworld.util.lisp")
 (load "overworld.tiled.lisp")
 
+(defpackage :flora-search-aurora
+  (:nicknames :fsa :✿)
+  (:export #:main)
+  (:use :cl))
+
+
 (defun local-path (subpath)
   (format nil "~A~A" (uiop:getcwd) subpath))
 

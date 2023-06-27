@@ -146,7 +146,7 @@
   <object id="1" name="Player" type="Person" x="604.788" y="657.818">
    <properties>
     <property name="facing-right" type="bool" value="true"/>
-    <property name="id" value="player"/>
+    <property name="id" value="✿:player"/>
     <property name="normal-face" value="^_^"/>
     <property name="talking-face" value="^o^"/>
    </properties>
@@ -155,8 +155,8 @@
   <object id="2" name="Boozy Bird" type="Person" x="230.833" y="49.3333">
    <properties>
     <property name="facing-right" type="bool" value="false"/>
-    <property name="id" value="boozy-lady"/>
-    <property name="interact" value="boozy-lady-interact"/>
+    <property name="id" value="✿:boozy-lady"/>
+    <property name="interact" value="✿:boozy-lady-interact"/>
     <property name="normal-face" value="=///="/>
     <property name="talking-face" value="=///="/>
    </properties>
@@ -165,8 +165,8 @@
   <object id="3" name="Boozy Friend" type="Person" x="210" y="100">
    <properties>
     <property name="facing-right" type="bool" value="false"/>
-    <property name="id" value="boozy-friend"/>
-    <property name="interact" value="boozy-friend-interact"/>
+    <property name="id" value="✿:boozy-friend"/>
+    <property name="interact" value="✿:boozy-friend-interact"/>
     <property name="normal-face" value="&lt;s&lt;"/>
     <property name="talking-face" value="&lt;o&lt;"/>
    </properties>
@@ -175,8 +175,8 @@
   <object id="4" name="Bad Gambler" type="Person" x="213.175" y="219.086">
    <properties>
     <property name="facing_right" type="bool" value="false"/>
-    <property name="id" value="bad-gambler"/>
-    <property name="interact" value="bad-gambler-interact"/>
+    <property name="id" value="✿:bad-gambler"/>
+    <property name="interact" value="✿:bad-gambler-interact"/>
     <property name="normal-face" value=";~:"/>
     <property name="talking-face" value="&gt;o&lt;"/>
    </properties>
@@ -185,8 +185,8 @@
   <object id="5" name="Desk Attendant" type="Person" x="602" y="520.667">
    <properties>
     <property name="facing-right" type="bool" value="false"/>
-    <property name="id" value="casino-attendant"/>
-    <property name="interact" value="casino-attendant-interact"/>
+    <property name="id" value="✿:casino-attendant"/>
+    <property name="interact" value="✿:casino-attendant-interact"/>
     <property name="normal-face" value="^3^"/>
     <property name="talking-face" value="^O^"/>
    </properties>
@@ -195,15 +195,15 @@
   <object id="6" name="Bartender" type="Person" x="75.9405" y="164.485">
    <properties>
     <property name="facing-right" type="bool" value="false"/>
-    <property name="id" value="casino-bartender"/>
-    <property name="interact" value="casino-bartender-interact"/>
+    <property name="id" value="✿:casino-bartender"/>
+    <property name="interact" value="✿:casino-bartender-interact"/>
     <property name="normal-face" value="uvu~"/>
    </properties>
    <point/>
   </object>
   <object id="8" name="Exit" type="Trigger" x="578.776" y="663.718" width="66.8802" height="14.6666">
    <properties>
-    <property name="function" value="casino-exit-trigger"/>
+    <property name="function" value="✿:casino-exit-trigger"/>
    </properties>
   </object>
   <object id="10" name="Ring" type="Entity" x="603.68" y="620.126">
@@ -212,8 +212,8 @@
     <property name="adjective-eo" value="bele"/>
     <property name="avatar" value="~o~"/>
     <property name="desc-en" value="It shines in the moonlight, as all else is gone."/>
-    <property name="id" value="ring"/>
-    <property name="interact" value="take-item-interact"/>
+    <property name="id" value="✿:ring"/>
+    <property name="interact" value="✿:TAKE-ITEM-INTERACT"/>
     <property name="name-en" value="ring"/>
     <property name="name-eo" value="ringo"/>
     <property name="reaction-face" value="&gt;_&lt;"/>

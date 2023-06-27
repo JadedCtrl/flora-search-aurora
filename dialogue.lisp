@@ -96,7 +96,7 @@ If not, have some tea on me: I’m paying. =w="
 (defun dialogue-speaker (dialogue)
   "Get the DIALOGUE-speaker’s corresponding identifying symbol.
 Because they’re stored in strings. So we gotta, like, unstringify. Ya dig?"
-  (intern (string-upcase (getf dialogue :speaker))))
+  (getf dialogue :speaker))
 
 
 
@@ -124,7 +124,7 @@ If FACE is NIL… guess what that does. :^)"
 (defun update-speaking-face (map dialogue)
   "Given a line (plist) of DIALOGUE, change speaker’s face to either their
 talking-face or the face given by the DIALOGUE."
-  (let* ((speaker (intern (string-upcase (getf dialogue :speaker))))
+  (let* ((speaker (getf dialogue :speaker))
          (new-face (appropriate-face map speaker (getf dialogue :face))))
     ;; Replace the face, when appropriate.
     (when new-face
@@ -134,7 +134,7 @@ talking-face or the face given by the DIALOGUE."
 (defun update-entity-data (map dialogue)
   "Given a plist of DIALOGUE, update an arbitrary bit of data in the speaker's
 data, using :SET and :TO of the DIALOGUE."
-  (let* ((speaker (intern (string-upcase (getf dialogue :speaker))))
+  (let* ((speaker (getf dialogue :speaker))
          (key (getf dialogue :set))
          (data (getf dialogue :to)))
     (when (and key data)
@@ -295,7 +295,7 @@ The data returned is a list of the box’es top-left coordinate, max-column,
 and max-row; for use with RENDER-STRING. Like so:
   ((:x X :y Y) MAX-COLUMN MAX-ROW)"
   (let* ((speaker-id (dialogue-speaker dialogue))
-         (playerp (eq speaker-id '🌍:player))
+         (playerp (eq speaker-id 'player)) ;;'✿:player))
          (leftp (not (🌍:getf-entity-data map speaker-id :facing-right)))
          (text (getf dialogue :text))
          (coords (🌍:world-coords->screen-coords (🌍:getf-entity-data map speaker-id :coords))))

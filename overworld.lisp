@@ -225,7 +225,7 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
                   (interactee-id (car interactee))
                   (interaction (getf (cdr interactee) :interact)))
              (if interaction
-                 (apply (intern (string-upcase interaction)) (list map interactee-id))
+                 (apply (string->symbol interaction) (list map interactee-id))
                  (list :map map))))
           ;; The pause-menu…
 ;;          ((plist = input '(:modifier nil :char #\Esc)))
@@ -248,7 +248,7 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
   (let* ((coords (getf-entity-data map 'player :coords))
          (trigger (trigger-at-coords map (list :x (getf coords :x) :y (getf coords :y)))))
     (if (and trigger (getf trigger :function))
-        (apply (intern (string-upcase (getf trigger :function)))
+        (apply (string->symbol (getf trigger :function))
                (list map))
         (list :map map))))
 

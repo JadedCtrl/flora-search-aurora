@@ -17,17 +17,6 @@
 ;;;; A simple TUI-game made for the text-flavoured LibreJam of 2023-06!
 ;;;; See: https://jamgaroo.xyz/jams/2
 
-(ql:quickload '(alexandria anaphora assoc-utils cl-charms cl-tiled str))
-
-(load "util.lisp")
-(load "input.lisp")
-(load "display.lisp")
-(load "ui.lisp")
-(load "overworld.util.lisp")
-(load "overworld.lisp")
-(load "dialogue.lisp")
-(load "engine.lisp")
-
 (defpackage :flora-search-aurora
   (:nicknames :fsa :✿)
   (:export #:main)
@@ -40,8 +29,6 @@
 
 (defvar *casino-map* nil)
 (defvar *outdoors-map* nil)
-
-
 
 
 
@@ -68,11 +55,11 @@ of a new item. The attributes set for the entity item should be:
   REACTION-TALKING
 All are optional, save ID."
   (start-dialogue
-   (face 'player (or (getf item-plist :reaction-face) "^_^")
-                 (or (getf item-plist :reaction-talking) "^o^"))
+   (face   'player (or (getf item-plist :reaction-face) "^_^")
+                   (or (getf item-plist :reaction-talking) "^o^"))
    (mumble 'player :en (format nil "(Hey, it's a ~A! ~A!)"
-                               (or (getf item-plist :name-en) (getf item-plist :id))
-                               (or (getf item-plist :adjective-en) "Nice"))
+                        (or (getf item-plist :name-en) (getf item-plist :id))
+                        (or (getf item-plist :adjective-en) "Nice"))
                    :eo (format nil "(Ho, jen ~A! ~A!)"
                                (or (getf item-plist :name-eo) (getf item-plist :id))
                                (or (getf item-plist :adjective-eo) "Interese")))
@@ -97,7 +84,7 @@ Should be the `interact` function for takeable items."
 ;;; ———————————————————————————————————
 ;;; The Outside World™
 ;;; ———————————————————————————————————
-(load "res/maps/outdoors.tmx.lisp")
+;;(load "res/maps/outdoors.tmx.lisp")
 
 (defun casino-entrance-trigger (&optional map)
     (list :map (🌍:merge-maps map *casino-map*)))
@@ -109,60 +96,60 @@ Should be the `interact` function for takeable items."
 ;;; ———————————————————————————————————
 (defun childhood-friend-greetings (map)
   (…:incf-0 (getf-act map :sasha-greetings))
-  (let ((sasha "childhood-friend"))
+  (let ((sasha 'childhood-friend))
     (case (getf-act map :sasha-greetings)
        (0
         (💬:start-dialogue
-         (💬:mumble sasha    :en "...")
-         (💬:say    "player" :eo "Kielas apud la mar'?"
-                             :en "How's the view?")
-         (💬:face   "player" "<.<" "<o<")
-         (💬:say    sasha    :eo "Kielas apud la ruinoj de via viv'?"
-                             :en "How's your trainwreck of a life?")))
+         (💬:mumble sasha   :en "...")
+         (💬:say    'player :eo "Kielas apud la mar'?"
+                            :en "How's the view?")
+         (💬:face   'player "<.<" "<o<")
+         (💬:say    sasha   :eo "Kielas apud la ruinoj de via viv'?"
+                            :en "How's your trainwreck of a life?")))
        (1
         (start-dialogue
-         (mumble "player"  :en "...")
-         (face   "player"  "<w<")
-         (say    sasha     :eo "Kial vi restas? Ĉu tiom solecas ke nur ideas ĝeni min?"
-                           :en "Why are you still here? Are you so lonely you've only got me to bother?")
-         (face   "player"  ":w:" ":u:")
-         (mumble "player"  :eo "(Ŝi parolas pri si mem, ĉu ne?)"
-                           :en "(She's projecting, isn't she?)")))
+         (mumble 'player  :en "...")
+         (face   'player  "<w<")
+         (say    sasha    :eo "Kial vi restas? Ĉu tiom solecas ke nur ideas ĝeni min?"
+                          :en "Why are you still here? Are you so lonely you've only got me to bother?")
+         (face   'player  ":w:" ":u:")
+         (mumble 'player  :eo "(Ŝi parolas pri si mem, ĉu ne?)"
+                          :en "(She's projecting, isn't she?)")))
        (2
         (start-dialogue
-         (face   "player"  ":w:" ":o:")
-         (say    "player"  :eo "Nu... Vi staris tie ĉi senmove dum la pastintaj tri tagoj..."
-                           :en "So... You've stood around here for three days already, you've hardly moved...")
-         (say    sasha     :eo "Pŝ! Do?! Mi simple havas multajn pripensindaĵojn! Mi tiom multe okupiĝas!"
-                           :en "Pff! So what?! My mind's just busy! I've got a lot going on right now!"
-                           :face "vov")
-         (say    sasha     :eo "Ne ŝajnigu vin supera al mi, dum vi mem senespere sencelas!!"
-                           :en "Don't act all haughty when you're such an aimless loser yourself!!"
-                           :face ">o<")
-         (face   "player"  "=w=" "=u=")
-         (mumble "player"  :eo "Eee.. pardonu."
-                           :en "Well... sorry.")))
+         (face   'player  ":w:" ":o:")
+         (say    'player  :eo "Nu... Vi staris tie ĉi senmove dum la pastintaj tri tagoj..."
+                          :en "So... You've stood around here for three days already, you've hardly moved...")
+         (say    sasha    :eo "Pŝ! Do?! Mi simple havas multajn pripensindaĵojn! Mi tiom multe okupiĝas!"
+                          :en "Pff! So what?! My mind's just busy! I've got a lot going on right now!"
+                          :face "vov")
+         (say    sasha    :eo "Ne ŝajnigu vin supera al mi, dum vi mem senespere sencelas!!"
+                          :en "Don't act all haughty when you're such an aimless loser yourself!!"
+                          :face ">o<")
+         (face   'player  "=w=" "=u=")
+         (mumble 'player  :eo "Eee.. pardonu."
+                          :en "Well... sorry.")))
        (3
         (start-dialogue
-         (say    "player"  :eo "Nu, vere, mia celo sufiĉe klaras al mi. Jam baldaŭ redungiĝos."
-                           :en "I'm not too aimless, actually. I've got good job prospects, right about now."
-                           :face "<w<")
-         (say    sasha     :eo "Mi tute ne prizorgas."
-                           :en "I really don't care."))))))
+         (say    'player  :eo "Nu, vere, mia celo sufiĉe klaras al mi. Jam baldaŭ redungiĝos."
+                          :en "I'm not too aimless, actually. I've got good job prospects, right about now."
+                          :face "<w<")
+         (say    sasha    :eo "Mi tute ne prizorgas."
+                          :en "I really don't care."))))))
 
 
 (defun childhood-friend-partings ()
   (let ((partings
           '((:eo "Nu? Ĝis! Adiaŭ!"
              :en "Well? Bye! Ta-ta!")
-            (:eo "Ve! Eĉ via rigardo sentas strange!"
-             :en "God! The way you look at me gives me the creeps!")
+            (:eo "Ve! Eĉ via rigardo malkomfortigas!"
+             :en "God! You're such a creep!")
             (:eo "Lasu! Min! Sooooola!"
              :en "Leave me! The hell! Alooooone!")
             (:eo "Subvermo!"
              :en "Worm!"))))
     (start-dialogue
-      (apply #'say (append '("childhood-friend")
+      (apply #'say (append '(childhood-friend)
                            (nth (random (length partings)) partings))))))
 
 
@@ -183,7 +170,7 @@ Should be the `interact` function for takeable items."
 ;;; ———————————————————————————————————
 ;;; Casino!
 ;;; ———————————————————————————————————
-(load "res/maps/casino.tmx.lisp")
+;;(load "res/maps/casino.tmx.lisp")
 
 (defun casino-exit-trigger (&optional map)
   (list :map (🌍:merge-maps map *outdoors-map*)))
@@ -210,7 +197,7 @@ Should be the `interact` function for takeable items."
             (:eo "kaj mi diris RIKAŜIKA! DIN-DON!"
              :en "and I said BAZINGA! CA-CHOW!"))))
     (start-dialogue
-      (apply #'say (append '("boozy-lady")
+      (apply #'say (append '(boozy-lady)
                            (nth (random (length messages)) messages))))))
 
 
@@ -222,32 +209,32 @@ Should be the `interact` function for takeable items."
   (make-dialogue-state
    map
    (start-dialogue
-    (say "boozy-friend" :eo "Kial ŝi ĉiufoje tiom ebriiĝas?"
-                        :en "I swear, she gets like this every time.")
-    (say "boozy-friend" :eo "Kia ĝeno, tiom hontindas...!"
-                        :en "It's so embarrasing..."))))
+    (say 'boozy-friend :eo "Kial ŝi ĉiufoje tiom ebriiĝas?"
+                       :en "I swear, she gets like this every time.")
+    (say 'boozy-friend :eo "Kia ĝeno, tiom hontindas...!"
+                       :en "It's so embarrasing..."))))
 
 
 (defun casino-attendant-interact (map &optional interactee-id)
   (make-dialogue-state
    map
    (start-dialogue
-    (say "casino-attendant" :eo "Bonvenon, estimata sinjoro!"
-                            :en "Welcome in, good sir!")
-    (say "casino-attendant" :eo "Ĝuu la ludadon, kaj sorto ridetu al vi!"
-                            :en "Have fun; may lady luck blow you a kiss!"))))
+    (say 'casino-attendant :eo "Bonvenon, estimata sinjoro!"
+                           :en "Welcome in, good sir!")
+    (say 'casino-attendant :eo "Ĝuu la ludadon, kaj sorto ridetu al vi!"
+                           :en "Have fun; may lady luck blow you a kiss!"))))
 
 
 (defun casino-bartender-interact (map &optional interactee-id)
   (make-dialogue-state
    map
    (start-dialogue
-    (say "casino-bartender" :eo "Pffff, ŝi tiom amuzas!"
-                            :en "Pffff, this broad's a riot!"
-                            :face "xD ~")
-    (say "casino-bartender" :eo "Fojfoje mi ja ŝatas mian fakon, mdr."
-                            :en "Sometimes I really do like my job. lol"
-                            :face "=w=~"))))
+    (say 'casino-bartender :eo "Pffff, ŝi tiom amuzas!"
+                           :en "Pffff, this broad's a riot!"
+                           :face "xD ~")
+    (say 'casino-bartender :eo "Fojfoje mi ja ŝatas mian fakon, mdr."
+                           :en "Sometimes I really do like my job. lol"
+                           :face "=w=~"))))
 
 
 
@@ -256,7 +243,7 @@ Should be the `interact` function for takeable items."
 ;;; ———————————————————————————————————
 (defun bad-gambler-greetings (map)
   (…:incf-0 (getf-act map :gambler-greetings))
-  (let ((gambler "bad-gambler"))
+  (let ((gambler 'bad-gambler))
     (case (getf-act map :gambler-greetings)
        (0
         (start-dialogue
@@ -331,7 +318,7 @@ Should be the `interact` function for takeable items."
                        :en "Five feet under, maybe..."))))))
 
 
-(defun bad-gambler-partings (map)
+(defun bad-gambler-partings (&optional map)
   (let ((messages
           '((:eo "... kaj ŝiaj mamoj tiom belis..."
              :en "... her titties were so nice, too...")
@@ -346,7 +333,7 @@ Should be the `interact` function for takeable items."
             (:eo "... finiĝo, ĉesiĝo, paciĝo..."
              :en "... endings, partings, peace-ings..."))))
     (start-dialogue
-     (apply #'say (append '("bad-gambler")
+     (apply #'say (append '(bad-gambler)
                           (nth (random (length messages)) messages))))))
 
 
@@ -367,17 +354,19 @@ Should be the `interact` function for takeable items."
 ;;; ———————————————————————————————————
 ;;; Main-menu data
 ;;; ———————————————————————————————————
-(defparameter *submenu* `(((LABEL :en "IDK") (selection . 100) (selected t))
-                          ((LABEL :en "GO BACK") (return . nil))))
+(defun submenu ()
+  `(((LABEL :en "IDK") (selection . 100) (selected t))
+    ((LABEL :en "GO BACK") (return . nil))))
 
 
-(defparameter *main-menu* `(((LABEL :en "PLAY" :eo "EKLUDI")
-                             (selection . 100) (selected . t)
-                             (return . ,(🌍:make-overworld-state *casino-map*)))
-                            ((LABEL :en "SUBMENU" :eo "SUBMENUO")
-                             (return . ,(📋:make-menu-state *submenu*)))
-                            ((LABEL :en "QUIT" :eo "REZIGNI")
-                             (return . nil))))
+(defun main-menu ()
+  `(((LABEL :en "PLAY" :eo "EKLUDI")
+     (selection . 100) (selected . t)
+     (return . ,(🌍:make-overworld-state *casino-map*)))
+    ((LABEL :en "SUBMENU" :eo "SUBMENUO")
+     (return . ,(📋:make-menu-state (submenu))))
+    ((LABEL :en "QUIT" :eo "REZIGNI")
+     (return . nil))))
 
 
 
@@ -388,10 +377,9 @@ Should be the `interact` function for takeable items."
   "A pathetic fascimile of a main loop. What does it do? WHAST DOES TI DODOO?
 What a mysteryyy! You’ll have to check out the engine to uncover it.
 engine.lisp, that is. Cheers! :D"
-    (⚙:main (list (📋:make-menu-state *main-menu*))))
+  (⚙:main (list (🌍:make-overworld-state *casino-map*))))
 
 
-(main) ;; — Knock-knock
 ;; — Who’s there?
 ;; — Yo momma!
 ;; — “Yo momma” who?

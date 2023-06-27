@@ -19,7 +19,7 @@
 
 (defpackage :flora-search-aurora.overworld.tiled
   (:nicknames :fsa.o.t :overworld.tiled :🌍.🀨)
-  (:use :cl :anaphora-basic
+  (:use :cl
    :flora-search-aurora.overworld.util)
   (:export #:load-map))
 
@@ -74,10 +74,7 @@ character-scale world coordinates in plist form."
         :face (gethash "normal-face" properties)
         :coords (tiled-coords->world-coords (cl-tiled:object-x tiled-obj)
                                             (cl-tiled:object-y tiled-obj)
-                                            tiled-map)
-        :direction (if (gethash "facing-right" properties)
-                       'right
-                       'left))))))
+                                            tiled-map))))))
 
 
 (defun tiled-object->trigger (tiled-obj tiled-map)

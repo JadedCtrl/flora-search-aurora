@@ -20,13 +20,14 @@
 (defpackage :flora-search-aurora.overworld
   (:nicknames :fsa.o :overworld :🌍)
   (:use :cl
-   :flora-search-aurora.overworld.tiled :flora-search-aurora.overworld.util)
+   :flora-search-aurora.overworld.util)
   (:export #:overworld-state #:make-overworld-state #:overworld-state-draw
            #:merge-maps
            #:world-coords->screen-coords
            #:getf-entity #:getf-entity-data #:removef-entity
            #:aget-item #:getf-act #:getf-know
            #:move-entity-to #:move-entity
+           #:plist->map
            :left :right
            :player))
 
@@ -154,6 +155,30 @@ replays of the game."
 
 
 ;;; ———————————————————————————————————
+;;; Map conversions & manipulations
+;;; ———————————————————————————————————
+(defun merge-maps (map-a map-b)
+  "Copy data that should be persistent between maps from map-a to map-b.
+Used primarily in moving between different maps in an overworld state."
+  ;; Copy over important game-data from map-a.
+  (mapcar
+   (lambda (map-key)
+     (setf (gethash map-key map-b) (gethash map-key map-a)))
+   '(:acts :knows :items :seconds :day))
+  ;; Copy specific bits of player data from map-a’s :ENTITIES.
+  (mapcar
+   (lambda (player-key)
+     (setf (getf-entity-data map-b 'player player-key)
+           (getf-entity-data map-a 'player player-key)))
+   '(:face :normal-face :talking-face))
+  map-b)
+
+
+
+
+
+
+;;; ———————————————————————————————————
 ;;; Overworld logic
 ;;; ———————————————————————————————————
 (defun overworld-state-update (map Δt)
@@ -185,7 +210,7 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
     ;; Go through the day-update procedures!
     (when (not (eq (getf game-datetime :day)
                    (gethash :day map)))
-        (setf (gethash :day map) (getf game-datetime :day)))))
+      (setf (gethash :day map) (getf game-datetime :day)))))
 
 
 (defun process-overworld-input (map)
@@ -231,9 +256,9 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
 (defun move-entity (map entity-id &key (Δx 0) (Δy 0))
   "Move an entity relative to its current position."
   (when (< Δx 0)
-    (setf (getf-entity-data map entity-id :direction) 'left))
+    (setf (getf-entity-data map entity-id :facing-right) nil))
   (when (> Δx 0)
-    (setf (getf-entity-data map entity-id :direction) 'right))
+    (setf (getf-entity-data map entity-id :facing-right) 't))
   (let ((coords (getf-entity-data map entity-id :coords)))
     (move-entity-to map entity-id
                     :x (+ Δx (getf coords :x))
@@ -331,11 +356,10 @@ alist containing a character (:CHAR) and :X & :Y coordinates."
 (defun matrix-write-entity-head (matrix entity-plist)
   "Draw an entity’s head. There aren't any Mami Tomoes in this game, dang it!"
   (let* ((screen-coords (world-coords->screen-coords (getf entity-plist :coords)))
-         (direction (getf entity-plist :direction))
          (face (getf entity-plist :face))
          (width (+ (length face) 2)) ;; Face + |borders|
          (y (- (getf screen-coords :y) 1))
-         (x (if (eq direction 'right)
+         (x (if (getf entity-plist :facing-right)
                 (- (getf screen-coords :x) (floor (/ width 2)) 0)
                 (- (getf screen-coords :x) (floor (/ width 2)) 0))))
     (📋:render-line matrix face (+ x 1) y)
@@ -348,9 +372,8 @@ alist containing a character (:CHAR) and :X & :Y coordinates."
   "Draw a bipdel entity’s legs — a surprisingly in-depth task!"
   (let* ((screen-coords (world-coords->screen-coords (getf entity-plist :coords)))
          (x (getf screen-coords :x))
-         (y (getf screen-coords :y))
-         (direction (getf entity-plist :direction)))
-    (cond ((eq direction 'right)
+         (y (getf screen-coords :y)))
+    (cond ((getf entity-plist :facing-right)
            (ignore-errors (setf (aref matrix y x) #\|))
            (ignore-errors (setf (aref matrix y (- x 1)) #\|)))
           ('t
@@ -396,19 +419,3 @@ A state-function for use with STATE-LOOP."
   (lambda (matrix &key (map map))
     (apply #'🌍:overworld-state
            (list matrix :map map))))
-
-
-(defun merge-maps (map-a map-b)
-  "Copy data that should be persistent between maps from map-a to map-b."
-  ;; Copy over important game-data from map-a.
-  (mapcar
-   (lambda (map-key)
-     (setf (gethash map-key map-b) (gethash map-key map-a)))
-   '(:acts :knows :items :seconds :day))
-  ;; Copy specific bits of player data from map-a’s :ENTITIES.
-  (mapcar
-   (lambda (player-key)
-     (setf (getf-entity-data map-b 'player player-key)
-           (getf-entity-data map-a 'player player-key)))
-   '(:face :normal-face :talking-face))
-  map-b)

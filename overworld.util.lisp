@@ -17,11 +17,13 @@
 ;;;; Utility functions used by multiple overworld packages (overworld.tiled & overworld).
 
 (defpackage :flora-search-aurora.overworld.util
-  (:nicknames :fsa.o.u :overworld.util)
+  (:nicknames :fsa.o.u :overworld.util :🌍.…)
   (:use :cl)
   (:export #:coords->symbol #:symbol->coords
           #:world-coords->screen-coords
-          #:world-coords-chunk))
+          #:world-coords-chunk
+          #:map->plist #:plist->map
+          #:save-map-to-file))
 
 (in-package :flora-search-aurora.overworld.util)
 
@@ -51,3 +53,35 @@ The world is split into screen-sized “chunks” to this end.
 
 (defun world-coords-chunk (coords)
   (getf (world-coords->screen-coords coords) :chunk))
+
+
+(defun map->plist (map-hash)
+  "Convert a map(-HASH) into a friendly, property-list format!
+Used by SAVE-MAP-TO-FILE."
+  (alexandria:hash-table-plist map-hash))
+
+
+(defun plist->map (plist)
+  "Convert a map from a MAP->PLIST’ed PLIST into a normal
+map hash-table, as used by the game."
+  (let ((hash (make-hash-table)))
+    ;; Add the core map-data…
+    (setf (gethash :tiles hash) (getf plist :tiles))
+    (setf (gethash :top-tiles hash) (getf plist :top-tiles))
+    (setf (gethash :bump-map hash) (getf plist :bump-map))
+    (setf (gethash :entities hash) (getf plist :entities))
+    (setf (gethash :triggers hash) (getf plist :triggers))
+    ;; And now the user’s data…
+    (setf (gethash :seconds hash) (getf plist :seconds))
+    (setf (gethash :day hash) (getf plist :day))
+    (setf (gethash :acts hash) (getf plist :acts))
+    (setf (gethash :knows hash) (getf plist :knows))
+    (setf (gethash :items hash) (getf plist :items))
+    hash))
+
+
+(defun save-map-to-file (path map &optional (package ":FLORA-SEARCH-AURORA") (variable "*map*"))
+  "Given a map, generate source-code that corresponds to it."
+  (with-open-file (file-stream path :direction :output :if-exists :supersede)
+    (format file-stream "(in-package ~A)~%(defparameter ~A~%  (🌍.…:plist->map~%    (QUOTE ~S)))"
+            package variable (map->plist map))))

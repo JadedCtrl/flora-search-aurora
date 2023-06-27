@@ -295,9 +295,8 @@ The data returned is a list of the box’es top-left coordinate, max-column,
 and max-row; for use with RENDER-STRING. Like so:
   ((:x X :y Y) MAX-COLUMN MAX-ROW)"
   (let* ((speaker-id (dialogue-speaker dialogue))
-         (direction (🌍:getf-entity-data map speaker-id :direction))
          (playerp (eq speaker-id '🌍:player))
-         (leftp (not (eq direction '🌍:right)))
+         (leftp (not (🌍:getf-entity-data map speaker-id :facing-right)))
          (text (getf dialogue :text))
          (coords (🌍:world-coords->screen-coords (🌍:getf-entity-data map speaker-id :coords))))
     ;; Ideally, place text-box above/below (NPC/player); otherwise, place it behind speaker

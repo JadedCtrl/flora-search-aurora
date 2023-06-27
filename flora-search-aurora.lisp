@@ -24,7 +24,6 @@
 (load "display.lisp")
 (load "ui.lisp")
 (load "overworld.util.lisp")
-(load "overworld.tiled.lisp")
 (load "overworld.lisp")
 (load "dialogue.lisp")
 (load "engine.lisp")
@@ -39,6 +38,8 @@
 
 (in-package :flora-search-aurora)
 
+(defvar *casino-map* nil)
+(defvar *outdoors-map* nil)
 
 
 
@@ -96,7 +97,10 @@ Should be the `interact` function for takeable items."
 ;;; ———————————————————————————————————
 ;;; The Outside World™
 ;;; ———————————————————————————————————
-(defparameter *outdoors-map* (overworld.tiled:load-map (format nil "~Ares/map.tmx" (uiop:getcwd))))
+(load "res/maps/outdoors.tmx.lisp")
+
+(defun casino-entrance-trigger (&optional map)
+    (list :map (🌍:merge-maps map *casino-map*)))
 
 
 
@@ -179,12 +183,7 @@ Should be the `interact` function for takeable items."
 ;;; ———————————————————————————————————
 ;;; Casino!
 ;;; ———————————————————————————————————
-(defparameter *casino-map* (overworld.tiled:load-map (format nil "~Ares/casino.tmx" (uiop:getcwd))))
-
-
-(defun casino-entrance-trigger (&optional map)
-    (list :map (🌍:merge-maps map *casino-map*)))
-
+(load "res/maps/casino.tmx.lisp")
 
 (defun casino-exit-trigger (&optional map)
   (list :map (🌍:merge-maps map *outdoors-map*)))

@@ -50,7 +50,7 @@ of a new item. The attributes set for the entity item should be:
   ID
   NAME-[EO|EN]
   DESC-[EO|EN]
-  ADJECTIVE-[EO|EN]
+  REMARK-[EO|EN]
   REACTION-FACE
   REACTION-TALKING
 All are optional, save ID."
@@ -59,15 +59,15 @@ All are optional, save ID."
                    (or (getf item-plist :reaction-talking) "^o^"))
    (mumble 'player :en (format nil "(Hey, it's a ~A! ~A!)"
                         (or (getf item-plist :name-en) (getf item-plist :id))
-                        (or (getf item-plist :adjective-en) "Nice"))
-                   :eo (format nil "(Ho, jen ~A! ~A!)"
+                        (or (getf item-plist :remark-en) "Nice!"))
+                   :eo (format nil "(Ho, jen ~A! ~A)"
                                (or (getf item-plist :name-eo) (getf item-plist :id))
-                               (or (getf item-plist :adjective-eo) "Interese")))
+                               (or (getf item-plist :remark-eo) "Interese!")))
    (mumble 'player :en (if (getf item-plist :desc-en)
-                           (format nil "~~~~ ~A ~~~~" (getf item-plist :desc-en))
+                           (format nil "~A" (getf item-plist :desc-en))
                            "(I'm glad I found it.)")
                    :eo (if (getf item-plist :desc-eo)
-                           (format nil "~~~~ ~A ~~~~" (getf item-plist :desc-eo))
+                           (format nil "~A" (getf item-plist :desc-eo))
                            "(Kia bonŝanco!)"))))
 
 
@@ -80,12 +80,22 @@ Should be the `interact` function for takeable items."
       (make-dialogue-state map (take-item-dialogue item-plist)))))
 
 
+(defun description-interact (map interactee-id)
+  "Try to “pick up” the interactee entity, then have the player react to the
+pickup. See TAKE-ITEM-DIALOGUE for customizing the reaction dialogue.
+Should be the `interact` function for takeable items."
+  (let ((item-plist (cdr (getf-entity map interactee-id))))
+    (make-dialogue-state
+     map
+     (start-dialogue
+      (mumble 'player :en (or (getf item-plist :desc-en) "...")
+                      :eo (getf item-plist :desc-eo))))))
+
+
 
 ;;; ———————————————————————————————————
 ;;; The Outside World™
 ;;; ———————————————————————————————————
-;;(load "res/maps/outdoors.tmx.lisp")
-
 (defun casino-entrance-trigger (&optional map)
     (list :map (🌍:merge-maps map *casino-map*)))
 
@@ -168,10 +178,53 @@ Should be the `interact` function for takeable items."
 
 
 ;;; ———————————————————————————————————
+;;; School prologue: Childhood friend
+;;; ———————————————————————————————————
+(defun flashback-childhood-friend-interact (map &optional sasha)
+  (make-dialogue-state
+   map
+   (start-dialogue
+    (face   'player "` `" "`o`")
+    (say    'player :eo "Ĉu ĉio enordas, Saŝa? Iom malfruas, ĉu ne?"
+                    :en "Is everything OK, Sasha? It's a bit late, isn't it?")
+    (face   sasha   ">->" ">o>")
+    (say    sasha   :eo "Jes, jes! Mi nur iom distriĝis."
+                    :en "Yea, yea! I just got a bit distracted is all.")
+    (say    'player :eo "Prelegoj finiĝis antaŭ du horoj nun..."
+                    :en "School ended two hours ago...")
+    (say    sasha   :eo "Nu, mi ĵus eliris klubkunvenon! De klubo!"
+                    :en "Well, I just got out of a meeting! ... Of a club!")
+    (say    sasha   :eo "Do, kial VI restas? Ĉu ankoraŭ havas ne amikojn?"
+                    :en "And what're YOU doing here? Still a loner?")
+    (say    sasha   :eo "Nesurprize, tutatendite!"
+                    :en "I'm sure not surprised.")
+    (say    'player :eo "Ĉu ne ni estas amikoj, Saŝa?"
+                    :en "Well, aren't we friends, Sasha?")
+    (face   sasha   ":v:" ":o:")
+    (mumble sasha   :en "...")
+    (say    sasha   :eo "Kun vi? Ni? Amikoj..?"
+                    :en "You? Me? Friends..?")
+    (mumble sasha   :en "...")
+    (face   sasha   "<-<" "<o<")
+    (face   'player ":w:" ":u:")
+    (say    sasha   :eo "Pŝ! Ne metu ŝercojn tiom stultaj, Dio mia!"
+                    :en "Pssh! Don't make such bad jokes, Jesus.")
+    (face   sasha   ">->" ">o>")
+    (say    sasha   :eo "Kvazaŭ ni povus esti tiel!"
+                    :en "As if!")
+    (face   sasha   "<-<" "<o<")
+    (say    sasha   :eo "Mi ne TIOM subigos miajn minimumojn!"
+                    :en "I'd never lower my standards THAT much!")
+    (say    'player :eo "... ĉu iu ajn atingas viajn minimumojn?"
+                    :en "... does anyone meet your standards?")
+    (say    sasha   :eo "Fermu la buŝon, stulta vermo!"
+                    :en "Shut up, you damn loser!"
+                    :face ">O<"))))
+
+
+;;; ———————————————————————————————————
 ;;; Casino!
 ;;; ———————————————————————————————————
-;;(load "res/maps/casino.tmx.lisp")
-
 (defun casino-exit-trigger (&optional map)
   (list :map (🌍:merge-maps map *outdoors-map*)))
 
@@ -362,7 +415,7 @@ Should be the `interact` function for takeable items."
 (defun main-menu ()
   `(((LABEL :en "PLAY" :eo "EKLUDI")
      (selection . 100) (selected . t)
-     (return . ,(🌍:make-overworld-state *casino-map*)))
+     (return . ,(🌍:make-overworld-state *flashback-school-map*)))
     ((LABEL :en "SUBMENU" :eo "SUBMENUO")
      (return . ,(📋:make-menu-state (submenu))))
     ((LABEL :en "QUIT" :eo "REZIGNI")
@@ -377,7 +430,7 @@ Should be the `interact` function for takeable items."
   "A pathetic fascimile of a main loop. What does it do? WHAST DOES TI DODOO?
 What a mysteryyy! You’ll have to check out the engine to uncover it.
 engine.lisp, that is. Cheers! :D"
-  (⚙:main (list (🌍:make-overworld-state *casino-map*))))
+  (⚙:main (list (📋:make-menu-state (main-menu)))))
 
 
 ;; — Who’s there?

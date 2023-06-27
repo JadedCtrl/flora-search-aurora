@@ -1,5 +1,5 @@
 (defsystem "flora-search-aurora"
-  :depends-on ("alexandria" "assoc-utils" "cl-charms" "cl-tiled" "str")
+  :depends-on ("alexandria" "assoc-utils" "cl-charms" "str")
   :build-operation "program-op"
   :build-pathname "flora-search-aurora"
   :entry-point "flora-search-aurora:main"
@@ -13,4 +13,5 @@
                (:file "engine")
                (:file "flora-search-aurora")
                (:file "res/maps/casino.tmx")
-               (:file "res/maps/outdoors.tmx")))
+               (:file "res/maps/outdoors.tmx")
+               (:file "res/maps/flashback-school.tmx")))

@@ -166,12 +166,12 @@ coordinates listed in the DIALOGUE’s :COORDS property. … If applicable, ofc.
     (when (not finished-moving-p)
      (🌍:move-entity
       map speaker
-      :x (cond ((< (getf target-coords :x) (getf speaker-coords :x)) -1)
-               ((> (getf target-coords :x) (getf speaker-coords :x)) 1)
-               ('t 0))
-      :y (cond ((< (getf target-coords :y) (getf speaker-coords :y)) -1)
-               ((> (getf target-coords :y) (getf speaker-coords :y)) 1)
-               ('t 0)))
+      :Δx (cond ((< (getf target-coords :x) (getf speaker-coords :x)) -1)
+                ((> (getf target-coords :x) (getf speaker-coords :x)) 1)
+                ('t 0))
+      :Δy (cond ((< (getf target-coords :y) (getf speaker-coords :y)) -1)
+                ((> (getf target-coords :y) (getf speaker-coords :y)) 1)
+                ('t 0)))
      (sleep (or (getf dialogue :delay) 0)))
     finished-moving-p))
 
@@ -209,8 +209,9 @@ Returns the state for use with STATE-LOOP, pay attention!"
           (list :dialogue (cdr dialogue-list) :map map)
           (progn
             (✎:hide-cursor)
-            (values nil
-                    (list :map map)))))
+            (values (or (getf dialogue :return) nil)
+                    (or (getf dialogue :return-2)
+                        (list :map map))))))
       ;; Allow interupting text-printing to end it!
       ((and did-press-enter-p (not did-finish-printing-p))
        (setf (getf (car dialogue-list) :progress) (length text))
@@ -297,7 +298,7 @@ The data returned is a list of the box’es top-left coordinate, max-column,
 and max-row; for use with RENDER-STRING. Like so:
   ((:x X :y Y) MAX-COLUMN MAX-ROW)"
   (let* ((speaker-id (dialogue-speaker dialogue))
-         (playerp (eq speaker-id 'player)) ;;'✿:player))
+         (playerp (eq speaker-id 'player))
          (leftp (not (🌍:getf-entity-data map speaker-id :facing-right)))
          (text (getf dialogue :text))
          (coords (🌍:world-coords->screen-coords (🌍:getf-entity-data map speaker-id :coords))))

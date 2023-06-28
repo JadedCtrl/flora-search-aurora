@@ -97,7 +97,7 @@ Should be the `interact` function for takeable items."
 ;;; The Outside World™
 ;;; ———————————————————————————————————
 (defun casino-entrance-trigger (&optional map)
-    (list :map (🌍:merge-maps map *casino-map*)))
+  (list :map (🌍:merge-maps map *casino-map*)))
 
 
 
@@ -180,6 +180,13 @@ Should be the `interact` function for takeable items."
 ;;; ———————————————————————————————————
 ;;; School prologue: Childhood friend
 ;;; ———————————————————————————————————
+(defun flashback-school-trigger (map)
+  "This is triggered right as the player enters the map — they literally can't
+avoid triggering this."
+  (take-item map 'bracelet)
+  't)
+
+
 (defun flashback-childhood-friend-interact (map &optional sasha)
   (make-dialogue-state
    map
@@ -187,39 +194,76 @@ Should be the `interact` function for takeable items."
     (face   'player "` `" "`o`")
     (say    'player :eo "Ĉu ĉio enordas, Saŝa? Iom malfruas, ĉu ne?"
                     :en "Is everything OK, Sasha? It's a bit late, isn't it?")
-    (face   sasha   ">->" ">o>")
-    (say    sasha   :eo "Jes, jes! Mi nur iom distriĝis."
-                    :en "Yea, yea! I just got a bit distracted is all.")
-    (say    'player :eo "Prelegoj finiĝis antaŭ du horoj nun..."
-                    :en "School ended two hours ago...")
-    (say    sasha   :eo "Nu, mi ĵus eliris klubkunvenon! De klubo!"
-                    :en "Well, I just got out of a meeting! ... Of a club!")
-    (say    sasha   :eo "Do, kial VI restas? Ĉu ankoraŭ havas ne amikojn?"
-                    :en "And what're YOU doing here? Still a loner?")
-    (say    sasha   :eo "Nesurprize, tutatendite!"
-                    :en "I'm sure not surprised.")
-    (say    'player :eo "Ĉu ne ni estas amikoj, Saŝa?"
-                    :en "Well, aren't we friends, Sasha?")
+    (face   sasha   "=_=" "=o=")
+    (say    sasha   :eo "Ho, jes, mi simple ĵus eliris klubkunvenon."
+                    :en "Yea, I just left a club-meeting, is all.")
+    (say    'player :eo "Hodiaŭ ne estas klubotago..."
+                    :en "Today isn't club day...")
+    (say    sasha   :eo "Nu, estas escepte speciala klubo!"
+                    :en "Well, whatever, it's a special club!"
+                    :face "<o<")
+    (say    sasha   :eo "Nu, kial VI restas? Ĉu ankoraŭ havas ne amikojn?"
+                    :en "And what're YOU doing here? Still no friends?")
+    (say    'player :eo "Ankoraŭ sole vin."
+                    :en "Still just you.")
     (face   sasha   ":v:" ":o:")
     (mumble sasha   :en "...")
-    (say    sasha   :eo "Kun vi? Ni? Amikoj..?"
-                    :en "You? Me? Friends..?")
+    (say    sasha   :eo "Nu..."
+                    :en "Well...")
     (mumble sasha   :en "...")
     (face   sasha   "<-<" "<o<")
     (face   'player ":w:" ":u:")
-    (say    sasha   :eo "Pŝ! Ne metu ŝercojn tiom stultaj, Dio mia!"
-                    :en "Pssh! Don't make such bad jokes, Jesus.")
+    (say    sasha   :eo "Pŝ! Fermu la buŝon, vermo!"
+                    :en "Ugh! Just shut up, you loser!")
     (face   sasha   ">->" ">o>")
     (say    sasha   :eo "Kvazaŭ ni povus esti tiel!"
                     :en "As if!")
     (face   sasha   "<-<" "<o<")
-    (say    sasha   :eo "Mi ne TIOM subigos miajn minimumojn!"
-                    :en "I'd never lower my standards THAT much!")
-    (say    'player :eo "... ĉu iu ajn atingas viajn minimumojn?"
-                    :en "... does anyone meet your standards?")
-    (say    sasha   :eo "Fermu la buŝon, stulta vermo!"
-                    :en "Shut up, you damn loser!"
-                    :face ">O<"))))
+    (say    sasha   :eo "Simple lasu min al paco, fek'!!"
+                    :en "Just get the hell out of my face!!"
+                    :face ">o<")
+    (say    'player :eo "Bedaŭron..."
+                    :en "Sorry...")
+    (move   'player '(:x 46 :y 11) :delay .05)
+    (face   'player "^_^" "^o^")
+    (say    'player :eo "Ho, jes!"
+                    :en "Oh, yea!")
+    (move   sasha  '(:x 36 :y 3) :delay .03)
+    (move   'player '(:x 43 :y 4) :delay .05)
+    (move   sasha  '(:x 37 :y 3))
+    (say    'player :eo "Mi freŝe trovis ĉi tion, ĝi ŝajnis akorda al via stilo."
+                    :en "I found this a while back, I thought you'd like it.")
+    (face   sasha   ":w:" ":u:")
+    (mumble 'player :eo "[Vi donas al SAŜA ĉirkaŭmanon belbrilan.]"
+                    :en "[You give SASHA a shiny bracelet.]")
+    (say    sasha   :eo "Ho, tio surprize afablis...."
+                    :en "Oh, that's surprisingly nice...")
+    (face   sasha   "<w<" "<o<")
+    (face   'player ";w:" ";o:")
+    (say    sasha   :eo "... jen la sola koloro, kiun mi malamas."
+                    :en "... this is literally the one color I hate.")
+    (say    sasha   :eo "Kial vi ne elektis bluan? Dio mia."
+                    :en "You couldn't have gotten blue?")
+    (say    sasha   :eo "Mi jam bone sciu, ne atendi bonon de vi."
+                    :en "I should know not to expect so much from you...")
+    (say    sasha   :eo "Bonaj \"amikoj\" ni estas, ja..."
+                    :en "\"Friends\" my ass.")
+    (face   'player "T_T" "ToT")
+    (say    'player :eo "Je Dio, mi ne povas elteni plu. Mi rezignas."
+                    :en "You know what? I give up.")
+    (move   'player '(:x 40 :y 3) :delay .05)
+    (face   sasha   ";_:")
+    (mumble 'player :eo "[Vi prenas de SAŜA ĉirkaŭmanon belbrilan.]"
+                    :en "[You take a shiny bracelet from SASHA.]")
+    (move   'player '(:x 46 :y 5) :delay .05)
+    (say    'player :eo "Mi rezignas."
+                    :en "I can't take this anymore.")
+    (move   'player '(:x 47 :y 9) :delay .05)
+    (say    'player :eo "Vi teruras, Saŝa."
+                    :en "You're the worst, Sasha.")
+    (move   'player '(:x 51 :y 19))
+    `((:return-2 ,(list :map (merge-maps map *casino-map*)))))))
+
 
 
 ;;; ———————————————————————————————————

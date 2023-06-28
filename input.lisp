@@ -16,17 +16,6 @@
 ;;;; FLORA-SEARCH-AURORA.INPUT
 ;;;; All input-related voodoo goes here: Input reading, translating, parsing, etc.
 
-(defpackage :flora-search-aurora.input
-  (:use :cl)
-  (:nicknames :fsa.i :input :⌨)
-  (:export #:read-char-plist #:read-gamefied-char-plist
-           #:normalize-char-plist #:gameify-char-plist
-           #:plist-char-p
-           :control :meta :shift
-           +qwerty-layout+ +dvorak-layout+
-           +arrows-game-layout+ +wasd-game-layout+ +ijkl-game-layout+
-           :↑ :← :→ :↓ :🆗 :❎))
-
 (in-package :flora-search-aurora.input)
 
 ;; Yup, they're hardcoded like this. Horrid, ain't it? ^_^

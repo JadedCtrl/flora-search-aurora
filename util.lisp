@@ -13,18 +13,9 @@
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-;;;; FLORA-SEARCH-AURORA.UI
-;;;; Generic menu-making, displaying, and management.
+;;;; FLORA-SEARCH-AURORA.UTIL
+;;;; Useful misc. utilities used in multiple packages.
 ;;;; Let's get to it, we're on a deadline!
-
-(defpackage :flora-search-aurora.util
-  (:nicknames :fsa.ut :util :…)
-  (:use :cl :assoc-utils)
-  (:export #:split-string-by-length
-           #:plist=
-           #:incf-0
-           #:at-least #:at-most
-           #:system-language #:langcode->keysym #:getf-lang))
 
 (in-package :flora-search-aurora.util)
 

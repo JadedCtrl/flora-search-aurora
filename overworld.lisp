@@ -17,25 +17,6 @@
 ;;;; All game-functions and data relating to the “overworld” (that is,
 ;;;; the primary gameplay, the RPG-ish-ish bits).
 
-(defpackage :flora-search-aurora
-  (:nicknames :fsa :✿)
-  (:export :player))
-
-
-(defpackage :flora-search-aurora.overworld
-  (:nicknames :fsa.o :overworld :🌍)
-  (:use :cl
-   :flora-search-aurora.overworld.util)
-  (:export #:overworld-state #:make-overworld-state #:overworld-state-draw
-           #:merge-maps
-           #:world-coords->screen-coords
-           #:getf-entity #:getf-entity-data #:removef-entity
-           #:aget-item #:getf-act #:getf-know
-           #:move-entity-to #:move-entity
-           #:plist->map
-           :left :right))
-
-
 (in-package :flora-search-aurora.overworld)
 
 

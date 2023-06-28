@@ -1,12 +1,8 @@
 (ql:quickload '(alexandria cl-tiled assoc-utils str uiop))
+(load "packages.lisp")
 (load "util.lisp")
 (load "overworld.util.lisp")
 (load "overworld.tiled.lisp")
-
-(defpackage :flora-search-aurora
-  (:nicknames :fsa :✿)
-  (:export #:main)
-  (:use :cl))
 
 
 (defun local-path (subpath)
@@ -21,3 +17,5 @@
     ":FLORA-SEARCH-AURORA"
     (format nil "*~A-map*" map-name)))
  '("casino" "outdoors" "flashback-school"))
+
+(quit)

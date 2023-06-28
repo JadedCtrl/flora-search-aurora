@@ -1,4 +1,3 @@
-
 ;;;; Copyright © 2023, Jaidyn Ann <jadedctrl@posteo.at>
 ;;;;
 ;;;; This program is free software: you can redistribute it and/or
@@ -16,11 +15,6 @@
 
 ;;;; FLORA-SEARCH-AURORA.INVENTORY
 ;;;; The menu for inventory selection/management.
-
-(defpackage :flora-search-aurora.inventory
-  (:nicknames :fsa.inv :inventory :🎒)
-  (:use :cl)
-  (:export #:inventory-state #:make-inventory-state))
 
 (in-package :flora-search-aurora.inventory)
 

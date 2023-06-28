@@ -16,12 +16,6 @@
 ;;;; FLORA-SEARCH-AURORA.DISPLAY
 ;;;; All display-related curses go here.
 
-(defpackage :flora-search-aurora.display
-  (:nicknames :fsa.d :display :✎)
-  (:use :cl)
-  (:export #:make-screen-matrix #:print-screen-matrix #:matrix-delta
-           #:hide-cursor #:show-cursor #:clear-screen))
-
 (in-package :flora-search-aurora.display)
 
 

@@ -3,7 +3,8 @@
   :build-operation "program-op"
   :build-pathname "flora-search-aurora"
   :entry-point "flora-search-aurora:main"
-  :components ((:file "util")
+  :components ((:file "packages")
+               (:file "util")
                (:file "display")
                (:file "input")
                (:file "ui")

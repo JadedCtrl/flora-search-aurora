@@ -16,16 +16,6 @@
 ;;;; FLORA-SEARCH-AURORA.OVERWORLD.UTIL
 ;;;; Utility functions used by multiple overworld packages (overworld.tiled & overworld).
 
-(defpackage :flora-search-aurora.overworld.util
-  (:nicknames :fsa.o.u :overworld.util :🌍.…)
-  (:use :cl)
-  (:export #:coords->symbol #:symbol->coords
-          #:world-coords->screen-coords
-          #:world-coords-chunk
-          #:map->plist #:plist->map
-          #:string->symbol
-          #:save-map-to-file))
-
 (in-package :flora-search-aurora.overworld.util)
 
 

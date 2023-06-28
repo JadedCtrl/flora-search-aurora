@@ -17,13 +17,6 @@
 ;;;; Generic menu-making, displaying, and management.
 ;;;; Let's get to it, we're on a deadline!
 
-(defpackage :flora-search-aurora.ui
-  (:nicknames :fsa.u :ui :📋)
-  (:use :cl :assoc-utils)
-  (:export #:menu-state #:make-menu-state
-           #:render-line #:render-string #:render-string-partially
-           :label :selection :selected))
-
 (in-package :flora-search-aurora.ui)
 
 

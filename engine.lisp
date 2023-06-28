@@ -17,12 +17,6 @@
 ;;;; The core of the game’s engine, the loop. Not much to see here other
 ;;;; than a loop. Honest!
 
-
-(defpackage :flora-search-aurora.engine
-  (:nicknames :fsa.eng :engine :⚙)
-  (:export #:state-loop #:main)
-  (:use :cl))
-
 (in-package :flora-search-aurora.engine)
 
 

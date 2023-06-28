@@ -17,14 +17,6 @@
 ;;;; A simple TUI-game made for the text-flavoured LibreJam of 2023-06!
 ;;;; See: https://jamgaroo.xyz/jams/2
 
-(defpackage :flora-search-aurora
-  (:nicknames :fsa :✿)
-  (:export #:main)
-  (:use :cl
-   :flora-search-aurora.input :flora-search-aurora.display
-   :flora-search-aurora.overworld :flora-search-aurora.dialogue
-   :flora-search-aurora.ui))
-
 (in-package :flora-search-aurora)
 
 (defvar *casino-map* nil)
@@ -468,7 +460,7 @@ avoid triggering this."
 
 
 ;;; ———————————————————————————————————
-;;; Invocation station! 🚆
+;;; Invocation station! Choo-choo! 🚆
 ;;; ———————————————————————————————————
 (defun main ()
   "A pathetic fascimile of a main loop. What does it do? WHAST DOES TI DODOO?

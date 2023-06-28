@@ -16,19 +16,7 @@
 ;;;; FLORA-SEARCH-AURORA.DIALOGUE
 ;;;; The dialogue-scripting part of the game. This handles all dialogue!
 
-(defpackage :flora-search-aurora
-  (:nicknames :fsa :✿)
-  (:export :player))
-
-(defpackage :flora-search-aurora.dialogue
-  (:nicknames :fsa.dia :dialogue :💬)
-  (:use :cl)
-  (:export #:dialogue-state #:make-dialogue-state
-           #:start-dialogue #:face #:say #:mumble #:move
-           :normal-face :talking-face))
-
 (in-package :flora-search-aurora.dialogue)
-
 
 
 ;;; ———————————————————————————————————

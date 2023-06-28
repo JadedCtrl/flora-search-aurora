@@ -224,12 +224,12 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
              (if interaction
                  (apply (string->symbol interaction) (list map interactee-id))
                  (list :map map))))
-          ;; The pause-menu…
-;;          ((plist = input '(:modifier nil :char #\Esc)))
+          ('⌨:❎
+           (🎒:make-inventory-state map))
           ;; Simple up-down-left-right movements
           ('⌨:→
            (move-player map :Δx 1))
-          ('⌨:→
+          ('⌨:←
            (move-player map :Δx -1))
           ('⌨:↑
            (move-player map :Δy -1))

@@ -7,6 +7,7 @@
                (:file "display")
                (:file "input")
                (:file "ui")
+               (:file "inventory")
                (:file "overworld.util")
                (:file "overworld")
                (:file "dialogue")

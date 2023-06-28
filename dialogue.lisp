@@ -13,9 +13,12 @@
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-;;;; FLORA-SEARCH-AURORA.OVERWORLD
-;;;; All game-functions and data relating to the “overworld” (that is,
-;;;; the primary gameplay, the RPG-ish-ish bits).
+;;;; FLORA-SEARCH-AURORA.DIALOGUE
+;;;; The dialogue-scripting part of the game. This handles all dialogue!
+
+(defpackage :flora-search-aurora
+  (:nicknames :fsa :✿)
+  (:export :player))
 
 (defpackage :flora-search-aurora.dialogue
   (:nicknames :fsa.dia :dialogue :💬)
@@ -298,7 +301,7 @@ The data returned is a list of the box’es top-left coordinate, max-column,
 and max-row; for use with RENDER-STRING. Like so:
   ((:x X :y Y) MAX-COLUMN MAX-ROW)"
   (let* ((speaker-id (dialogue-speaker dialogue))
-         (playerp (eq speaker-id 'player))
+         (playerp (eq speaker-id '✿:player))
          (leftp (not (🌍:getf-entity-data map speaker-id :facing-right)))
          (text (getf dialogue :text))
          (coords (🌍:world-coords->screen-coords (🌍:getf-entity-data map speaker-id :coords))))

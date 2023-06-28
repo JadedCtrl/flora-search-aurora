@@ -17,6 +17,11 @@
 ;;;; All game-functions and data relating to the “overworld” (that is,
 ;;;; the primary gameplay, the RPG-ish-ish bits).
 
+(defpackage :flora-search-aurora
+  (:nicknames :fsa :✿)
+  (:export :player))
+
+
 (defpackage :flora-search-aurora.overworld
   (:nicknames :fsa.o :overworld :🌍)
   (:use :cl
@@ -28,8 +33,8 @@
            #:aget-item #:getf-act #:getf-know
            #:move-entity-to #:move-entity
            #:plist->map
-           :left :right
-           :player))
+           :left :right))
+
 
 (in-package :flora-search-aurora.overworld)
 
@@ -168,8 +173,8 @@ Used primarily in moving between different maps in an overworld state."
   ;; Copy specific bits of player data from map-a’s :ENTITIES.
   (mapcar
    (lambda (player-key)
-     (setf (getf-entity-data map-b 'player player-key)
-           (getf-entity-data map-a 'player player-key)))
+     (setf (getf-entity-data map-b '✿:player player-key)
+           (getf-entity-data map-a '✿:player player-key)))
    '(:face :normal-face :talking-face))
   map-b)
 
@@ -217,7 +222,7 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
         (case (getf input :semantic)
           ;; Interacting with nearby characters/entities
           ('⌨:🆗
-           (let* ((player (getf-entity map 'player))
+           (let* ((player (getf-entity map '✿:player))
                   (interactee (car (entities-near-entity player (gethash :entities map))))
                   (interactee-id (car interactee))
                   (interaction (getf (cdr interactee) :interact)))
@@ -241,8 +246,8 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
 
 
 (defun move-player (map &key (Δx 0) (Δy 0))
-  (move-entity map 'player :Δx Δx :Δy Δy)
-  (let* ((coords (getf-entity-data map 'player :coords))
+  (move-entity map '✿:player :Δx Δx :Δy Δy)
+  (let* ((coords (getf-entity-data map '✿:player :coords))
          (trigger (trigger-at-coords map (list :x (getf coords :x) :y (getf coords :y)))))
     (if (and trigger (getf trigger :function))
         (apply (string->symbol (getf trigger :function))
@@ -288,7 +293,7 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
 (defun overworld-state-draw (matrix map)
   "Draw the overworld map to the given matrix.
 A core part of OVERWORLD-STATE."
-  (let* ((chunk (world-coords-chunk (getf-entity-data map 'player :coords))))
+  (let* ((chunk (world-coords-chunk (getf-entity-data map '✿:player :coords))))
     (matrix-write-tiles matrix (gethash :tiles map) chunk)
     (matrix-write-entities matrix map chunk)
     (when (gethash :seconds map)

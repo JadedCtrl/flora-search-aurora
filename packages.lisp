@@ -30,10 +30,10 @@
   (:export #:read-char-plist #:read-gamefied-char-plist
            #:normalize-char-plist #:gameify-char-plist
            #:plist-char-p
-           :control :meta :shift
-           +qwerty-layout+ +dvorak-layout+
-           +arrows-game-layout+ +wasd-game-layout+ +ijkl-game-layout+
-           :↑ :← :→ :↓ :🆗 :❎))
+   :control :meta :shift
+   +qwerty-layout+ +dvorak-layout+
+   +arrows-game-layout+ +wasd-game-layout+ +ijkl-game-layout+
+   :↑ :← :→ :↓ :🆗 :❎))
 
 (defpackage :flora-search-aurora.display
   (:nicknames :fsa.d :display :✎)
@@ -46,14 +46,14 @@
   (:use :cl :assoc-utils)
   (:export #:menu-state #:make-menu-state
            #:render-line #:render-string #:render-string-partially
-           :label :selection :selected))
+   :label :selection :selected))
 
 (defpackage :flora-search-aurora.dialogue
   (:nicknames :fsa.dia :dialogue :💬)
   (:use :cl)
   (:export #:dialogue-state #:make-dialogue-state
            #:start-dialogue #:face #:say #:mumble #:move
-           :normal-face :talking-face))
+   :normal-face :talking-face))
 
 (defpackage :flora-search-aurora.inventory
   (:nicknames :fsa.inv :inventory :🎒)
@@ -64,11 +64,11 @@
   (:nicknames :fsa.o.u :overworld.util :🌍.…)
   (:use :cl)
   (:export #:coords->symbol #:symbol->coords
-          #:world-coords->screen-coords
-          #:world-coords-chunk
-          #:map->plist #:plist->map
-          #:string->symbol
-          #:save-map-to-file))
+           #:world-coords->screen-coords
+           #:world-coords-chunk
+           #:map->plist #:plist->map
+           #:string->symbol
+           #:save-map-to-file))
 
 (defpackage :flora-search-aurora.overworld
   (:nicknames :fsa.o :overworld :🌍)
@@ -91,9 +91,12 @@
 (defpackage :flora-search-aurora
   (:nicknames :fsa :✿)
   (:export #:main
-           :player)
+   :player)
   (:use :cl
    :flora-search-aurora.input :flora-search-aurora.display
    :flora-search-aurora.overworld :flora-search-aurora.dialogue
    :flora-search-aurora.ui))
 
+(defpackage :figlet-font-plist
+  (:export #:parse-figlet-font-file)
+  (:use cl))

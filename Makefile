@@ -1,5 +1,8 @@
 LISP ?= ecl
 
+fonts:
+	$(LISP) \
+		--load "res/fonts/flf→lisp.lisp"
 maps:
 	$(LISP) \
 		--load "res/maps/tmx→lisp.lisp"

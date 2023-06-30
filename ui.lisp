@@ -40,6 +40,7 @@ A state-function for use with the #'state-loop."
 (defun menu-state-draw (matrix menu-alist)
   "Render a menu in menu-alist format to the given matrix.
 A core part of #'menu-state."
+  (intermission::render-clock-base matrix (list :x 0 :y 0))
   (render-menu-strip matrix menu-alist 0 0))
 
 
@@ -54,27 +55,15 @@ A core part of #'menu-state."
 ;;; ———————————————————————————————————
 ;;; Menu display
 ;;; ———————————————————————————————————
-(defun render-line (matrix text x y)
-  "Apply a one-line string to the matrix at the given coordinates."
-  (let ((dims (array-dimensions matrix)))
-    (if (and (stringp text)
-             (> (length text) 0))
-        (progn
-          (ignore-errors (setf (aref matrix y x) (char text 0)))
-          (render-line matrix (subseq text 1)
-                       (+ x 1) y))
-        matrix)))
-
-
 (defun render-menu-item
     (matrix text x y &key (width (+ (length text) 2)) (height 3) (selection 0) (selected nil))
   "Render a “menu-item” — that is, text surrounded by a box with an optional
 'selected' form. If selected is a non-zero number below 100, then that percent
 of the box will be displayed as selected/highlighted. This percent is from
 left-to-right, unless negative — in which case, right-to-left."
-  (render-string matrix text (list :x (+ x 1) :y (+ 1 y))
-                 :max-column (- (+ x width) 1)
-                 :max-row (- (+ y height) 2))
+  (✎:render-string matrix text (list :x (+ x 1) :y (+ 1 y))
+                   :max-column (- (+ x width) 1)
+                   :max-row (- (+ y height) 2))
   ;; Render the normal top and bottom bars.
   (dotimes (i width)
     (setf (aref matrix y (+ x i)) #\-)
@@ -121,47 +110,6 @@ The item list should be an alist of the following format:
                            :selected (cdr (assoc 'selected item)))
          (setf x (+ x width 1))))
      items))
-  matrix)
-
-
-(defun render-string (matrix text coords &key (max-column 72) (max-row 20))
-  "Render the given string to the matrix of characters, character-by-character.
-Will line-break or truncate as appropriate and necessary to not exceed the
-positional arguments nor the dimensions of the matrix."
-  (render-string-partially matrix text coords :max-column max-column :max-row max-row
-                           :char-count (length text)))
-
-
-(defun render-string-partially (matrix text coords &key (char-count 0) (max-column 72) (max-row 20))
-  "Partially render the given string to a matrix of characters. Will render only
-a portion of the string, dictated by the CHAR-COUNT.
-See the similar RENDER-STRING function."
-  (let* ((x (getf coords :x))
-         (y (getf coords :y))
-         (dimensions (array-dimensions matrix))
-         (max-column (…:at-most (cadr dimensions) max-column))
-         (row-width (- max-column x))
-         (max-write-row (…:at-most (…:at-most (car dimensions) max-row)
-                                   (floor (/ char-count row-width))))
-         (row-width-at-max-write-row
-           (…:at-most row-width
-                      (- char-count (* max-write-row row-width))))
-         (substrings (…:split-string-by-length text row-width))
-         (row 0))
-    (loop while (and (<= (+ y row) max-row)
-                     substrings)
-          do (cond ((< row max-write-row)
-                    (render-line matrix (pop substrings)
-                                 x (+ y row)))
-                   ;; At the last line, write only up til the :CHAR-COUNT
-                   ((eq row max-write-row)
-                    (render-line
-                     matrix
-                     (subseq (pop substrings) 0 row-width-at-max-write-row)
-                     x (+ y row)))
-                   ('t
-                    (pop substrings)))
-             (incf row)))
   matrix)
 
 
@@ -224,13 +172,13 @@ That is, 0 for non-selected items and 100 for selected items."
   (let ((old-position (selected-menu-item-position menu-alist)))
     ;; The “polarity” (direction of selection) depends on the relative
     ;; direction of the previous selection.
-    (setf (aget (nth position menu-alist) 'selection)
+    (setf (assoc-utils:aget (nth position menu-alist) 'selection)
       (if (< old-position position) 10 -10))
-    (setf (aget (nth position menu-alist) 'selected) 't)
+    (setf (assoc-utils:aget (nth position menu-alist) 'selected) 't)
     ;; Likewise for the previously-selected item.
-    (setf (aget (nth old-position menu-alist) 'selection)
+    (setf (assoc-utils:aget (nth old-position menu-alist) 'selection)
           (if (< old-position position) -90 90))
-    (setf (aget (nth old-position menu-alist) 'selected) nil))
+    (setf (assoc-utils:aget (nth old-position menu-alist) 'selected) nil))
   menu-alist)
 
 

@@ -313,7 +313,7 @@ make it pretty, dang it! >O<
          (text (getf dialogue :text))
          (optimal-layout (when text (optimal-speech-layout map dialogue))))
     (when (and text optimal-layout)
-      (📋:render-string-partially
+      (✎:render-string-partially
        matrix text (first optimal-layout)
        :max-column (second optimal-layout)
        :max-row (third optimal-layout)

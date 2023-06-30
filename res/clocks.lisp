@@ -16,33 +16,29 @@
 ;;;; FLORA-SEARCH-AURORA.INTERMISSION — CLOCKS
 ;;;; Some ASCII clock-stuff, for use with INTERMISSION’s clock-rendering.
 
-(set-dispatch-macro-character #\# #\> #'cl-heredoc:read-heredoc)
-;;(in-package :flora-search-aurora.intermission)
-
-;; So that we can do #>eof>strings like this!eof
-;; What a wonderful macro! :D
+(in-package :flora-search-aurora.intermission)
 
 
 (defparameter *clock-base*
-"
+ "
    ---------------
   /   ________   \\\"\
- / . /        \ ,.\\\"\
-⁄   /          \   \\\"|
+ / . /        \\ ,.\\\"\
+⁄   /          \\   \\\"|
 |  |            |  |\"|
 | ,|     ()     | ,|\"|
 |. |            |  |\"|
-|   \          / , |\"|
-| ,. \________/.   |\"|
+|   \\          / , |\"|
+| ,. \\________/.   |\"|
 | .            . . |\"|
 | .,-  ., . .      |\"|
 | ..  . . . . . .  |\"|
 |__________________|\"|
-"
-)
+")
+
 
 (defparameter *calendar-base*
-"
+ "
   :===================:
   :===================:|
   |\/      /          ||
@@ -55,6 +51,6 @@
   |                   ||\"''
   |                   ||\"''
   |___________________||
-"
-)
+")
+
 

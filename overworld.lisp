@@ -333,7 +333,7 @@ alist containing a character (:CHAR) and :X & :Y coordinates."
          (width (length avatar))
          (y (getf screen-coords :y))
          (x (- (getf screen-coords :x) (floor (/ width 2)))))
-    (📋:render-line matrix avatar x y)))
+    (✎:render-line matrix avatar (list :x x :y y))))
 
 
 (defun matrix-write-entity-head (matrix entity-plist)
@@ -345,7 +345,7 @@ alist containing a character (:CHAR) and :X & :Y coordinates."
          (x (if (getf entity-plist :facing-right)
                 (- (getf screen-coords :x) (floor (/ width 2)) 0)
                 (- (getf screen-coords :x) (floor (/ width 2)) 0))))
-    (📋:render-line matrix face (+ x 1) y)
+    (✎:render-line matrix face (list :x (+ x 1) :y y))
     (ignore-errors (setf (aref matrix y x) #\|))
     (ignore-errors (setf (aref matrix y (+ width x -1))
                          #\|))))
@@ -381,7 +381,7 @@ alist containing a character (:CHAR) and :X & :Y coordinates."
 
 (defun matrix-write-datetime (matrix datetime)
   (let ((string (game-datetime->string datetime)))
-    (📋:render-line matrix string (- 71 (length string)) 19)))
+    (✎:render-line matrix string (list :x (- 71 (length string)) :y 19))))
 
 
 

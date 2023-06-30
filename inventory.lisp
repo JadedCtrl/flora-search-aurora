@@ -37,7 +37,7 @@
 ;;; Inventory loop drawing
 ;;; ———————————————————————————————————
 (defun inventory-state-draw (matrix items)
-  (📋:render-string matrix (format nil "~A" items) '(:x 0 :y 0)))
+  (✎:render-string matrix (format nil "~A" items) '(:x 0 :y 0)))
 
 
 

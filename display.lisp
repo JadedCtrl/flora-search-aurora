@@ -72,6 +72,74 @@ that change between A→B (favouring those in B) — all others are nil."
 
 
 ;;; ———————————————————————————————————
+;;; “Rendering” strings to matrix
+;;; ———————————————————————————————————
+(defun render-line (matrix text coords)
+  "Apply a one-line string to the matrix at the given coordinates."
+  (let ((dims (array-dimensions matrix))
+        (x (getf coords :x))
+        (y (getf coords :y)))
+    (if (and (stringp text)
+             (> (length text) 0))
+        (progn
+          (ignore-errors (setf (aref matrix y x) (char text 0)))
+          (render-line matrix (subseq text 1)
+                       (list :x (+ x 1) :y y)))
+        matrix)))
+
+
+(defun render-string-verbatim (matrix string coords)
+  "Apply a STRING to a MATRIX at the precise COORDS, preserving newlines.
+No word-wrapping is done, even if the line exceeds the MATRIX’es size!"
+  (let ((y (- (getf coords :y) 1))
+        (x (getf coords :x)))
+    (mapcar (lambda (line) (✎:render-line matrix line (list :x x :y (incf y))))
+            (str:lines string))))
+
+
+(defun render-string-partially (matrix text coords &key (char-count 0) (max-column 72) (max-row 20))
+  "Partially render the given string to a matrix of characters. Will render only
+a portion of the string, dictated by the CHAR-COUNT.
+See the similar RENDER-STRING function."
+  (let* ((x (getf coords :x))
+         (y (getf coords :y))
+         (dimensions (array-dimensions matrix))
+         (max-column (…:at-most (cadr dimensions) max-column))
+         (row-width (- max-column x))
+         (max-write-row (…:at-most (…:at-most (car dimensions) max-row)
+                                   (floor (/ char-count row-width))))
+         (row-width-at-max-write-row
+           (…:at-most row-width
+                      (- char-count (* max-write-row row-width))))
+         (substrings (…:split-string-by-length text row-width))
+         (row 0))
+    (loop while (and (<= (+ y row) max-row)
+                     substrings)
+          do (cond ((< row max-write-row)
+                    (render-line matrix (pop substrings)
+                                 (list :x x :y (+ y row))))
+                   ;; At the last line, write only up til the :CHAR-COUNT
+                   ((eq row max-write-row)
+                    (render-line
+                     matrix
+                     (subseq (pop substrings) 0 row-width-at-max-write-row)
+                     (list :x x :y (+ y row))))
+                   ('t
+                    (pop substrings)))
+             (incf row)))
+  matrix)
+
+
+(defun render-string (matrix text coords &key (max-column 72) (max-row 20))
+  "Render the given string to the matrix of characters, character-by-character.
+Will line-break or truncate as appropriate and necessary to not exceed the
+positional arguments nor the dimensions of the matrix."
+  (render-string-partially matrix text coords :max-column max-column :max-row max-row
+                                              :char-count (length text)))
+
+
+
+;;; ———————————————————————————————————
 ;;; Misc. utils
 ;;; ———————————————————————————————————
 (defun hide-cursor ()

@@ -17,7 +17,7 @@
 
 (defpackage :flora-search-aurora.util
   (:nicknames :fsa.utl :util :…)
-  (:use :cl :assoc-utils)
+  (:use :cl)
   (:export #:split-string-by-length
            #:plist=
            #:incf-0
@@ -39,14 +39,14 @@
   (:nicknames :fsa.d :display :✎)
   (:use :cl)
   (:export #:make-screen-matrix #:print-screen-matrix #:matrix-delta
+           #:render-line #:render-string #:render-string-verbatim #:render-string-partially
            #:hide-cursor #:show-cursor #:clear-screen))
 
 (defpackage :flora-search-aurora.ui
   (:nicknames :fsa.u :ui :📋)
-  (:use :cl :assoc-utils)
+  (:use :cl)
   (:export #:menu-state #:make-menu-state
-           #:render-line #:render-string #:render-string-partially
-   :label :selection :selected))
+           :label :selection :selected))
 
 (defpackage :flora-search-aurora.dialogue
   (:nicknames :fsa.dia :dialogue :💬)
@@ -59,6 +59,11 @@
   (:nicknames :fsa.inv :inventory :🎒)
   (:use :cl)
   (:export #:inventory-state #:make-inventory-state))
+
+(defpackage :flora-search-aurora.intermission
+  (:nicknames :fsa.int :intermission :🎭)
+  (:use :cl)
+  (:export :*standard-font* :*small-font*))
 
 (defpackage :flora-search-aurora.overworld.util
   (:nicknames :fsa.o.u :overworld.util :🌍.…)
@@ -96,7 +101,3 @@
    :flora-search-aurora.input :flora-search-aurora.display
    :flora-search-aurora.overworld :flora-search-aurora.dialogue
    :flora-search-aurora.ui))
-
-(defpackage :figlet-font-plist
-  (:export #:parse-figlet-font-file)
-  (:use cl))

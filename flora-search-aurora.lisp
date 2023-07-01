@@ -19,10 +19,6 @@
 
 (in-package :flora-search-aurora)
 
-(defvar *casino-map* nil)
-(defvar *outdoors-map* nil)
-
-
 
 ;;; ———————————————————————————————————
 ;;; Trans-map entity interactions
@@ -73,15 +69,42 @@ Should be the `interact` function for takeable items."
 
 
 (defun description-interact (map interactee-id)
-  "Try to “pick up” the interactee entity, then have the player react to the
-pickup. See TAKE-ITEM-DIALOGUE for customizing the reaction dialogue.
-Should be the `interact` function for takeable items."
+  "An interact-function that can be used for displaying simple descriptions of
+items on the map. These descriptions can be set by the :DESC-EN and :DESC-EO
+properties of an entity (editable from Tiled)."
   (let ((item-plist (cdr (getf-entity map interactee-id))))
     (make-dialogue-state
      map
-     (start-dialogue
-      (mumble 'player :en (or (getf item-plist :desc-en) "...")
-                      :eo (getf item-plist :desc-eo))))))
+     (apply #'start-dialogue
+            (loop for en-line in (str:lines (getf item-plist :desc-en))
+                  for eo-line in (str:lines (getf item-plist :desc-eo))
+                  collect (mumble 'player :en en-line :eo eo-line))))))
+
+
+(defun monologue-interact (map interactee-id)
+  "An interact-function that can be used for displaying a monologue of a the
+interactee — that is, they say the dialogue defined in the interactee’s
+:SPEECH-EN and :SPEECH-EO properties."
+  (let ((item-plist (cdr (getf-entity map interactee-id))))
+   (make-dialogue-state
+    map
+    (apply #'start-dialogue
+           (loop for en-line in (str:lines (getf item-plist :speech-en))
+                 for eo-line in (str:lines (getf item-plist :speech-eo))
+                 collect (say interactee-id :en en-line :eo eo-line))))))
+
+
+(defun random-monologue-interact (map interactee-id)
+  "An interact-function that can be used for displaying a random piece of
+dialogue as a monologue of a the interactee — that is, they say the dialogue
+defined in the interactee’s :SPEECH-EN and :SPEECH-EO properties.
+Each line in :SPEECH-EN or :SPEECH-EO is treated as a seperate line of
+dialogue, among which one will be selected randomly."
+  (let* ((item-plist (cdr (getf-entity map interactee-id)))
+         (eo-line (alexandria:random-elt (str:lines (getf item-plist :speech-eo))))
+         (en-line (alexandria:random-elt (str:lines (getf item-plist :speech-en)))))
+    (make-dialogue-state
+      map (start-dialogue (say interactee-id :en en-line :eo eo-line)))))
 
 
 
@@ -243,7 +266,7 @@ avoid triggering this."
     (face   'player "T_T" "ToT")
     (say    'player :eo "Je Dio, mi ne povas elteni plu. Mi rezignas."
                     :en "You know what? I give up.")
-    (move   'player '(:x 40 :y 3) :delay .05)
+    (move   'player '(:x 41 :y 3) :delay .05)
     (face   sasha   ";_:")
     (mumble 'player :eo "[Vi prenas de SAŜA ĉirkaŭmanon belbrilan.]"
                     :en "[You take a shiny bracelet from SASHA.]")
@@ -263,67 +286,6 @@ avoid triggering this."
 ;;; ———————————————————————————————————
 (defun casino-exit-trigger (&optional map)
   (list :map (🌍:merge-maps map *outdoors-map*)))
-
-
-
-;;; ———————————————————————————————————
-;;; Random casino NPCs
-;;; ———————————————————————————————————
-(defun boozy-lady-dialogue ()
-  (let ((messages
-          '((:eo "SaaaAAAl' belul', ĉu vjifik...vekfj/?"
-             :en "HeeeEey sweet-cheeks, u wan sum..?")
-            (:eo "Iu prenu bieron por tiu ĉi BELULO--!"
-             :en "Someone get this HUNK a beer--!")
-            (:eo "Kara, ĉu vi volus iri... min?"
-             :en "Baby, wanna take a ride on my... me?")
-            (:eo "Restu kun miii! <3"
-             :en "Stay a whileee! <3")
-            (:eo "Mia sino malvarmassss! Hlepu min, karulo~"
-             :en "My lap's coldd! Gimem some help, sweetie.")
-            (:eo "Lasu panjon instrui vin *hik* boooone"
-             :en "Let momma show you a good *hic* timeee")
-            (:eo "kaj mi diris RIKAŜIKA! DIN-DON!"
-             :en "and I said BAZINGA! CA-CHOW!"))))
-    (start-dialogue
-      (apply #'say (append '(boozy-lady)
-                           (nth (random (length messages)) messages))))))
-
-
-(defun boozy-lady-interact (map &optional interactee-id)
-  (make-dialogue-state map (boozy-lady-dialogue)))
-
-
-(defun boozy-friend-interact (map &optional interactee-id)
-  (make-dialogue-state
-   map
-   (start-dialogue
-    (say 'boozy-friend :eo "Kial ŝi ĉiufoje tiom ebriiĝas?"
-                       :en "I swear, she gets like this every time.")
-    (say 'boozy-friend :eo "Kia ĝeno, tiom hontindas...!"
-                       :en "It's so embarrasing..."))))
-
-
-(defun casino-attendant-interact (map &optional interactee-id)
-  (make-dialogue-state
-   map
-   (start-dialogue
-    (say 'casino-attendant :eo "Bonvenon, estimata sinjoro!"
-                           :en "Welcome in, good sir!")
-    (say 'casino-attendant :eo "Ĝuu la ludadon, kaj sorto ridetu al vi!"
-                           :en "Have fun; may lady luck blow you a kiss!"))))
-
-
-(defun casino-bartender-interact (map &optional interactee-id)
-  (make-dialogue-state
-   map
-   (start-dialogue
-    (say 'casino-bartender :eo "Pffff, ŝi tiom amuzas!"
-                           :en "Pffff, this broad's a riot!"
-                           :face "xD ~")
-    (say 'casino-bartender :eo "Fojfoje mi ja ŝatas mian fakon, mdr."
-                           :en "Sometimes I really do like my job. lol"
-                           :face "=w=~"))))
 
 
 
@@ -451,7 +413,7 @@ avoid triggering this."
 (defun main-menu ()
   `(((LABEL :en "PLAY" :eo "EKLUDI")
      (selection . 100) (selected . t)
-     (return . ,(🌍:make-overworld-state *flashback-school-map*)))
+     (return . ,(🌍:make-overworld-state *casino-map*)))
     ((LABEL :en "SUBMENU" :eo "SUBMENUO")
      (return . ,(📋:make-menu-state (submenu))))
     ((LABEL :en "QUIT" :eo "REZIGNI")

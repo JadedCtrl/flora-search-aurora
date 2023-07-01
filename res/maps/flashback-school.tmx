@@ -300,6 +300,8 @@
     <property name="desc-en" value="A bracelet that gleams in the light, it's simply dazzling!"/>
     <property name="desc-eo" value="Ĉirkaŭmano kiu lumspegulas belbrile, kia ĉarma aspekto!"/>
     <property name="id" value="✿:bracelet"/>
+    <property name="inv-name-en" value="bracelet"/>
+    <property name="inv-name-eo" value="ĉirkaŭmano"/>
     <property name="name-en" value="dazzling bracelet"/>
     <property name="name-eo" value="belbrila ĉirkaŭmano"/>
    </properties>

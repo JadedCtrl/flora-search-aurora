@@ -70,6 +70,45 @@ that change between A→B (favouring those in B) — all others are nil."
   (make-array '(20 72) :initial-element #\space))
 
 
+(defun search-all (subseq sequence &key (start 0))
+  "Given a SUBSEQ to search for within a SEQUENCE, return every instance of
+SUBSEQ in SEQUENCE."
+  (let ((matches '()))
+    (loop while (setf start (search subseq sequence :start2 start))
+          do (progn (pushnew start matches)
+                    (incf start)))
+    (reverse matches))) ;; So they’re in ascending order!
+
+
+(defun closest-below (num number-list)
+  "Given a NUMBER-LIST, return a descending list of member numbers below NUM."
+  (sort
+   (remove-if-not (lambda (a) (and (numberp a) (<= a num))) number-list)
+   #'>))
+
+
+(defun linewrap-string (string width)
+  "Break a STRING into several lines, each one no larger than WIDTH. Only replaces
+spaces with newlines; no more, no less. Don’t choose too small a WIDTH, or else
+you might be in trouble!"
+  (let ((spaces (search-all " " string))
+        (index width))
+    (loop while (< index (length string))
+          do (progn (setf index (car (closest-below index spaces)))
+                    (setf (elt string index) #\newline)
+                    (incf index width)))
+    string))
+
+
+(defun string-dimensions (string)
+  "Given a linewrapped STRING, return the minimum width and minimum height (in
+characters) for a rectangle that might contain the entirety of the string.
+  (WIDTH HEIGHT)"
+  (let ((lines (str:lines string)))
+    (list (sort (mapcar #'length lines) #'<) ;; Width
+          (count lines)))) ;; Height
+
+
 
 ;;; ———————————————————————————————————
 ;;; “Rendering” strings to matrix
@@ -97,45 +136,21 @@ No word-wrapping is done, even if the line exceeds the MATRIX’es size!"
             (str:lines string))))
 
 
-(defun render-string-partially (matrix text coords &key (char-count 0) (max-column 72) (max-row 20))
-  "Partially render the given string to a matrix of characters. Will render only
-a portion of the string, dictated by the CHAR-COUNT.
-See the similar RENDER-STRING function."
+(defun render-string-partially (matrix text coords &key (char-count 0) (max-column 72))
   (let* ((x (getf coords :x))
          (y (getf coords :y))
-         (dimensions (array-dimensions matrix))
-         (max-column (…:at-most (cadr dimensions) max-column))
-         (row-width (- max-column x))
-         (max-write-row (…:at-most (…:at-most (car dimensions) max-row)
-                                   (floor (/ char-count row-width))))
-         (row-width-at-max-write-row
-           (…:at-most row-width
-                      (- char-count (* max-write-row row-width))))
-         (substrings (…:split-string-by-length text row-width))
-         (row 0))
-    (loop while (and (<= (+ y row) max-row)
-                     substrings)
-          do (cond ((< row max-write-row)
-                    (render-line matrix (pop substrings)
-                                 (list :x x :y (+ y row))))
-                   ;; At the last line, write only up til the :CHAR-COUNT
-                   ((eq row max-write-row)
-                    (render-line
-                     matrix
-                     (subseq (pop substrings) 0 row-width-at-max-write-row)
-                     (list :x x :y (+ y row))))
-                   ('t
-                    (pop substrings)))
-             (incf row)))
-  matrix)
+         (width (- max-column x)))
+    (render-string-verbatim
+     matrix
+     (linewrap-string (subseq text 0 char-count) width)
+     coords)))
 
 
-(defun render-string (matrix text coords &key (max-column 72) (max-row 20))
+(defun render-string (matrix text coords &key (max-column 72))
   "Render the given string to the matrix of characters, character-by-character.
 Will line-break or truncate as appropriate and necessary to not exceed the
 positional arguments nor the dimensions of the matrix."
-  (render-string-partially matrix text coords :max-column max-column :max-row max-row
-                                              :char-count (length text)))
+  (render-string-partially matrix text coords :max-column max-column :char-count (length text)))
 
 
 

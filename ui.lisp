@@ -62,8 +62,7 @@ A core part of #'menu-state."
 of the box will be displayed as selected/highlighted. This percent is from
 left-to-right, unless negative — in which case, right-to-left."
   (✎:render-string matrix text (list :x (+ x 1) :y (+ 1 y))
-                   :max-column (- (+ x width) 1)
-                   :max-row (- (+ y height) 2))
+                   :max-column (- (+ x width) 1))
   ;; Render the normal top and bottom bars.
   (dotimes (i width)
     (setf (aref matrix y (+ x i)) #\-)

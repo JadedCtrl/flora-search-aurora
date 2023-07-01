@@ -40,8 +40,7 @@ If not, have some tea on me: I’m paying. =w="
 ;;; Dialogue-generation helpers
 ;;; ———————————————————————————————————
 (defun start-dialogue (&rest dialogue-tree)
-  (reduce (lambda (a b) (append a b))
-          dialogue-tree))
+  (reduce #'append dialogue-tree))
 
 
 (defun face (speaker face &optional (talking-face nil))
@@ -230,8 +229,9 @@ use with RENDER-STRING."
                               (if rightp
                                   (- width text-x-margin)
                                   (- (getf coords :x) 3))))
-         (lines (ignore-errors (…:split-string-by-length text text-width)))
+         (lines (ignore-errors (str:lines (…:linewrap-string text text-width))))
          (text-height (length lines)))
+    (format *error-output* "HEIGHT: ~A WIDTH ~A LINES: ~A~%" text-height text-width lines)
     ;; When this layout is valid…
     (when (and lines
                (>= height text-height) ;; If the text’ll fit on screen
@@ -245,7 +245,7 @@ use with RENDER-STRING."
                    (- text-width (length text))
                    text-x-margin)))
        (list (list :x x :y y) ;; Coords
-             (+ x text-width) ;; Max column
+             text-width ;;(+ x text-width) ;; Max column
              height)))))      ;; Max row
 
 
@@ -262,7 +262,8 @@ is found, otherwise return a list of the coordinates, max-column, and max-row
                           (- height text-y-margin)
                           (- text-y-margin 1)))
          (text-width (floor (* width 3/5))) ;; Too wide’s illegible! So ⅗-screen.
-         (lines (ignore-errors (…:split-string-by-length text text-width))))
+         (lines (ignore-errors (str:lines (…:linewrap-string text text-width)))))
+    (format *error-output* "HEIGHT: ~A WIDTH ~A LINES: ~A~%" text-height text-width lines)
     ;; When the text can be printed with this layout…
     (when (and lines (>= text-height (length lines)))
       (let ((y (…:at-least
@@ -277,7 +278,7 @@ is found, otherwise return a list of the coordinates, max-column, and max-row
                         (floor (/ (length (car lines)) 2))
                         (floor (/ text-width 2)))))))
         (list (list :x x :y y)       ;; Coords
-              (+ x text-width)       ;; Max column
+              text-width ;;(+ x text-width)       ;; Max column
               (+ y text-height)))))) ;; Max row
 
 
@@ -311,12 +312,18 @@ make it pretty, dang it! >O<
 ☆:.｡.o(≧▽≦)o.｡.:☆"
   (let* ((progress (getf dialogue :progress))
          (text (getf dialogue :text))
-         (optimal-layout (when text (optimal-speech-layout map dialogue))))
+         (optimal-layout (when text (optimal-speech-layout map dialogue)))
+         (coords (car optimal-layout)))
     (when (and text optimal-layout)
-      (✎:render-string-partially
+      (format *error-output* "~A~%" optimal-layout)
+;;      (✎:render-fill-rectangle matrix #\space
+;;                               (list :x (- (getf coords :x) 1)
+;;                                     :y (- (getf coords :y) 1)
+;;                               (- (second optimal-layout) (getf coords :x) -2)
+;;                               (- (third optimal-layout) (getf coords :y) -2))
+      (✎:render-string
        matrix text (first optimal-layout)
-       :max-column (second optimal-layout)
-       :max-row (third optimal-layout)
+       :width (second optimal-layout)
        :char-count progress))))
 
 

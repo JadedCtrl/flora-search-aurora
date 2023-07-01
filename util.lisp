@@ -19,19 +19,72 @@
 
 (in-package :flora-search-aurora.util)
 
+
+;;; ———————————————————————————————————
+;;; Linewrapping & its helpers
+;;; ———————————————————————————————————
+(defun search-all (subseq sequence &key (start 0))
+  "Given a SUBSEQ to search for within a SEQUENCE, return every instance of
+SUBSEQ in SEQUENCE."
+  (let ((matches '()))
+    (loop while (setf start (search subseq sequence :start2 start))
+          do (progn (pushnew start matches)
+                    (incf start)))
+    (reverse matches))) ;; So they’re in ascending order!
 
-(defun split-string-by-length (string line-length &key (substrings '()))
-  "Given a string, split it into a list of substrings all with lengths
-equal or lower to the given length."
-  (if (> (length string) line-length)
-      (split-string-by-length
-       (subseq string line-length)
-       line-length
-       :substrings (append substrings
-                           `(,(subseq string 0 line-length))))
-      (append substrings `(,string))))
+
+(defun closest-below (num number-list)
+  "Given a NUMBER-LIST, return a descending list of member numbers below NUM."
+  (sort
+   (remove-if-not (lambda (a) (and (numberp a) (<= a num))) number-list)
+   #'>))
 
 
+(defun string-dimensions (string)
+  "Given a linewrapped STRING, return the minimum width and minimum height (in
+characters) for a rectangle that might contain the entirety of the string.
+  (WIDTH HEIGHT)"
+  (let ((lines (str:lines string)))
+    (list (sort (mapcar #'length lines) #'<) ;; Width
+          (count lines)))) ;; Height
+
+
+(defun fit-lines (string width &key (alignment :center))
+  "Fit each line of a STING into a specific WIDTH, with ALIGNMENT to a specific
+side (either :CENTER, :LEFT, or :RIGHT)."
+  (str:unlines
+   (mapcar (lambda (line)
+             (str:fit width line :pad-side alignment))
+           (str:lines string))))
+
+
+(defun linewrap-string (string width)
+  "Break a STRING into several lines, each one no larger than WIDTH. Uses
+newlines and hypens (to break long words) as necessary."
+  (let ((spaces (append '(0) (search-all " " string)))
+        (index width))
+    (loop while (< index (length string))
+          do (let ((closest-space (car (closest-below index spaces)))
+                   (old-index (- index width)))
+               (if (or (<= closest-space old-index)
+                       (> closest-space index))
+                   ;; Break up long words with a hyphen
+                   (return
+                     (linewrap-string
+                      (str:insert "- " (- index 1)
+                                  (str:replace-all (string #\newline) " " string))
+                      width))
+                   ;; Replace eligible spaces with newlines uwu
+                   (progn
+                     (setf (elt string closest-space) #\newline)
+                     (setf index (+ closest-space width)))))
+         finally (return string))))
+
+
+
+;;; ———————————————————————————————————
+;;; Listic affairs
+;;; ———————————————————————————————————
 (defun every-other-element (list)
   "Collect every-other-element of a list. E.g., (1 2 3 4) → (1 3)."
   (when list
@@ -50,6 +103,10 @@ Uses the keys of plist a."
           finally (return 't))))
 
 
+
+;;; ———————————————————————————————————
+;;; Numeric affairs
+;;; ———————————————————————————————————
 (defmacro incf-0 (place &optional (Δ 1))
   "INCF the given PLACE, if it’s a number. If not a number, then set it to zero."
   `(if (numberp ,place)
@@ -73,6 +130,10 @@ minimum returns your more pitiful of moments."
       num))
 
 
+
+;;; ———————————————————————————————————
+;;; Linguistic affirs
+;;; ———————————————————————————————————
 (defun langcode->keysym (str)
   "Given a language’s code (es/cz/it/etc.), return a corresponding key symbol,
 if the language is among the supported. Otherwise, nil."

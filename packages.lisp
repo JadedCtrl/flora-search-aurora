@@ -18,7 +18,7 @@
 (defpackage :flora-search-aurora.util
   (:nicknames :fsa.utl :util :…)
   (:use :cl)
-  (:export #:split-string-by-length
+  (:export #:linewrap-string #:fit-lines
            #:plist=
            #:incf-0
            #:at-least #:at-most
@@ -40,6 +40,7 @@
   (:use :cl)
   (:export #:make-screen-matrix #:print-screen-matrix #:matrix-delta
            #:render-line #:render-string #:render-string-verbatim #:render-string-partially
+           #:render-fill-rectangle
            #:hide-cursor #:show-cursor #:clear-screen))
 
 (defpackage :flora-search-aurora.ui

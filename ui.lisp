@@ -40,7 +40,8 @@ A state-function for use with the #'state-loop."
 (defun menu-state-draw (matrix menu-alist)
   "Render a menu in menu-alist format to the given matrix.
 A core part of #'menu-state."
-  (intermission::render-clock-base matrix (list :x 0 :y 0))
+  ;;  (intermission::render-clock-base matrix (list :x 0 :y 0))
+  (✎:render-string matrix "daddy is dead anmd I hate him" '(:x 20 :y 10) :width 15 :char-count 18)
   (render-menu-strip matrix menu-alist 0 0))
 
 
@@ -62,7 +63,7 @@ A core part of #'menu-state."
 of the box will be displayed as selected/highlighted. This percent is from
 left-to-right, unless negative — in which case, right-to-left."
   (✎:render-string matrix text (list :x (+ x 1) :y (+ 1 y))
-                   :max-column (- (+ x width) 1))
+                   :width width) ;; (- (+ x width) 1))
   ;; Render the normal top and bottom bars.
   (dotimes (i width)
     (setf (aref matrix y (+ x i)) #\-)

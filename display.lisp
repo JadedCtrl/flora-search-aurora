@@ -70,45 +70,6 @@ that change between A→B (favouring those in B) — all others are nil."
   (make-array '(20 72) :initial-element #\space))
 
 
-(defun search-all (subseq sequence &key (start 0))
-  "Given a SUBSEQ to search for within a SEQUENCE, return every instance of
-SUBSEQ in SEQUENCE."
-  (let ((matches '()))
-    (loop while (setf start (search subseq sequence :start2 start))
-          do (progn (pushnew start matches)
-                    (incf start)))
-    (reverse matches))) ;; So they’re in ascending order!
-
-
-(defun closest-below (num number-list)
-  "Given a NUMBER-LIST, return a descending list of member numbers below NUM."
-  (sort
-   (remove-if-not (lambda (a) (and (numberp a) (<= a num))) number-list)
-   #'>))
-
-
-(defun linewrap-string (string width)
-  "Break a STRING into several lines, each one no larger than WIDTH. Only replaces
-spaces with newlines; no more, no less. Don’t choose too small a WIDTH, or else
-you might be in trouble!"
-  (let ((spaces (search-all " " string))
-        (index width))
-    (loop while (< index (length string))
-          do (progn (setf index (car (closest-below index spaces)))
-                    (setf (elt string index) #\newline)
-                    (incf index width)))
-    string))
-
-
-(defun string-dimensions (string)
-  "Given a linewrapped STRING, return the minimum width and minimum height (in
-characters) for a rectangle that might contain the entirety of the string.
-  (WIDTH HEIGHT)"
-  (let ((lines (str:lines string)))
-    (list (sort (mapcar #'length lines) #'<) ;; Width
-          (count lines)))) ;; Height
-
-
 
 ;;; ———————————————————————————————————
 ;;; “Rendering” strings to matrix
@@ -136,21 +97,23 @@ No word-wrapping is done, even if the line exceeds the MATRIX’es size!"
             (str:lines string))))
 
 
-(defun render-string-partially (matrix text coords &key (char-count 0) (max-column 72))
+(defun render-string (matrix text coords &key (char-count (length text)) (width 35))
   (let* ((x (getf coords :x))
-         (y (getf coords :y))
-         (width (- max-column x)))
+         (y (getf coords :y)))
     (render-string-verbatim
      matrix
-     (linewrap-string (subseq text 0 char-count) width)
+     (…:linewrap-string (subseq text 0 char-count) width)
      coords)))
 
 
-(defun render-string (matrix text coords &key (max-column 72))
-  "Render the given string to the matrix of characters, character-by-character.
-Will line-break or truncate as appropriate and necessary to not exceed the
-positional arguments nor the dimensions of the matrix."
-  (render-string-partially matrix text coords :max-column max-column :char-count (length text)))
+(defun render-fill-rectangle (matrix char coords width height)
+  (render-string-verbatim
+   matrix
+   (str:unlines
+    (loop for i to height
+          collect (make-string width :initial-element char)))
+   coords)
+  matrix)
 
 
 

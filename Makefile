@@ -1,4 +1,4 @@
-LISP ?= ecl
+LISP ?= sbcl
 SWANK ?= ${HOME}/.config/emacs/elpa/slime-20221206.26/swank-loader.lisp
 USE_SWANK ?= no
 
@@ -9,7 +9,7 @@ maps:
 	$(LISP) \
 		--load "res/maps/tmx→lisp.lisp"
 
-build:
+build: maps fonts
 	$(LISP) \
 		--eval '(ql:quickload :flora-search-aurora)' \
 		--eval '(asdf:make :flora-search-aurora)' \

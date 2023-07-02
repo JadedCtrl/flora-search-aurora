@@ -29,25 +29,25 @@
     (📋:menu-state matrix menu-list)))
 
 
-(defun menu-state (matrix menu-alist)
-  "Render a menu in menu-alist format to the given matrix, and process user-input.
+(defun menu-state (matrix menu-plist)
+  "Render a menu in menu-plist format to the given matrix, and process user-input.
 A state-function for use with the #'state-loop."
   (sleep .02)
-  (menu-state-draw matrix menu-alist)
-  (menu-state-update menu-alist))
+  (menu-state-draw matrix menu-plist)
+  (menu-state-update menu-plist))
 
 
-(defun menu-state-draw (matrix menu-alist)
-  "Render a menu in menu-alist format to the given matrix.
+(defun menu-state-draw (matrix menu-plist)
+  "Render a menu in menu-plist format to the given matrix.
 A core part of #'menu-state."
-  (render-menu-strip matrix menu-alist 0 0))
+  (render-menu-strip matrix menu-plist 0 0))
 
 
-(defun menu-state-update (menu-alist)
-  "Update a menu — that is, take user input and modify the menu’s alist appropriately.
+(defun menu-state-update (menu-plist)
+  "Update a menu — that is, take user input and modify the menu’s plist appropriately.
 A core part of #'menu-state."
-  (progress-menu-items menu-alist)
-  (process-menu-input menu-alist))
+  (progress-menu-items menu-plist)
+  (process-menu-input menu-plist))
 
 
 
@@ -61,7 +61,7 @@ A core part of #'menu-state."
 of the box will be displayed as selected/highlighted. This percent is from
 left-to-right, unless negative — in which case, right-to-left."
   (✎:render-string matrix text (list :x (+ x 1) :y (+ 1 y))
-                   :width width) ;; (- (+ x width) 1))
+                   :width width)
   ;; Render the normal top and bottom bars.
   (dotimes (i width)
     (setf (aref matrix y (+ x i)) #\-)
@@ -90,14 +90,14 @@ left-to-right, unless negative — in which case, right-to-left."
 (defun render-menu-strip (matrix items x y &key (max-item-width 12) (height 3))
   "Render several menu items to the matrix, starting at the given x/y coordinates,
 maximum width for any given item, and the height of all items.
-The item list should be an alist of the following format:
+The item list should be an plist of the following format:
    (((LABEL :en “BIRD” :eo “BIRDO”)(SELECTED . T)(SELECTION . 100))
     ((LABEL :en “BAR” :eo “BARO”)(SELECTION . -20)) ⋯)"
   (let ((x x))
     (mapcar
      (lambda (item)
-       (let* ((label (…:getf-lang (cdr (assoc 'label item))))
-              (selection (or (cdr (assoc 'selection item))
+       (let* ((label (…:getf-lang item))
+              (selection (or (getf item :selection)
                              0))
               (width (…:at-most max-item-width
                               (+ (length label) 2))))
@@ -105,7 +105,7 @@ The item list should be an alist of the following format:
                            :width width
                            :height height
                            :selection selection
-                           :selected (cdr (assoc 'selected item)))
+                           :selected (getf item :selected))
          (setf x (+ x width 1))))
      items))
   matrix)
@@ -115,91 +115,91 @@ The item list should be an alist of the following format:
 ;;; ———————————————————————————————————
 ;;; Menu logic
 ;;; ———————————————————————————————————
-(defun progress-menu-items (menu-alist)
-  "Given an associative list of menu-items, decrement or increment each
+(defun progress-menu-items (menu-plist)
+  "Given an property list of menu-items, decrement or increment each
 item's “selected-percentage”, so that they converge at the right percent.
 That is, 0 for non-selected items and 100 for selected items."
   (mapcar
    (lambda (item)
-     (let* ((selection (assoc 'selection item))
-            (selection-num (or (cdr selection) 0))
-            (selectedp (cdr (assoc 'selected item))))
+     (let* ((selection (or (getf item :selection) 0))
+            (selectedp (getf item :selected)))
        (if selection
-           (setf (cdr selection)
+           (setf (getf item :selection)
                  (gravitate-toward
-                  (cond ((and selectedp (< selection-num 0) 0)
+                  (cond ((and selectedp (< selection 0) 0)
                          -100)
                         (selectedp 100)
                         ('t 0))
-                  (cdr selection) 10)))))
-   menu-alist)
-  menu-alist)
+                  selection 10)))))
+   menu-plist)
+  menu-plist)
 
 
-(defun process-menu-input (menu-alist)
-  "Get and process any keyboard input, modifying the menu alist as necessary."
+(defun process-menu-input (menu-plist)
+  "Get and process any keyboard input, modifying the menu plist as necessary."
   (if (listen)
       (let* ((input (⌨:read-gamefied-char-plist))
-             (selected-item (nth (selected-menu-item-position menu-alist)
-                                 menu-alist))
-             (func (cdr (assoc 'function selected-item)))
-             (return-val (assoc 'return selected-item)))
+             (selected-item (nth (selected-menu-item-position menu-plist)
+                                 menu-plist))
+             (func (getf selected-item :function))
+             (return-val-p (member :return selected-item))
+             (return-val (getf selected-item :return)))
         (case (getf input :semantic)
-          ('⌨:→ (progn (select-right-menu-item menu-alist)
+          ('⌨:→ (progn (select-right-menu-item menu-plist)
                        't))
-          ('⌨:← (progn (select-left-menu-item menu-alist)
+          ('⌨:← (progn (select-left-menu-item menu-plist)
                        't))
           ('⌨:❎
            nil)
           ('⌨:🆗
-           (cond ((and func return-val)
+           (cond ((and func return-val-p)
                   (apply func '())
-                  (cdr return-val))
+                  return-val)
                  (func
                   (apply func '()))
-                 (return-val
-                  (cdr return-val))
+                 (return-val-p
+                  return-val)
                  ('t
                   't)))
           (otherwise 't)))
       't))
 
 
-(defun select-menu-item (menu-alist position)
-  "Given a menu associative list, select the menu-item at the given position."
-  (let ((old-position (selected-menu-item-position menu-alist)))
+(defun select-menu-item (menu-plist position)
+  "Given a menu property list, select the menu-item at the given position."
+  (let ((old-position (selected-menu-item-position menu-plist)))
     ;; The “polarity” (direction of selection) depends on the relative
     ;; direction of the previous selection.
-    (setf (assoc-utils:aget (nth position menu-alist) 'selection)
+    (setf (getf (nth position menu-plist) :selection)
       (if (< old-position position) 10 -10))
-    (setf (assoc-utils:aget (nth position menu-alist) 'selected) 't)
+    (setf (getf (nth position menu-plist) :selected) 't)
     ;; Likewise for the previously-selected item.
-    (setf (assoc-utils:aget (nth old-position menu-alist) 'selection)
+    (setf (getf (nth old-position menu-plist) :selection)
           (if (< old-position position) -90 90))
-    (setf (assoc-utils:aget (nth old-position menu-alist) 'selected) nil))
-  menu-alist)
+    (setf (getf (nth old-position menu-plist) :selected) nil))
+  menu-plist)
 
 
-(defun select-right-menu-item (menu-alist)
+(defun select-right-menu-item (menu-plist)
   "Select the item to the right of the currenty-selected item."
-  (let ((new-selection (+ (selected-menu-item-position menu-alist) 1)))
-    (if (< new-selection (length menu-alist))
-      (select-menu-item menu-alist new-selection))))
+  (let ((new-selection (+ (selected-menu-item-position menu-plist) 1)))
+    (if (< new-selection (length menu-plist))
+      (select-menu-item menu-plist new-selection))))
 
 
-(defun select-left-menu-item ( menu-alist)
+(defun select-left-menu-item ( menu-plist)
   "Select the item to the left of the currenty-selected item."
-  (let ((new-selection (- (selected-menu-item-position menu-alist) 1)))
+  (let ((new-selection (- (selected-menu-item-position menu-plist) 1)))
     (if (>= new-selection 0)
-      (select-menu-item menu-alist new-selection))))
+      (select-menu-item menu-plist new-selection))))
 
 
-(defun selected-menu-item-position (menu-alist)
-  "Returns the index of the menu alist's selected item."
+(defun selected-menu-item-position (menu-plist)
+  "Returns the index of the menu plist's selected item."
   (or (position
-       't menu-alist
+       't menu-plist
        :test (lambda (ignore list-item)
-               (cdr (assoc 'selected list-item))))
+               (getf list-item :selected)))
       0))
 
 

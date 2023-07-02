@@ -406,18 +406,20 @@ avoid triggering this."
 ;;; Main-menu data
 ;;; ———————————————————————————————————
 (defun submenu ()
-  `(((LABEL :en "IDK") (selection . 100) (selected t))
-    ((LABEL :en "GO BACK") (return . nil))))
+  `((:en "IDK"
+     :selection 100 :selected t)
+    (:en "GO BACK"
+     :return nil)))
 
 
 (defun main-menu ()
-  `(((LABEL :en "PLAY" :eo "EKLUDI")
-     (selection . 100) (selected . t)
-     (return . ,(🌍:make-overworld-state *casino-map*)))
-    ((LABEL :en "SUBMENU" :eo "SUBMENUO")
-     (return . ,(📋:make-menu-state (submenu))))
-    ((LABEL :en "QUIT" :eo "REZIGNI")
-     (return . nil))))
+  `((:en "PLAY" :eo "EKLUDI"
+     :selection 100 :selected t
+     :return ,(🌍:make-overworld-state *casino-map*))
+    (:en "SUBMENU" :eo "SUBMENUO"
+     :return ,(📋:make-menu-state (submenu)))
+    (:en "QUIT" :eo "REZIGNI"
+     :return nil)))
 
 
 

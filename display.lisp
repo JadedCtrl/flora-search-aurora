@@ -102,7 +102,7 @@ No word-wrapping is done, even if the line exceeds the MATRIX’es size!"
          (y (getf coords :y)))
     (render-string-verbatim
      matrix
-     (…:linewrap-string (subseq text 0 char-count) width)
+     (subseq (…:linewrap-string text width) 0 char-count)
      coords)))
 
 

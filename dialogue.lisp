@@ -220,8 +220,8 @@ Returns the state for use with STATE-LOOP, pay attention!"
 return the parameters of a text-box that can optimally fit the given TEXT in the
 direction specified relative to the focal point. If a legible position can’t be
 found, just give up! Return nil.
-Otherwise, return a list list with the coordinates, max column, and max row — for
-use with RENDER-STRING."
+Otherwise, return a list list with the coordinates, textbox width, and textbox
+height — all parameters for use with RENDER-STRING & co."
   (let* ((text-x-margin (if rightp
                             (+ (getf coords :x) 3)
                             0))
@@ -231,30 +231,35 @@ use with RENDER-STRING."
                                   (- (getf coords :x) 3))))
          (lines (ignore-errors (str:lines (…:linewrap-string text text-width))))
          (text-height (length lines)))
-    (format *error-output* "HEIGHT: ~A WIDTH ~A LINES: ~A~%" text-height text-width lines)
+    (format *error-output* "HORIZ COORD: ~A HEIGHT: ~A WIDTH ~A LINES:~%~S~%" coords text-height text-width lines)
     ;; When this layout is valid…
     (when (and lines
                (>= height text-height) ;; If the text’ll fit on screen
                (> text-width 10))      ;; If the text is wide enough to be legible
-      (let ((y (…:at-least 0 (- (getf coords :y)
-                                (if (eq (length lines) 1)  ;; Align toward the speaker’s face
-                                    1 0)
-                               (floor (/ (length lines) 2)))))
-            (x (if (and (not rightp)
-                        (eq (length lines) 1))
-                   (- text-width (length text))
-                   text-x-margin)))
-       (list (list :x x :y y) ;; Coords
-             text-width ;;(+ x text-width) ;; Max column
-             height)))))      ;; Max row
+      (let* ((y (…:at-least 0 (- (getf coords :y)
+                                 (if (eq text-height 1)  ;; Align toward the speaker’s face
+                                     1 0)
+                                 (floor (/ text-height 2)))))
+             (x (if (and (not rightp)
+                         (eq (length lines) 1))
+                    (- text-width (length text))
+                    text-x-margin))
+             (y-margin (if (> (+ y (length lines)) height) ;; How many lines are off-screen
+                           (- (+ y (length lines)) height)
+                           0)))
+        (list
+         ;; Coords of text-box’es top-left corner
+         (list :x x :y (- y y-margin))
+         text-width       ;; Width of text-box
+         text-height))))) ;; Height of text-box
 
 
 (defun optimal-text-placement-vertically (text coords &key (downp nil) (width 72) (height 20))
   "Given a vertical direction (DOWNP defined or nil) and a focal point COORDS,)
 return the parameters of a text-box that can optimally fit the given TEXT in the
 direction specified relative to the focal point. Return nil if no such placement
-is found, otherwise return a list of the coordinates, max-column, and max-row
-(for use with RENDER-STRING)."
+is found, otherwise return a list of the coordinates, textbox width, and textbox
+height (for use as parameters with RENDER-STRING et al.)."
   (let* ((text-y-margin (if downp
                             (+ (getf coords :y) 2)
                             (- (getf coords :y) 2)))
@@ -263,23 +268,28 @@ is found, otherwise return a list of the coordinates, max-column, and max-row
                           (- text-y-margin 1)))
          (text-width (floor (* width 3/5))) ;; Too wide’s illegible! So ⅗-screen.
          (lines (ignore-errors (str:lines (…:linewrap-string text text-width)))))
-    (format *error-output* "HEIGHT: ~A WIDTH ~A LINES: ~A~%" text-height text-width lines)
+    (format *error-output* "VERT HEIGHT: ~A WIDTH ~A LINES: ~A~%" text-height text-width lines)
     ;; When the text can be printed with this layout…
     (when (and lines (>= text-height (length lines)))
-      (let ((y (…:at-least
-                 0
-                 (if downp
-                     text-y-margin
-                     (- text-y-margin (length lines)))))
-            (x (…:at-least
-                 0
-                 (- (getf coords :x)
-                    (if (eq (length lines) 1)
-                        (floor (/ (length (car lines)) 2))
-                        (floor (/ text-width 2)))))))
-        (list (list :x x :y y)       ;; Coords
-              text-width ;;(+ x text-width)       ;; Max column
-              (+ y text-height)))))) ;; Max row
+      (let* ((y (…:at-least
+                  0
+                  (if downp
+                      text-y-margin
+                      (- text-y-margin (length lines)))))
+             (x (…:at-least
+                  0
+                  (- (getf coords :x)
+                     (if (eq (length lines) 1)
+                         (floor (/ (length (car lines)) 2))
+                         (floor (/ text-width 2))))))
+             (x-margin (if (> (+ x text-width) width)
+                           (- (+ x text-width) width)
+                           0)))
+        (list
+         ;; Coords of text-box’es top-left corner
+         (list :x (- x x-margin) :y y)
+         text-width          ;; Width of the text-box
+         (length lines)))))) ;; Height of text-box
 
 
 (defun optimal-speech-layout (map dialogue &key (width 72) (height 20))
@@ -305,22 +315,30 @@ and max-row; for use with RENDER-STRING. Like so:
         (optimal-text-placement-vertically text coords :width width :height height
                                              :downp  (not playerp)))))
 
+(defun ensure-dialogue-layout (map dialogue-list)
+  "Given a DIALOGUE-LIST, ensure that the FIRST line of dialogue has a :layout
+property — that is, a property detailing the optimal width and coordinates for
+its display."
+  (when (and (getf (car dialogue-list) :text)
+             (not (getf (car dialogue-list) :layout)))
+    (setf (getf (car dialogue-list) :layout)
+          (optimal-speech-layout map (car dialogue-list)))))
 
-(defun render-dialogue-block (matrix map dialogue)
+
+(defun render-dialogue-block (matrix dialogue)
   "Render a bit of DIALOGUE to the MATRIX, in an intelligent fashion; that is,
 make it pretty, dang it! >O<
 ☆:.｡.o(≧▽≦)o.｡.:☆"
   (let* ((progress (getf dialogue :progress))
          (text (getf dialogue :text))
-         (optimal-layout (when text (optimal-speech-layout map dialogue)))
+         (optimal-layout (getf dialogue :layout))
          (coords (car optimal-layout)))
     (when (and text optimal-layout)
-      (format *error-output* "~A~%" optimal-layout)
-;;      (✎:render-fill-rectangle matrix #\space
-;;                               (list :x (- (getf coords :x) 1)
-;;                                     :y (- (getf coords :y) 1)
-;;                               (- (second optimal-layout) (getf coords :x) -2)
-;;                               (- (third optimal-layout) (getf coords :y) -2))
+      (✎:render-fill-rectangle matrix #\space
+                               (list :x (- (getf coords :x) 1)
+                                     :y (- (getf coords :y) 1))
+                               (+ (second optimal-layout) 2) ;; Width
+                               (+ (third optimal-layout) 1)) ;; Height
       (✎:render-string
        matrix text (first optimal-layout)
        :width (second optimal-layout)
@@ -332,7 +350,8 @@ make it pretty, dang it! >O<
 Helper function for DIALOGUE-STATE."
   (when (getf (car dialogue-list) :text)
     (✎:show-cursor)
-    (render-dialogue-block matrix map (car dialogue-list))))
+    (ensure-dialogue-layout map dialogue-list)
+    (render-dialogue-block matrix (car dialogue-list))))
 
 
 

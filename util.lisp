@@ -61,8 +61,9 @@ side (either :CENTER, :LEFT, or :RIGHT)."
 (defun linewrap-string (string width)
   "Break a STRING into several lines, each one no larger than WIDTH. Uses
 newlines and hypens (to break long words) as necessary."
-  (let ((spaces (append '(0) (search-all " " string)))
-        (index width))
+  (let* ((string (str:replace-all (string #\newline) " " string))
+         (spaces (append '(0) (search-all " " string)))
+         (index width))
     (loop while (< index (length string))
           do (let ((closest-space (car (closest-below index spaces)))
                    (old-index (- index width)))
@@ -71,8 +72,7 @@ newlines and hypens (to break long words) as necessary."
                    ;; Break up long words with a hyphen
                    (return
                      (linewrap-string
-                      (str:insert "- " (- index 1)
-                                  (str:replace-all (string #\newline) " " string))
+                      (str:insert "- " (- index 1) string)
                       width))
                    ;; Replace eligible spaces with newlines uwu
                    (progn

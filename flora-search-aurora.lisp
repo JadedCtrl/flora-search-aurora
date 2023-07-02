@@ -416,9 +416,10 @@ avoid triggering this."
   `((:en "PLAY" :eo "EKLUDI"
      :selection 100 :selected t
      :return ,(🌍:make-overworld-state *casino-map*))
-    (:en "SUBMENU" :eo "SUBMENUO"
+    (:en "SUBMENU" :eo "SUBMENUO" :row 1
      :return ,(📋:make-menu-state (submenu)))
-    (:en "QUIT" :eo "REZIGNI"
+    (:en "TERURE" :eo "BADLY" :row 1)
+    (:en "QUIT" :eo "REZIGNI" :row 2
      :return nil)))
 
 

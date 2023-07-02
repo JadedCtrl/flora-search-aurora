@@ -40,7 +40,7 @@ A state-function for use with the #'state-loop."
 (defun menu-state-draw (matrix menu-plist)
   "Render a menu in menu-plist format to the given matrix.
 A core part of #'menu-state."
-  (render-menu-strip matrix menu-plist 0 0))
+  (render-menu-items matrix menu-plist 0 0))
 
 
 (defun menu-state-update (menu-plist)
@@ -87,26 +87,30 @@ left-to-right, unless negative — in which case, right-to-left."
    matrix))
 
 
-(defun render-menu-strip (matrix items x y &key (max-item-width 12) (height 3))
+(defun render-menu-items (matrix items x y &key (max-item-width 12) (height 3))
   "Render several menu items to the matrix, starting at the given x/y coordinates,
 maximum width for any given item, and the height of all items.
 The item list should be an plist of the following format:
    (((LABEL :en “BIRD” :eo “BIRDO”)(SELECTED . T)(SELECTION . 100))
     ((LABEL :en “BAR” :eo “BARO”)(SELECTION . -20)) ⋯)"
-  (let ((x x))
+  (let ((row-x’es '()))
     (mapcar
      (lambda (item)
        (let* ((label (…:getf-lang item))
               (selection (or (getf item :selection)
                              0))
               (width (…:at-most max-item-width
-                              (+ (length label) 2))))
-         (render-menu-item matrix label x y
+                                (+ (length label) 2)))
+              (row (or (getf item :row) 0))
+              (item-x (or (getf row-x’es row) x))
+              (item-y (+ y (* row height))))
+         (render-menu-item matrix label
+                           item-x item-y
                            :width width
                            :height height
                            :selection selection
                            :selected (getf item :selected))
-         (setf x (+ x width 1))))
+         (setf (getf row-x’es row) (+ item-x width 1))))
      items))
   matrix)
 

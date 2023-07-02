@@ -43,8 +43,8 @@
            #:render-fill-rectangle
            #:hide-cursor #:show-cursor #:clear-screen))
 
-(defpackage :flora-search-aurora.ui
-  (:nicknames :fsa.u :ui :📋)
+(defpackage :flora-search-aurora.menu
+  (:nicknames :fsa.men :menu :📋)
   (:use :cl)
   (:export #:menu-state #:make-menu-state
            :label :selection :selected))
@@ -101,4 +101,4 @@
   (:use :cl
    :flora-search-aurora.input :flora-search-aurora.display
    :flora-search-aurora.overworld :flora-search-aurora.dialogue
-   :flora-search-aurora.ui))
+   :flora-search-aurora.menu))

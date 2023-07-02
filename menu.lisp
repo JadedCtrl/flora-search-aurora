@@ -17,7 +17,7 @@
 ;;;; Generic menu-making, displaying, and management.
 ;;;; Let's get to it, we're on a deadline!
 
-(in-package :flora-search-aurora.ui)
+(in-package :flora-search-aurora.menu)
 
 
 ;;; ———————————————————————————————————
@@ -40,8 +40,6 @@ A state-function for use with the #'state-loop."
 (defun menu-state-draw (matrix menu-alist)
   "Render a menu in menu-alist format to the given matrix.
 A core part of #'menu-state."
-  ;;  (intermission::render-clock-base matrix (list :x 0 :y 0))
-  (✎:render-string matrix "daddy is dead anmd I hate him" '(:x 20 :y 10) :width 15 :char-count 18)
   (render-menu-strip matrix menu-alist 0 0))
 
 

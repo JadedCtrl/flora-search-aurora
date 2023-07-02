@@ -221,6 +221,14 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
            (move-player map :Δy -1))
           ('⌨:↓
            (move-player map :Δy 1))
+          ('⌨:↰
+           (move-player map :Δx -1 :Δy -1))
+          ('⌨:↱
+           (move-player map :Δx 1 :Δy -1))
+          ('⌨:↲
+           (move-player map :Δx -1 :Δy 1))
+          ('⌨:↳
+           (move-player map :Δx 1 :Δy 1))
           (otherwise
            (list :map map))))
       (list :map map)))

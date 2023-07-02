@@ -33,7 +33,7 @@
    :control :meta :shift
    +qwerty-layout+ +dvorak-layout+
    +arrows-game-layout+ +wasd-game-layout+ +ijkl-game-layout+
-   :↑ :← :→ :↓ :🆗 :❎))
+   :↑ :← :→ :↓ :↰ :↱ :↲ :↳ :🆗 :❎))
 
 (defpackage :flora-search-aurora.display
   (:nicknames :fsa.d :display :✎)

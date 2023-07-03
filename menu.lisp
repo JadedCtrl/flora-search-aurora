@@ -259,6 +259,11 @@ on that same ROW."
       0))
 
 
+(defun selected-menu-item (menu-plist)
+  (nth (selected-menu-item-position menu-plist)
+       menu-plist))
+
+
 
 ;;; ———————————————————————————————————
 ;;; Misc. utils

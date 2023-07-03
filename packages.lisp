@@ -47,6 +47,7 @@
   (:nicknames :fsa.men :menu :📋)
   (:use :cl)
   (:export #:menu-state #:menu-state-update #:menu-state-draw #:make-menu-state
+           #:selected-menu-item
            :label :selection :selected))
 
 (defpackage :flora-search-aurora.dialogue

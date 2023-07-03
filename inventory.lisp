@@ -20,7 +20,7 @@
 
 
 ;;; ———————————————————————————————————
-;;; Menu-creation! How fun!
+;;; Misc. Utils
 ;;; ———————————————————————————————————
 (defun subseq-head (length sequence)
   "Get a subsequence of SEQUENCE containing its first LENGTH elements. If LENGTH
@@ -28,11 +28,15 @@ exceeds the size of SEQUENCE, the returned subsequence is equivalent to SEQUENCE
   (subseq sequence 0 (…:at-most (length sequence) length)))
 
 
+
+;;; ———————————————————————————————————
+;;; Menu-creation! How fun!
+;;; ———————————————————————————————————
 (defun items->menu-plist (item-plists &key (row-width 72))
   "Convert a list of items’ plists (that one might get from OVERWORLD’s map
 :ITEMS) into a pretty and presentable menu-grid of items, for use with
 📋:MENU-STATE(-*)."
-  (format *error-output* "ITEMS ~A~%" item-plists)
+  (format *error-output* "ITEMS ~S~%" item-plists)
   (let* ((label-width 7)
          (border-width 2)
          ;; Weird bounding, whoops! I’m so clumsy, it’s endearing instead of just annoying! … Right? =w=”
@@ -43,14 +47,17 @@ exceeds the size of SEQUENCE, the returned subsequence is equivalent to SEQUENCE
               (when (>= column row-width)
                 (incf row)
                 (setf column 0))
-              (list :en (subseq-head label-width (or (getf (cdr item) :name-en) (getf (cdr item) :id)))
-                    :eo (subseq-head label-width (getf (cdr item) :name-eo))
-                    :selected (and (eq row 0) (eq column 0))
-                    :selection (if (and (eq row 0) (eq column 0)) 100 0)
-                    :return nil
-                    :row row))
+              (append (list :en (subseq-head label-width (or (getf (cdr item) :inv-name-en)
+                                                             (getf (cdr item) :name-en)
+                                                             (getf (cdr item) :id)))
+                            :eo (subseq-head label-width (or (getf (cdr item) :inv-name-eo)
+                                                             (getf (cdr item) :name-eo)))
+                            :selected (and (eq row 0) (eq column 0))
+                            :selection (if (and (eq row 0) (eq column 0)) 100 0)
+                            :return nil
+                            :row row)
+                      (cdr item)))
             item-plists)))
-
 
 
 
@@ -58,6 +65,8 @@ exceeds the size of SEQUENCE, the returned subsequence is equivalent to SEQUENCE
 ;;; Inventory loop logic
 ;;; ———————————————————————————————————
 (defun inventory-state-update (map inventory-menu)
+  "The input-taking/logic-handling component of the inventory state-function.
+Part of INVENTORY-STATE."
   (if (📋:menu-state-update inventory-menu)
       (list :map map :inventory inventory-menu)
       (values nil
@@ -68,8 +77,26 @@ exceeds the size of SEQUENCE, the returned subsequence is equivalent to SEQUENCE
 ;;; ———————————————————————————————————
 ;;; Inventory loop drawing
 ;;; ———————————————————————————————————
+(defun render-selected-item (matrix items)
+  "Draw the title, avatar, and description of the currently-selected item to
+the bottom of the screen."
+  (let* ((item (menu:selected-menu-item items))
+         (name (list :en (or (getf item :name-en) (getf item :inv-name-en) (getf item :id))
+                     :eo (or (getf item :name-eo) (getf item :inv-name-eo))))
+         (desc (list :en (getf item :desc-en)
+                     :eo (getf item :desc-eo))))
+    (display:render-string-verbatim matrix (str:concat ":" (…:getf-lang name) ":  "
+                                                       (getf item :avatar))
+                                    '(:x 1 :y 17))
+    (display:render-string matrix (…:getf-lang desc)
+                          '(:x 1 :y 18) :width 70)))
+
+
 (defun inventory-state-draw (matrix items)
-  (📋:menu-state-draw matrix items))
+  "The drawing component of the inventory state-function.
+Part of INVENTORY-STATE."
+  (📋:menu-state-draw matrix items)
+  (render-selected-item matrix items))
 
 
 

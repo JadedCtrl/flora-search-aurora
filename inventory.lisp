@@ -20,16 +20,48 @@
 
 
 ;;; ———————————————————————————————————
+;;; Menu-creation! How fun!
+;;; ———————————————————————————————————
+(defun subseq-head (length sequence)
+  "Get a subsequence of SEQUENCE containing its first LENGTH elements. If LENGTH
+exceeds the size of SEQUENCE, the returned subsequence is equivalent to SEQUENCE."
+  (subseq sequence 0 (…:at-most (length sequence) length)))
+
+
+(defun items->menu-plist (item-plists &key (row-width 72))
+  "Convert a list of items’ plists (that one might get from OVERWORLD’s map
+:ITEMS) into a pretty and presentable menu-grid of items, for use with
+📋:MENU-STATE(-*)."
+  (format *error-output* "ITEMS ~A~%" item-plists)
+  (let* ((label-width 7)
+         (border-width 2)
+         ;; Weird bounding, whoops! I’m so clumsy, it’s endearing instead of just annoying! … Right? =w=”
+         (column (- 0 label-width border-width))
+         (row 0))
+    (mapcar (lambda (item)
+              (incf column (+ label-width border-width))
+              (when (>= column row-width)
+                (incf row)
+                (setf column 0))
+              (list :en (subseq-head label-width (or (getf (cdr item) :name-en) (getf (cdr item) :id)))
+                    :eo (subseq-head label-width (getf (cdr item) :name-eo))
+                    :selected (and (eq row 0) (eq column 0))
+                    :selection (if (and (eq row 0) (eq column 0)) 100 0)
+                    :return nil
+                    :row row))
+            item-plists)))
+
+
+
+
+;;; ———————————————————————————————————
 ;;; Inventory loop logic
 ;;; ———————————————————————————————————
-(defun inventory-state-update (map)
-  (if (and (listen)
-           (let ((input (getf (⌨:read-gamefied-char-plist) :semantic)))
-             (or (eq input '⌨:🆗)
-                 (eq input '⌨:❎))))
-    (values nil
-            (list :map map))
-    't))
+(defun inventory-state-update (map inventory-menu)
+  (if (📋:menu-state-update inventory-menu)
+      (list :map map :inventory inventory-menu)
+      (values nil
+             (list :map map))))
 
 
 
@@ -37,23 +69,23 @@
 ;;; Inventory loop drawing
 ;;; ———————————————————————————————————
 (defun inventory-state-draw (matrix items)
-  (✎:render-string matrix (format nil "~A" items) '(:x 0 :y 0)))
+  (📋:menu-state-draw matrix items))
 
 
 
 ;;; ———————————————————————————————————
 ;;; Inventory loop
 ;;; ———————————————————————————————————
-(defun inventory-state (matrix &key map)
+(defun inventory-state (matrix &key map inventory)
   "A state-function for use with STATE-LOOP."
   (sleep .02)
-  (inventory-state-draw matrix (gethash :items map))
-  (inventory-state-update map))
+  (inventory-state-draw matrix inventory)
+  (inventory-state-update map inventory))
 
 
 (defun make-inventory-state (map)
   "Return a state-function for inventory-listing, for use with STATE-LOOP."
-  (lambda (matrix &key (map map))
+  (lambda (matrix &key (map map) (inventory (items->menu-plist (gethash :items map))))
     (apply #'🎒:inventory-state
-           (list matrix :map map))))
+           (list matrix :map map :inventory inventory))))
 

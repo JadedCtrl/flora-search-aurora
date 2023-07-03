@@ -46,7 +46,7 @@
 (defpackage :flora-search-aurora.menu
   (:nicknames :fsa.men :menu :📋)
   (:use :cl)
-  (:export #:menu-state #:make-menu-state
+  (:export #:menu-state #:menu-state-update #:menu-state-draw #:make-menu-state
            :label :selection :selected))
 
 (defpackage :flora-search-aurora.dialogue
@@ -80,7 +80,7 @@
   (:nicknames :fsa.o :overworld :🌍)
   (:use :cl
    :flora-search-aurora.overworld.util)
-  (:export #:overworld-state #:make-overworld-state #:overworld-state-draw
+  (:export #:overworld-state #:overworld-state-draw #:make-overworld-state
            #:merge-maps
            #:world-coords->screen-coords
            #:getf-entity #:getf-entity-data #:removef-entity

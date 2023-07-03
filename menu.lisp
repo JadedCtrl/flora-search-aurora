@@ -203,7 +203,7 @@ That is, 0 for non-selected items and 100 for selected items."
   "Given a specific ROW, select the next item following the currently-selected
 on that same ROW."
   (let* ((selected-n (selected-menu-item-position menu-plist)))
-    (loop for i from (1+ selected-n) upto (length menu-plist)
+    (loop for i from (1+ selected-n) upto (1- (length menu-plist))
          do (when (eq (or (getf (nth i menu-plist) :row) 0) row)
               (return (select-menu-item menu-plist i))))))
 
@@ -240,6 +240,7 @@ on that same ROW."
    menu-plist
    (1- (or (getf (nth (selected-menu-item-position menu-plist) menu-plist) :row)
            1))))
+
 
 (defun select-down-menu-item (menu-plist)
   "Select the next item to below the currently-selected item."

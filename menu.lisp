@@ -60,8 +60,7 @@ A core part of #'menu-state."
 'selected' form. If selected is a non-zero number below 100, then that percent
 of the box will be displayed as selected/highlighted. This percent is from
 left-to-right, unless negative — in which case, right-to-left."
-  (✎:render-string matrix text (list :x (+ x 1) :y (+ 1 y))
-                   :width width)
+  (✎:render-string matrix text (list :x (+ x 1) :y (+ 1 y)) :width width)
   ;; Render the normal top and bottom bars.
   (dotimes (i width)
     (setf (aref matrix y (+ x i)) #\-)
@@ -153,6 +152,22 @@ That is, 0 for non-selected items and 100 for selected items."
                        't))
           ('⌨:← (progn (select-left-menu-item menu-plist)
                        't))
+          ('⌨:↑ (progn (select-up-menu-item menu-plist)
+                 't))
+          ('⌨:↓ (progn (select-down-menu-item menu-plist)
+                       't))
+          ('⌨:↰ (progn (select-up-menu-item menu-plist)
+                       (select-left-menu-item menu-plist)
+                       't))
+          ('⌨:↱ (progn (select-up-menu-item menu-plist)
+                       (select-right-menu-item menu-plist)
+                       't))
+          ('⌨:↲ (progn (select-down-menu-item menu-plist)
+                       (select-left-menu-item menu-plist)
+                       't))
+          ('⌨:↳ (progn (select-down-menu-item menu-plist)
+                       (select-right-menu-item menu-plist)
+                       't))
           ('⌨:❎
            nil)
           ('⌨:🆗
@@ -184,18 +199,54 @@ That is, 0 for non-selected items and 100 for selected items."
   menu-plist)
 
 
+(defun select-next-item-of-row (menu-plist row)
+  "Given a specific ROW, select the next item following the currently-selected
+on that same ROW."
+  (let* ((selected-n (selected-menu-item-position menu-plist)))
+    (loop for i from (1+ selected-n) upto (length menu-plist)
+         do (when (eq (or (getf (nth i menu-plist) :row) 0) row)
+              (return (select-menu-item menu-plist i))))))
+
+
+(defun select-previous-item-of-row (menu-plist row)
+  "Given a specific ROW, select the next item preceding the currently-selected
+on that same ROW."
+  (when (>= row 0)
+    (let* ((selected-n (selected-menu-item-position menu-plist)))
+       (loop for i from (1- selected-n) downto 0
+             do (when (eq (or (getf (nth i menu-plist) :row) 0) row)
+                  (return (select-menu-item menu-plist i)))))))
+
+
 (defun select-right-menu-item (menu-plist)
   "Select the item to the right of the currenty-selected item."
-  (let ((new-selection (+ (selected-menu-item-position menu-plist) 1)))
-    (if (< new-selection (length menu-plist))
-      (select-menu-item menu-plist new-selection))))
+  (select-next-item-of-row
+   menu-plist
+   (or (getf (nth (selected-menu-item-position menu-plist) menu-plist) :row)
+       0)))
 
 
-(defun select-left-menu-item ( menu-plist)
-  "Select the item to the left of the currenty-selected item."
-  (let ((new-selection (- (selected-menu-item-position menu-plist) 1)))
-    (if (>= new-selection 0)
-      (select-menu-item menu-plist new-selection))))
+(defun select-left-menu-item (menu-plist)
+  "Select the item to the right of the currenty-selected item."
+  (select-previous-item-of-row
+   menu-plist
+   (or (getf (nth (selected-menu-item-position menu-plist) menu-plist) :row)
+       0)))
+
+
+(defun select-up-menu-item (menu-plist)
+  "Select the next item above the currently-selected item."
+  (select-previous-item-of-row
+   menu-plist
+   (1- (or (getf (nth (selected-menu-item-position menu-plist) menu-plist) :row)
+           1))))
+
+(defun select-down-menu-item (menu-plist)
+  "Select the next item to below the currently-selected item."
+  (select-next-item-of-row
+   menu-plist
+   (1+ (or (getf (nth (selected-menu-item-position menu-plist) menu-plist) :row)
+           0))))
 
 
 (defun selected-menu-item-position (menu-plist)

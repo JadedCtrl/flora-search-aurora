@@ -1,13 +1,28 @@
 (in-package :FLORA-SEARCH-AURORA)
 (defparameter *flashback-school-map*
   (🌍.…:plist->map
-    (QUOTE (:TRIGGERS NIL :ENTITIES
+    (QUOTE (:TRIGGERS
             ((:|0,1|
+              (:COORDS (:X 2 :Y 23) :WIDTH 117 :HEIGHT 83 :BOTTOM-COORDS
+               (:X 9 :Y 28) :FUNCTION "✿:flashback-school-trigger")))
+            :ENTITIES
+            ((:|0,2|
+              (FLORA-SEARCH-AURORA::BRACELET :AVATAR "*=*" :COMMENT
+               "This is deliberately off-map! c:<" :DESC-EN
+               "A bracelet that gleams in the light, it's simply dazzling!"
+               :DESC-EO
+               "Ĉirkaŭmano kiu lumspegulas belbrile, kia ĉarma aspekto!" :ID
+               "✿:bracelet" :INV-NAME-EN "bracelet" :INV-NAME-EO "ĉirkaŭmano"
+               :NAME-EN "dazzling bracelet" :NAME-EO "belbrila ĉirkaŭmano"
+               :FACE NIL :COORDS (:X 70 :Y 40)))
+             (:|0,1|
               (FLORA-SEARCH-AURORA::FLASHBACK-LOCKED-DOOR :DESC-EN
                "(Class 204... right next to ours. The door's locked.)" :DESC-EO
                "(Klasoĉambro 204... apud la nia. La ĉambro estas ŝlosita.)" :ID
                "✿:flashback-locked-door" :INTERACT "✿:description-interact"
-               :FACE NIL :COORDS (:X 50 :Y 29)))
+               :FACE NIL :COORDS (:X 50 :Y 29))
+              (FLORA-SEARCH-AURORA:PLAYER :ID "✿:player" :NORMAL-FACE "^w^"
+               :TALKING-FACE "^o^" :FACE "^w^" :COORDS (:X 5 :Y 25)))
              (:|0,0|
               (FLORA-SEARCH-AURORA::FLASHBACK-TEACHER-DESK :DESC-EN
                "(Mr. Gardnr's desk. Nice and orderly, as per usual.)" :DESC-EO
@@ -33,9 +48,7 @@
               (FLORA-SEARCH-AURORA::CHILDHOOD-FRIEND :FACING-RIGHT T :ID
                "✿:childhood-friend" :INTERACT
                "✿:flashback-childhood-friend-interact" :NORMAL-FACE "=_="
-               :TALKING-FACE "=o=" :FACE "=_=" :COORDS (:X 42 :Y 4))
-              (FLORA-SEARCH-AURORA::PLAYER :ID "✿:player" :NORMAL-FACE "^w^"
-               :TALKING-FACE "^o^" :FACE "^w^" :COORDS (:X 51 :Y 13))))
+               :TALKING-FACE "=o=" :FACE "=_=" :COORDS (:X 42 :Y 4))))
             :BUMP-MAP
             ((:|0,1| (:COORDS (:X 0 :Y 20) :CHAR #\_ :LANG NIL)
               (:COORDS (:X 1 :Y 20) :CHAR #\_ :LANG NIL)

@@ -16,6 +16,6 @@
     (overworld.tiled:load-map (local-path (format nil "res/maps/~A.tmx" map-name)))
     ":FLORA-SEARCH-AURORA"
     (format nil "*~A-map*" map-name)))
- '("casino" "outdoors" "flashback-school"))
+ '("casino" "outdoors" "flashback-casino" "flashback-school"))
 
 (quit)

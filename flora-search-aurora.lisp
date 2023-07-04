@@ -323,7 +323,7 @@ avoid triggering this."
        (1
         (start-dialogue
          (say 'player :eo "Ĉu... ĉio enordas, samideano?"
-                      :en "Everything alright, friend..?")
+                      :en "Everything alright, man..?")
          (say gambler :eo "Jes! Tutorde! Bonas!"
                       :en "Yup! For sure! All good!")
          (say gambler :eo "Mi simple trafis iujn monproblemojn, ne problemas."
@@ -357,8 +357,8 @@ avoid triggering this."
                       :en "No life!")))
        (3
         (start-dialogue
-         (say  gambler :eo "Mi cedu al la vakuo. Tre komfortas ĉe la fundo, kamarado."
-                       :en "I'm giving into the void. It's quite peaceful down here, pal.")
+         (say  gambler :eo "Mi cedu al la vakuo. Tre komfortas ĉe la fundo, kara."
+                       :en "I'm giving into the void. It's quite peaceful down here, buddy.")
          (say  gambler :eo "Mi lasu min falu entute, ĉu ne, kara amiko? Ĉu neee?"
                        :en "I should let go, right, pal? Righttt?")
          (face 'player ";w;" ";o;")
@@ -403,6 +403,171 @@ avoid triggering this."
 
 
 ;;; ———————————————————————————————————
+;;; Casino prologue: Bad gambler!
+;;; ———————————————————————————————————
+(defun flashback-bad-gambler-dialogue ()
+  (let ((gambler 'flashback-bad-gambler))
+    (start-dialogue
+      (say  gambler :eo "Kia spektalo! Hahaha!"
+                    :en "How nice! Hahaha!")
+      (face gambler ">v<" ">u<")
+      (face 'player "o-o")
+      (say  gambler :en "HAHAHAHAHAHAHAHAHAHAHAHA!")
+      (face 'player "=w='")
+      (say  gambler :eo "Hehe-Heŭreka! Ĉi-nokte, Sorto estas mia kromvirino!"
+                    :en "Haha-Hot damn, lady luck's my mistress tonight!")
+      (face gambler "^#^" "^O^")
+      (say  gambler :eo "ĉu vi sciis, kara?"
+                    :en "Guess what, buddy?")
+      (say  gambler :eo "Por tiu ĉi ludo mi havas feke legendan vetaĵon!"
+                    :en "I've got one hell of a chip for this game!")
+      (face 'player "^_^" "^o^"))))
+
+
+(defun flashback-bad-gambler-interact (map &optional interactee-id)
+  (make-dialogue-state map (flashback-bad-gambler-dialogue)))
+
+
+(defun flashback-casino-dialogue-intro ()
+  (let ((father 'flashback-casino-father)
+        (mother 'flashback-casino-mother)
+        (dealer 'flashback-casino-dealer)
+        (geezer 'flashback-casino-geezer)
+        (gambler 'flashback-bad-gambler))
+    (start-dialogue
+     (say    dealer  :eo "Ĉu ĉiu pretas?"
+                     :en "Everyone ready?")
+     (say    geezer  :eo "Pretis jam antaŭ vi eĉ naskiĝis!"
+                     :en "I've been ready since before you were born!")
+     (say    gambler :eo "Ĉu necesas demandi?"
+                     :en "Need you ask?")
+     (say    father  :eo "Ni pretas, ankaŭ!"
+                     :en "We're ready, too!")
+     (say    'player :en "Eee...!"
+                     :face ";w:")
+     (say    father  :eo "Ho, jes, vi ne scipovas ludi."
+                     :en "Oh, right, you still don't know how to play.")
+     (say    father  :eo "Atendu momente, ĉiu, mi klarigos rapide!"
+                     :en "Hold on, everyone, we'll be quick!")
+     (say    father  :eo "Bone: Vikĉjo, atentu! Mi ne min ripetos!"
+                     :eo "Alright, Vic! Listen up, 'cuz I'm not gonna repeat myself!")
+     (say    father  :eo "La ludestro disdonas kartojn hazardkaŝe. La kartvaloro sekvas la numerojn, krom se estas kolora karto. Se estas kolora karto, la valoro sekvas la Epokon de la ludo. La unua Epoko estas Antaŭhistorio, kaj kompreneble plej valoras tiam la..."
+                     :en "The dealer hands out cards randomly and discretely. The cards' value is based on their number, unless they're a coloured card, in which case the value is based on the Era of the game. The first Era is Pre-history, and of course the most imporant card in Pre-history is...")
+     (face   'player "=w='" "=o='")
+     (say    'player :eo "(Mi ĝojas festi kun ĉiu, sed ĉi tiu ludo sonas jam tro malsimpla por mi...)"
+                     :en "(I'm glad to party like this with my folks, but this game sounds a bit complicated...)")
+     (say    'player :eo "(Ĉu ne ni povus simple ludi Hanafudan?)"
+                     :en "(Why can't we just play Hanafuda?)"
+                     :face "=w='")
+     (say    father  :eo "... kaj tiel oni venkas la markizon.")
+     (say    father  :eo "Bone, jen ĉio!")
+     (say    gambler :eo "Finfine!!"))))
+
+
+(defun flashback-casino-dialogue-bet (map)
+  (let ((father 'flashback-casino-father)
+        (mother 'flashback-casino-mother)
+        (dealer 'flashback-casino-dealer)
+        (geezer 'flashback-casino-geezer)
+        (gambler 'flashback-bad-gambler))
+    (append
+     (start-dialogue
+      (say    gambler :eo "Jen, mi vetas ĉi tion!"
+                      :en "Now, I'm putting this down!")
+      (say    gambler :eo "Momenton..."
+                      :en "Wait..."
+                      :face "`o`")
+      (say    gambler :eo "He?! Mi perdis la geeziĝan ringon?!"
+                      :en "Wait... what?! I lost my wedding ring?!"
+                      :face "O_O"))
+     (if (aget-item map 'ring)
+         (start-dialogue
+          (face   'player "^_^" "^o^")
+          (say    'player :eo "Ho! jen!"
+                          :en "Ĉu estas tia ĉi?")
+          (mumble 'player :eo "[Vi donas RINGON al HAZARDLUDEMULO]"
+                          :en "[You give RING to GAMBLER]")
+          (face   gambler "=w=" "=w=")
+          (say    gambler :eo "..."
+                          :en "...")
+          (face   gambler ":W:" ":O:")
+          (say    gambler :eo "Je dio!! Dankegon, kara!!"
+                          :en "God damn!! Thank you, buddy!!")
+          (say    gambler :eo "Mi preskaŭ tiom senesperis!"
+                          :en "I almost gave into despair!")
+          (face   gambler "^#^" "^O^")
+          (say    gambler :eo "NUN mi pretas ludi."
+                          :en "NOW I'm ready to play.")
+          (mumble gambler :eo "[HAZARDLUDEMULO donas GEEDZIĜAN RINGON al TABLO]"
+                          :en "[GAMBLER gives WEDDING RING to TABLE")
+          (say    'player :eo "Ĉu vere?! Kio misas je vi!?!"
+                          :en "Seriously?! What's wrong with you!?!"
+                          :face ">O<")
+          (face   'player ":w:'")
+          (say    gambler :en "Live fast die hard, brother!"
+                          :eo "Vivu akre mortu frue!"
+                          :face "B-)")
+          (say    mother  :eo "Vi provis, Vikĉjo..."
+                          :en "You tried, Vic..."))
+         (start-dialogue
+          (say    gambler :eo "... bone do, tio ĉi sufiĉos."
+                          :en "... fine then, this'll have to do."
+                          :face "<v<")
+          (mumble gambler :eo "[HAZARDLUDEMULO donas BIENPOSEDON al TABLO]"
+                          :en "[GAMBLER gives LAND OWNERSHIP to TABLE]")
+          (face   'player ":w:" ":0:")
+          (say    'player :eo "Ĉu vi frenezas?! Ne tion faru!!"
+                          :en "Are you crazy?! Don't do that!!")
+          (say    mother  :eo "Lasu lin, Vikĉjo."
+                          :en "Leave him, Vic.")
+          (say    mother  :eo "La fonto de amuzo estas senzorga risko!"
+                          :en "The root of all of joy is careless, unthinking risk!")
+          (say    father  :eo "Tielas la animokerno de la kartoj."
+                          :en "Such is the nature of the cards."))))))
+
+
+(defun flashback-casino-outro (map)
+  (start-dialogue
+   (say 'flashback-casino-dealer
+        :eo "Nu, ĉiu krom li, metu viajn vetaĵojn. Ni komencos je la Nula Epoko!"
+        :en "As for the rest of you, place your bets. It's time for the Zeroth Era!")
+   `((:return-2 ,(list :map (merge-maps map *outdoors-map*))))))
+
+
+(defun flashback-casino-dialogue (map)
+  (append (flashback-casino-dialogue-intro)
+          (flashback-casino-dialogue-bet map)
+          (flashback-casino-outro map)))
+
+
+(defun flashback-casino-trigger (map)
+    (make-dialogue-state
+     map
+     (flashback-casino-dialogue map)))
+
+
+(defun flashback-casino-exit-top-trigger (map)
+  (make-dialogue-state
+   map
+   (start-dialogue
+    (mumble 'player :eo "(Mi eble reiru al la gepatroj.)"
+                    :en "(I should probably get back to my folks.)")
+    (mumble 'player :eo "(Ili atendas min por ekfesti!)"
+                    :en "(They're waiting on me, after all!)")
+    (move 'player '(:x 35 :y 2)))))
+
+
+(defun flashback-casino-exit-bottom-trigger (map)
+  (make-dialogue-state
+   map
+   (start-dialogue
+    (mumble 'player :eo "(Mi ne fuĝu de mia propra naskiĝtaga festo!)"
+                    :en "(I can't ditch my own birthday party!)")
+    (move 'player '(:x 36 :y 17)))))
+
+
+
+;;; ———————————————————————————————————
 ;;; Main-menu data
 ;;; ———————————————————————————————————
 (defun submenu ()
@@ -415,7 +580,7 @@ avoid triggering this."
 (defun main-menu ()
   `((:en "PLAY" :eo "EKLUDI"
      :selection 100 :selected t
-     :return ,(🌍:make-overworld-state *casino-map*))
+     :return ,(🌍:make-overworld-state *flashback-casino-map*))
     (:en "SUBMENU" :eo "SUBMENUO" :row 1
      :return ,(📋:make-menu-state (submenu)))
     (:en "TERURE" :eo "BADLY" :row 1)

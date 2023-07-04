@@ -18,4 +18,5 @@
                (:file "res/clocks")
                (:file "res/maps/casino.tmx")
                (:file "res/maps/outdoors.tmx")
+               (:file "res/maps/flashback-casino.tmx")
                (:file "res/maps/flashback-school.tmx")))

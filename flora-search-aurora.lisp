@@ -115,6 +115,73 @@ dialogue, among which one will be selected randomly."
   (list :map (🌍:merge-maps map *casino-map*)))
 
 
+(defun factory-window-interact (&optional map interactee-id)
+  (make-dialogue-state
+   map
+   (start-dialogue
+    (face 'player "` `" "`o`")
+    (mumble 'player :eo "(Al ĉi tiu fenesto tute mankas vitro!)"
+                    :en "(This window's got no pane at all!)")
+    (mumble 'player :eo "(Mi kredeble povus grimpi tien, fakte...)"
+                    :en "(I could probably fit my way in there, actually...)")
+    (mumble 'player :eo "(... sed ĉu vere farindas?)"
+                    :en "(... but should I?)"
+                    :face "`o`"))))
+
+
+
+;;; ———————————————————————————————————
+;;; Random outdoors NPCs
+;;; ———————————————————————————————————
+(defun kvincent-greetings (map)
+  (case (…:incf-0 (getf-act map :kvincent-greetings))
+    (0
+     (start-dialogue
+      (face 'kvincent "@__@" ">OO<")
+      (face 'player   ":w:" ":o:")
+      (say  'kvincent :eo "AIIII! Ve! Ve! Diablo! Jen diablo!"
+                      :en "AIIII! Woe is me! The Devil has come!")
+      (say  'player   :eo "Kvincent, Kvincent! Trankviliĝu, trankviliĝu! Estas mi!"
+                      :en "Kvincent, Kvincent! Calm down, it's just me!")
+
+      (say  'kvincent :eo "... bedaŭron?"
+                      :en "... pardon?")
+      (face 'kvincent "@w@" "@o@")
+      (say  'kvincent :eo "Hooo, vi tute ne estas diablo! Vi estas nura homo!"
+                      :en "Ooooh, you're not the Devil! You're just a person!"
+                      :face "@v@")
+      (say  'player   :eo "Kompreneble!"
+                      :en "Obviously not!")))
+    (otherwise
+     (start-dialogue
+      (face 'player   "=w='" "=o='")
+      (face 'kvincent "@__@" ">OO<")
+      (say  'kvincent :eo "AJJJJ! Ve! Ve! Dia..."
+                      :en "AIIII! Woe is me! Dev...")
+      (say  'player   :eo "Mi ankoraŭ ne estas diablo!!"
+                      :en "I'm still no demon!!")
+      (face 'kvincent "@w@" "@o@")
+      (say  'kvincent :eo "Ha, jes. Pardonu."
+                      :en "Oh, right. Sorry.")))))
+
+
+(defun kvincent-dialogue (map)
+  (append (kvincent-greetings map)
+          (start-dialogue
+           (face 'player   "` `" "`o`")
+           (say  'player   :eo "Ĉu ĉio enordas, Kvincent?"
+                           :en "Everything alright, Kvincent?")
+           (say  'kvincent :eo "Mi apenaŭ trovas fungojn, hodiaŭ... la dioj malbenis min!"
+                           :en "I'm hardly finding any mushrooms... I've been cursed!")
+           (say  'player   :eo "Nek mi povas trovi florojn! Kia malfacila tago."
+                           :en "I can't find any flowers, either! Today sucks."
+                           :face "vov\'"))))
+
+
+(defun kvincent-interact (map &optional interactee-id)
+  (make-dialogue-state map (kvincent-dialogue map)))
+
+
 
 ;;; ———————————————————————————————————
 ;;; Childhood friend (Sasha) arc
@@ -580,7 +647,7 @@ avoid triggering this."
 (defun main-menu ()
   `((:en "PLAY" :eo "EKLUDI"
      :selection 100 :selected t
-     :return ,(🌍:make-overworld-state *flashback-casino-map*))
+     :return ,(🌍:make-overworld-state *outdoors-map*))
     (:en "SUBMENU" :eo "SUBMENUO" :row 1
      :return ,(📋:make-menu-state (submenu)))
     (:en "TERURE" :eo "BADLY" :row 1)

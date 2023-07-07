@@ -123,9 +123,9 @@ a :FUNCTION to be triggered when it’s stepped upon."
 ;;; ———————————————————————————————————
 (defun tiled-cell->cell (tiled-cell &key (language nil))
   "Convert a Tiled cell into a cell plist."
-  (list :coords (list :x (cl-tiled:cell-column tiled-cell)
-                      :y (cl-tiled:cell-row tiled-cell))
-        :char (tile-character (cl-tiled:cell-tile tiled-cell))
+  (list :x (cl-tiled:cell-column tiled-cell)
+        :y (cl-tiled:cell-row tiled-cell)
+        :@ (tile-character (cl-tiled:cell-tile tiled-cell))
         :lang language))
 
 
@@ -145,7 +145,7 @@ alist of Tiled cell “chunks”."
   (collect-items-into-groups
     (tiled-layer-cells layer)
     (lambda (cell)
-      (world-coords-chunk (getf cell :coords)))
+      (world-coords-chunk (list :x (getf cell :x) :y (getf cell :y))))
     :groups chunks))
 
 

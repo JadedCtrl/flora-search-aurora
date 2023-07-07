@@ -121,7 +121,8 @@ replays of the game."
   (let ((chunk (world-coords-chunk coords)))
     (member 't (cdr (assoc chunk map-chunks))
             :test (lambda (ignored cell)
-                    (…:plist= (getf cell :coords) coords)))))
+                    (…:plist= (list :x (getf cell :x) :y (getf cell :y))
+                              coords)))))
 
 
 (defun walkable-tile-p (map x y)
@@ -235,6 +236,8 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
 
 
 (defun move-player (map &key (Δx 0) (Δy 0))
+  "Moves the play by the given changes in x & y.
+Very kindly removes a list of parameters to be returned by the overworld state-function."
   (move-entity map '✿:player :Δx Δx :Δy Δy)
   (let* ((coords (getf-entity-data map '✿:player :coords))
          (trigger (trigger-at-coords map (list :x (getf coords :x) :y (getf coords :y)))))
@@ -305,13 +308,13 @@ A core part of OVERWORLD-STATE."
 
 
 (defun matrix-write-cell (matrix cell)
-  "Set a matrice's (2d array's) element corresponding to a “cell”; that is, an
-alist containing a character (:CHAR) and :X & :Y coordinates."
-  (let ((coords (world-coords->screen-coords (getf cell :coords))))
+  "Set a matrice's (2d array's) element corresponding to a “cell”; that is, a
+plist containing a character (:CHAR) and :X & :Y coordinates."
+  (let ((coords (world-coords->screen-coords (list :x (getf cell :x) :y (getf cell :y)))))
     (setf (aref matrix
                 (getf coords :y)
                 (getf coords :x))
-          (getf cell :char))))
+          (getf cell :@))))
 
 
 

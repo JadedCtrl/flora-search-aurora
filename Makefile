@@ -5,9 +5,13 @@ USE_SWANK ?= no
 fonts:
 	$(LISP) \
 		--load "res/fonts/flf→lisp.lisp"
+
 maps:
 	$(LISP) \
 		--load "res/maps/tmx→lisp.lisp"
+	sed -i 's%:LANG NIL%%g' res/maps/*.tmx.lisp
+	sed -i 's%^[ ]*%%' res/maps/*.tmx.lisp
+	sed -i 's%) (%)(%g' res/maps/*.tmx.lisp
 
 build: maps fonts
 	$(LISP) \

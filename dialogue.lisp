@@ -334,11 +334,11 @@ make it pretty, dang it! >O<
          (optimal-layout (getf dialogue :layout))
          (coords (car optimal-layout)))
     (when (and text optimal-layout)
-      (✎:render-fill-rectangle matrix #\space
-                               (list :x (- (getf coords :x) 1)
-                                     :y (- (getf coords :y) 1))
-                               (+ (second optimal-layout) 2) ;; Width
-                               (+ (third optimal-layout) 1)) ;; Height
+;;      (✎:render-fill-rectangle matrix #\space
+;;                               (list :x (- (getf coords :x) 1)
+;;                                     :y (- (getf coords :y) 1)
+;;                               (+ (second optimal-layout) 2) ;; Width
+;;                               (+ (third optimal-layout) 1)) ;; Height
       (✎:render-string
        matrix text (first optimal-layout)
        :width (second optimal-layout)

@@ -40,15 +40,6 @@ SUBSEQ in SEQUENCE."
    #'>))
 
 
-(defun string-dimensions (string)
-  "Given a linewrapped STRING, return the minimum width and minimum height (in
-characters) for a rectangle that might contain the entirety of the string.
-  (WIDTH HEIGHT)"
-  (let ((lines (str:lines string)))
-    (list (sort (mapcar #'length lines) #'<) ;; Width
-          (count lines)))) ;; Height
-
-
 (defun fit-lines (string width &key (alignment :center))
   "Fit each line of a STING into a specific WIDTH, with ALIGNMENT to a specific
 side (either :CENTER, :LEFT, or :RIGHT)."

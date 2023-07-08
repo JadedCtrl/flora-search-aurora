@@ -1,4 +1,5 @@
 # Flora Search Aurora
+_Flora Search Aurora_ is a game about destiny-making, peace-making, and (most importantly) bouquet-making.
 
 ## Installation
 

@@ -53,6 +53,7 @@ If no number is parsed out, return NIL."
   (str:unlines (remove-if-not #'stringp strings)))
 
 
+;; TODO: Use MISMATCH in this function, instead of whatever I did!
 (defun count-in-a-row (item seq &key (count 0) (test #'eql) (from-end nil))
   "How many times the given ITEM is found in SEQ in-a-row. Starts from the head
 of the list, unless FROM-END is specified. The TEST defaults to #'eql."

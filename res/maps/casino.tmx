@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="left-down" width="72" height="41" tilewidth="11" tileheight="17" infinite="0" nextlayerid="14" nextobjectid="43">
+<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="left-down" width="72" height="41" tilewidth="11" tileheight="17" infinite="0" nextlayerid="14" nextobjectid="55">
  <tileset firstgid="1" source="font.tsx"/>
  <layer id="4" name="Background" width="72" height="41">
   <data encoding="csv">
@@ -150,109 +150,157 @@
   </object>
  </objectgroup>
  <objectgroup id="8" name="Descriptions">
-  <object id="12" name="Slot-machine" x="466.667" y="312">
-   <properties>
-    <property name="desc-en" value="(A slot-machine! The screen displays such bright colors, and the knob beckons so!)"/>
-    <property name="desc-eo" value="(Jen hazardludilo! La ekrano elkrias tiom okulfrapajn kolorojn, kaj la stirilo tiom tentas!)"/>
-    <property name="id" value="✿:slot-machine"/>
-    <property name="interact" value="✿:description-interact"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="14" name="Slot-machine" x="460.667" y="231.333">
-   <properties>
-    <property name="desc-en" value="(A slot-machine! The screen displays such bright colors, and the knob beckons so!)"/>
-    <property name="desc-eo" value="(Jen hazardludilo! La ekrano elkrias tiom okulfrapajn kolorojn, kaj la stirilo tiom tentas!)"/>
-    <property name="id" value="✿:slot-machine"/>
-    <property name="interact" value="✿:description-interact"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="15" name="Slot-machine" x="362" y="230.667">
-   <properties>
-    <property name="desc-en" value="(A slot-machine! The screen displays such bright colors, and the knob beckons so!)"/>
-    <property name="desc-eo" value="(Jen hazardludilo! La ekrano elkrias tiom okulfrapajn kolorojn, kaj la stirilo tiom tentas!)"/>
-    <property name="id" value="✿:slot-machine"/>
-    <property name="interact" value="✿:description-interact"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="16" name="Slot-machine" x="357.333" y="314">
-   <properties>
-    <property name="desc-en" value="(A slot-machine! The screen displays such bright colors, and the knob beckons so!)"/>
-    <property name="desc-eo" value="(Jen hazardludilo! La ekrano elkrias tiom okulfrapajn kolorojn, kaj la stirilo tiom tentas!)"/>
-    <property name="id" value="✿:slot-machine"/>
-    <property name="interact" value="✿:description-interact"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="17" name="Slot-machine" x="461.333" y="141.333">
-   <properties>
-    <property name="desc-en" value="(A slot-machine! The screen displays such bright colors, and the knob beckons so!)"/>
-    <property name="desc-eo" value="(Jen hazardludilo! La ekrano elkrias tiom okulfrapajn kolorojn, kaj la stirilo tiom tentas!)"/>
-    <property name="id" value="✿:slot-machine"/>
-    <property name="interact" value="✿:description-interact"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="18" name="Slot-machine" x="360" y="142">
-   <properties>
-    <property name="desc-en" value="(A slot-machine! The screen displays such bright colors, and the knob beckons so!)"/>
-    <property name="desc-eo" value="(Jen hazardludilo! La ekrano elkrias tiom okulfrapajn kolorojn, kaj la stirilo tiom tentas!)"/>
-    <property name="id" value="✿:slot-machine"/>
-    <property name="interact" value="✿:description-interact"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="19" name="Slot-machine" x="461.333" y="69.3333">
-   <properties>
-    <property name="desc-en" value="(A slot-machine! The screen displays such bright colors, and the knob beckons so!)"/>
-    <property name="desc-eo" value="(Jen hazardludilo! La ekrano elkrias tiom okulfrapajn kolorojn, kaj la stirilo tiom tentas!)"/>
-    <property name="id" value="✿:slot-machine"/>
-    <property name="interact" value="✿:description-interact"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="20" name="Slot-machine" x="368.667" y="61.3333">
-   <properties>
-    <property name="desc-en" value="(A slot-machine! The screen displays such bright colors, and the knob beckons so!)"/>
-    <property name="desc-eo" value="(Jen hazardludilo! La ekrano elkrias tiom okulfrapajn kolorojn, kaj la stirilo tiom tentas!)"/>
-    <property name="id" value="✿:slot-machine"/>
-    <property name="interact" value="✿:description-interact"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="21" name="Slot-machine" x="718.667" y="60">
-   <properties>
-    <property name="desc-en" value="(A slot-machine! The screen displays such bright colors, and the knob beckons so!)"/>
-    <property name="desc-eo" value="(Jen hazardludilo! La ekrano elkrias tiom okulfrapajn kolorojn, kaj la stirilo tiom tentas!)"/>
-    <property name="id" value="✿:slot-machine"/>
-    <property name="interact" value="✿:description-interact"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="22" name="Slot-machine" x="717.333" y="146.667">
-   <properties>
-    <property name="desc-en" value="(A slot-machine! The screen displays such bright colors, and the knob beckons so!)"/>
-    <property name="desc-eo" value="(Jen hazardludilo! La ekrano elkrias tiom okulfrapajn kolorojn, kaj la stirilo tiom tentas!)"/>
-    <property name="id" value="✿:slot-machine"/>
-    <property name="interact" value="✿:description-interact"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="23" name="Slot-machine" x="716" y="230">
-   <properties>
-    <property name="desc-en" value="(A slot-machine! The screen displays such bright colors, and the knob beckons so!)"/>
-    <property name="desc-eo" value="(Jen hazardludilo! La ekrano elkrias tiom okulfrapajn kolorojn, kaj la stirilo tiom tentas!)"/>
-    <property name="id" value="✿:slot-machine"/>
-    <property name="interact" value="✿:description-interact"/>
-   </properties>
-   <point/>
-  </object>
   <object id="24" name="Slot-machine" x="719.333" y="316">
    <properties>
-    <property name="desc-en" value="(A slot-machine! The screen displays such bright colors, and the knob beckons so!)"/>
-    <property name="desc-eo" value="(Jen hazardludilo! La ekrano elkrias tiom okulfrapajn kolorojn, kaj la stirilo tiom tentas!)"/>
+    <property name="desc-en">(A slot-machine! Wow!)
+(It's even branded with cute anime girls!)
+(... but I'd rather not blow my hard-earned cash on a jumble of pixels.)</property>
+    <property name="desc-eo">(Hazardbitludo! Mirinde!)
+(La ekrano eĉ montras apenaŭvestitajn desegnitajn knabinojn!)
+(... mi ankoraŭ preferus ne forĵeti la monon pro nuraj bitokoj.)</property>
+    <property name="id" value="✿:slot-machine"/>
+    <property name="interact" value="✿:description-interact"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="44" name="Slot-machine" x="463.333" y="150.667">
+   <properties>
+    <property name="desc-en">(A slot-machine! Wow!)
+(It's even branded with cute anime girls!)
+(... but I'd rather not blow my hard-earned cash on a jumble of pixels.)</property>
+    <property name="desc-eo">(Hazardbitludo! Mirinde!)
+(La ekrano eĉ montras apenaŭvestitajn desegnitajn knabinojn!)
+(... mi ankoraŭ preferus ne forĵeti la monon pro nuraj bitokoj.)</property>
+    <property name="id" value="✿:slot-machine"/>
+    <property name="interact" value="✿:description-interact"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="45" name="Slot-machine" x="462" y="230.667">
+   <properties>
+    <property name="desc-en">(A slot-machine! Wow!)
+(It's even branded with cute anime girls!)
+(... but I'd rather not blow my hard-earned cash on a jumble of pixels.)</property>
+    <property name="desc-eo">(Hazardbitludo! Mirinde!)
+(La ekrano eĉ montras apenaŭvestitajn desegnitajn knabinojn!)
+(... mi ankoraŭ preferus ne forĵeti la monon pro nuraj bitokoj.)</property>
+    <property name="id" value="✿:slot-machine"/>
+    <property name="interact" value="✿:description-interact"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="46" name="Slot-machine" x="457.333" y="321.333">
+   <properties>
+    <property name="desc-en">(A slot-machine! Wow!)
+(It's even branded with cute anime girls!)
+(... but I'd rather not blow my hard-earned cash on a jumble of pixels.)</property>
+    <property name="desc-eo">(Hazardbitludo! Mirinde!)
+(La ekrano eĉ montras apenaŭvestitajn desegnitajn knabinojn!)
+(... mi ankoraŭ preferus ne forĵeti la monon pro nuraj bitokoj.)</property>
+    <property name="id" value="✿:slot-machine"/>
+    <property name="interact" value="✿:description-interact"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="47" name="Slot-machine" x="716.667" y="67.3333">
+   <properties>
+    <property name="desc-en">(A slot-machine! Wow!)
+(It's even branded with cute anime girls!)
+(... but I'd rather not blow my hard-earned cash on a jumble of pixels.)</property>
+    <property name="desc-eo">(Hazardbitludo! Mirinde!)
+(La ekrano eĉ montras apenaŭvestitajn desegnitajn knabinojn!)
+(... mi ankoraŭ preferus ne forĵeti la monon pro nuraj bitokoj.)</property>
+    <property name="id" value="✿:slot-machine"/>
+    <property name="interact" value="✿:description-interact"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="48" name="Slot-machine" x="718.667" y="149.333">
+   <properties>
+    <property name="desc-en">(A slot-machine! Wow!)
+(It's even branded with cute anime girls!)
+(... but I'd rather not blow my hard-earned cash on a jumble of pixels.)</property>
+    <property name="desc-eo">(Hazardbitludo! Mirinde!)
+(La ekrano eĉ montras apenaŭvestitajn desegnitajn knabinojn!)
+(... mi ankoraŭ preferus ne forĵeti la monon pro nuraj bitokoj.)</property>
+    <property name="id" value="✿:slot-machine"/>
+    <property name="interact" value="✿:description-interact"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="49" name="Slot-machine" x="722" y="228">
+   <properties>
+    <property name="desc-en">(A slot-machine! Wow!)
+(It's even branded with cute anime girls!)
+(... but I'd rather not blow my hard-earned cash on a jumble of pixels.)</property>
+    <property name="desc-eo">(Hazardbitludo! Mirinde!)
+(La ekrano eĉ montras apenaŭvestitajn desegnitajn knabinojn!)
+(... mi ankoraŭ preferus ne forĵeti la monon pro nuraj bitokoj.)</property>
+    <property name="id" value="✿:slot-machine"/>
+    <property name="interact" value="✿:description-interact"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="50" name="Slot-machine" x="462.667" y="60.6667">
+   <properties>
+    <property name="desc-en">(A slot-machine! Wow!)
+(It's even branded with cute anime girls!)
+(... but I'd rather not blow my hard-earned cash on a jumble of pixels.)</property>
+    <property name="desc-eo">(Hazardbitludo! Mirinde!)
+(La ekrano eĉ montras apenaŭvestitajn desegnitajn knabinojn!)
+(... mi ankoraŭ preferus ne forĵeti la monon pro nuraj bitokoj.)</property>
+    <property name="id" value="✿:slot-machine"/>
+    <property name="interact" value="✿:description-interact"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="51" name="Slot-machine" x="361.333" y="60.6667">
+   <properties>
+    <property name="desc-en">(A slot-machine! Wow!)
+(It's even branded with cute anime girls!)
+(... but I'd rather not blow my hard-earned cash on a jumble of pixels.)</property>
+    <property name="desc-eo">(Hazardbitludo! Mirinde!)
+(La ekrano eĉ montras apenaŭvestitajn desegnitajn knabinojn!)
+(... mi ankoraŭ preferus ne forĵeti la monon pro nuraj bitokoj.)</property>
+    <property name="id" value="✿:slot-machine"/>
+    <property name="interact" value="✿:description-interact"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="52" name="Slot-machine" x="360.667" y="143.333">
+   <properties>
+    <property name="desc-en">(A slot-machine! Wow!)
+(It's even branded with cute anime girls!)
+(... but I'd rather not blow my hard-earned cash on a jumble of pixels.)</property>
+    <property name="desc-eo">(Hazardbitludo! Mirinde!)
+(La ekrano eĉ montras apenaŭvestitajn desegnitajn knabinojn!)
+(... mi ankoraŭ preferus ne forĵeti la monon pro nuraj bitokoj.)</property>
+    <property name="id" value="✿:slot-machine"/>
+    <property name="interact" value="✿:description-interact"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="53" name="Slot-machine" x="358" y="228">
+   <properties>
+    <property name="desc-en">(A slot-machine! Wow!)
+(It's even branded with cute anime girls!)
+(... but I'd rather not blow my hard-earned cash on a jumble of pixels.)</property>
+    <property name="desc-eo">(Hazardbitludo! Mirinde!)
+(La ekrano eĉ montras apenaŭvestitajn desegnitajn knabinojn!)
+(... mi ankoraŭ preferus ne forĵeti la monon pro nuraj bitokoj.)</property>
+    <property name="id" value="✿:slot-machine"/>
+    <property name="interact" value="✿:description-interact"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="54" name="Slot-machine" x="359.333" y="314.667">
+   <properties>
+    <property name="desc-en">(A slot-machine! Wow!)
+(It's even branded with cute anime girls!)
+(... but I'd rather not blow my hard-earned cash on a jumble of pixels.)</property>
+    <property name="desc-eo">(Hazardbitludo! Mirinde!)
+(La ekrano eĉ montras apenaŭvestitajn desegnitajn knabinojn!)
+(... mi ankoraŭ preferus ne forĵeti la monon pro nuraj bitokoj.)</property>
     <property name="id" value="✿:slot-machine"/>
     <property name="interact" value="✿:description-interact"/>
    </properties>

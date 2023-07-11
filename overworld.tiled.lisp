@@ -81,16 +81,22 @@ character-scale world coordinates in plist form."
   "Convert a Tiled object into a “trigger” plist. That is, a rectangle with
 a :FUNCTION to be triggered when it’s stepped upon."
   (when (tiled-rectangle-p tiled-obj)
-    (let ((obj-x (cl-tiled:object-x tiled-obj))
+    (let ((properties (cl-tiled:properties tiled-obj))
+          (obj-x (cl-tiled:object-x tiled-obj))
           (obj-y (cl-tiled:object-y tiled-obj))
           (obj-width (cl-tiled:rect-width tiled-obj))
           (obj-height (cl-tiled:rect-height tiled-obj)))
-      (list
-       :coords (tiled-coords->world-coords obj-x obj-y tiled-map)
-       :width obj-width
-       :height obj-height
-       :bottom-coords (tiled-coords->world-coords (+ obj-x obj-width) (+ obj-y obj-height) tiled-map)
-       :function (gethash "function" (cl-tiled:properties tiled-obj))))))
+      (append
+       (loop for key being the hash-keys in properties
+        for val being the hash-values in properties
+        collect (intern (string-upcase key) "KEYWORD")
+        collect val)
+       (list
+        :coords (tiled-coords->world-coords obj-x obj-y tiled-map)
+        :width obj-width
+        :height obj-height
+        :bottom-coords (tiled-coords->world-coords (+ obj-x obj-width) (+ obj-y obj-height)
+                                                   tiled-map))))))
 
 
 (defun object-layer-entities (layer &optional (entity-chunks '()))

@@ -107,14 +107,28 @@ dialogue, among which one will be selected randomly."
       map (start-dialogue (say interactee-id :en en-line :eo eo-line)))))
 
 
+(defun string->symbol (string)
+  "Given a STRING with an optionally defined package (e.g., “package:symbol”),
+return it as an appopriate symbol."
+  (let* ((split (str:split ":" (string-upcase string)))
+         (package (when (eq (length split) 2)
+                    (car split)))
+         (symbol (or (cadr split) (car split))))
+    (if package
+        (intern symbol package)
+        (intern symbol))))
+
+
+(defun entrance-trigger (map trigger-plist)
+  "A trigger that can be used to move the user from one MAP to another, via the
+:MAP property in a trigger’s Tiled entity."
+  (list :map (🌍:merge-maps map (symbol-value (read-from-string (getf trigger-plist :map))))))
+
+
 
 ;;; ———————————————————————————————————
 ;;; The Outside World™
 ;;; ———————————————————————————————————
-(defun casino-entrance-trigger (&optional map)
-  (list :map (🌍:merge-maps map *casino-map*)))
-
-
 (defun factory-window-interact (&optional map interactee-id)
   (make-dialogue-state
    map
@@ -351,10 +365,6 @@ avoid triggering this."
 ;;; ———————————————————————————————————
 ;;; Casino!
 ;;; ———————————————————————————————————
-(defun casino-exit-trigger (&optional map)
-  (list :map (🌍:merge-maps map *outdoors-map*)))
-
-
 
 ;;; ———————————————————————————————————
 ;;; Destitute Gambler arc
@@ -607,13 +617,13 @@ avoid triggering this."
           (flashback-casino-outro map)))
 
 
-(defun flashback-casino-trigger (map)
+(defun flashback-casino-trigger (map &optional trigger-plist)
     (make-dialogue-state
      map
      (flashback-casino-dialogue map)))
 
 
-(defun flashback-casino-exit-top-trigger (map)
+(defun flashback-casino-exit-top-trigger (map &optional trigger-plist)
   (make-dialogue-state
    map
    (start-dialogue
@@ -624,7 +634,7 @@ avoid triggering this."
     (move 'player '(:x 35 :y 2)))))
 
 
-(defun flashback-casino-exit-bottom-trigger (map)
+(defun flashback-casino-exit-bottom-trigger (map &optional trigger-plist)
   (make-dialogue-state
    map
    (start-dialogue

@@ -243,7 +243,7 @@ Very kindly removes a list of parameters to be returned by the overworld state-f
          (trigger (trigger-at-coords map (list :x (getf coords :x) :y (getf coords :y)))))
     (if (and trigger (getf trigger :function))
         (apply (string->symbol (getf trigger :function))
-               (list map))
+               (list map trigger))
         (list :map map))))
 
 

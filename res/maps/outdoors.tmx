@@ -1776,7 +1776,7 @@ DANĜERA LOKO - VENENA MATERIO
     <property name="desc-eo">(La laborejo de paĉjo.)
 (Mi memoras ke, dum infanaĝo, li ofte petis min helpi lin tie.)
 (Fek', tiom enuigis!!)</property>
-    <property name="id" value="✿:grocery-window"/>
+    <property name="id" value="✿:machinist-window"/>
     <property name="interact" value="✿:description-interact"/>
    </properties>
    <point/>
@@ -1836,7 +1836,7 @@ DANĜERA LOKO - VENENA MATERIO
   </object>
  </objectgroup>
  <objectgroup id="7" name="People">
-  <object id="2" name="Player" type="Person" x="983.334" y="1637.34">
+  <object id="2" name="Player" type="Person" x="261.334" y="1604.34">
    <properties>
     <property name="facing-right" type="bool" value="true"/>
     <property name="id" value="✿:player"/>
@@ -1869,7 +1869,8 @@ DANĜERA LOKO - VENENA MATERIO
  <objectgroup id="14" name="Triggers">
   <object id="11" name="Casino entrance" type="Trigger" x="204.551" y="1547.73" width="93.7125" height="15.3923">
    <properties>
-    <property name="function" value="✿:casino-entrance-trigger"/>
+    <property name="function" value="✿:entrance-trigger"/>
+    <property name="map" value="✿::*casino-map*"/>
    </properties>
   </object>
  </objectgroup>

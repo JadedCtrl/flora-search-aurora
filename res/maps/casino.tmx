@@ -145,7 +145,8 @@
  <objectgroup id="13" name="Triggers">
   <object id="37" name="Exit" type="Trigger" x="378.56" y="668.417" width="40.8802" height="12.1666">
    <properties>
-    <property name="function" value="✿:casino-exit-trigger"/>
+    <property name="function" value="✿:entrance-trigger"/>
+    <property name="map" value="✿::*outdoors-map*"/>
    </properties>
   </object>
  </objectgroup>

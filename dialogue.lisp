@@ -75,9 +75,12 @@ If not, have some tea on me: I’m paying. =w="
          :face (getf keys :face))))
 
 
-(defun move (speaker world-coords &key (delay .05))
-  (list
-   (list :speaker speaker :coords world-coords :delay delay)))
+(defun move (speaker coords &key (delay .05))
+  (if (or (getf coords :Δx) (getf coords :Δy))
+      (list
+       (list :speaker speaker :relative-coords coords :delay delay))
+      (list
+        (list :speaker speaker :coords coords :delay delay))))
 
 
 
@@ -166,6 +169,19 @@ coordinates listed in the DIALOGUE’s :COORDS property. … If applicable, ofc.
     finished-moving-p))
 
 
+(defun ensure-dialogue-movement (map dialogue-list)
+  "Given a DIALOGUE-LIST, ensure that the first line of dialogue’s movement is
+absolute rather than relative, if it contains any movement at all."
+  (let ((dialogue (car dialogue-list)))
+    (when (and (getf dialogue :relative-coords)
+               (not (getf dialogue :coords)))
+      (let ((speaker-coords (🌍:getf-entity-data map (dialogue-speaker dialogue) :coords))
+            (relative-coords (getf dialogue :relative-coords)))
+        (setf (getf (car dialogue-list) :coords)
+              (list :x (+ (getf speaker-coords :x) (or (getf relative-coords :Δx) 0))
+                    :y (+ (getf speaker-coords :y) (or (getf relative-coords :Δy) 0))))))))
+
+
 (defun finished-printing-p (dialogue)
   "Whether or not a line of dialogue has been completely printed to the screen."
   (or (not (getf dialogue :text))
@@ -180,6 +196,7 @@ Returns the state for use with STATE-LOOP, pay attention!"
   (update-speaking-face map (car dialogue-list))
   (update-entity-data map (car dialogue-list))
   (progress-line-delivery (car dialogue-list))
+  (ensure-dialogue-movement map dialogue-list)
   ;; Progress to the next line of dialogue as appropriate.
   (let* ((dialogue (car dialogue-list))
          (text (getf dialogue :text))
@@ -314,6 +331,7 @@ and max-row; for use with RENDER-STRING. Like so:
                                                          :rightp (not leftp))
         (optimal-text-placement-vertically text coords :width width :height height
                                              :downp  (not playerp)))))
+
 
 (defun ensure-dialogue-layout (map dialogue-list)
   "Given a DIALOGUE-LIST, ensure that the FIRST line of dialogue has a :layout

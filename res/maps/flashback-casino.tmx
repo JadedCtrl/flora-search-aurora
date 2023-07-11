@@ -85,22 +85,34 @@
  <objectgroup id="13" name="Triggers">
   <object id="47" name="Sitting down" type="Trigger" x="672.06" y="139.548" width="19.7552" height="12.1666">
    <properties>
-    <property name="function" value="✿:flashback-casino-trigger"/>
+    <property name="function" value="✿:flashback-casino-seat-trigger"/>
    </properties>
   </object>
   <object id="48" name="Sitting down" type="Trigger" x="737.185" y="223.756" width="9.3802" height="12.1666">
    <properties>
-    <property name="function" value="✿:flashback-casino-trigger"/>
+    <property name="function" value="✿:flashback-casino-seat-trigger"/>
    </properties>
   </object>
   <object id="54" name="Don’t leave!!" type="Trigger" x="15" y="3.66667" width="763.333" height="9.66667">
    <properties>
-    <property name="function" value="✿:flashback-casino-exit-top-trigger"/>
+    <property name="desc-en">(I should probably get back to my folks.)
+(They're waiting on me, after all!)
+</property>
+    <property name="desc-eo">(Mi eble reiru al la gepatroj.)
+(Ili atendas min por ekfesti!)
+</property>
+    <property name="function" value="✿:move-trigger"/>
+    <property name="Δx" type="int" value="0"/>
+    <property name="Δy" type="int" value="3"/>
    </properties>
   </object>
   <object id="55" name="Nooo don’t goo!" type="Trigger" x="377.667" y="328.667" width="37.3333" height="6">
    <properties>
-    <property name="function" value="✿:flashback-casino-exit-bottom-trigger"/>
+    <property name="desc-en" value="(I can't ditch my own birthday party!)"/>
+    <property name="desc-eo" value="(Mi ne fuĝu de mia propra naskiĝtaga festo!)"/>
+    <property name="function" value="✿:move-trigger"/>
+    <property name="Δx" type="int" value="0"/>
+    <property name="Δy" type="int" value="-3"/>
    </properties>
   </object>
  </objectgroup>

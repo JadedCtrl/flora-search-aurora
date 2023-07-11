@@ -107,16 +107,23 @@ dialogue, among which one will be selected randomly."
       map (start-dialogue (say interactee-id :en en-line :eo eo-line)))))
 
 
-(defun string->symbol (string)
-  "Given a STRING with an optionally defined package (e.g., “package:symbol”),
-return it as an appopriate symbol."
-  (let* ((split (str:split ":" (string-upcase string)))
-         (package (when (eq (length split) 2)
-                    (car split)))
-         (symbol (or (cadr split) (car split))))
-    (if package
-        (intern symbol package)
-        (intern symbol))))
+(defun move-trigger (map trigger-plist)
+  "A trigger function that forces the player to move either relatively or
+absolutely, depending on the properties of TRIGGER-PLIST (:ΔX & ΔY or X & Y).
+It will also display a monologue of the :DESC-* properties before movement.
+Useful for making barriers the player character refuses to traverse."
+  (make-dialogue-state
+   map
+   (apply
+    #'start-dialogue
+    (append
+      (loop for en-line in (str:lines (getf trigger-plist :desc-en))
+         for eo-line in (str:lines (getf trigger-plist :desc-eo))
+         collect (mumble 'player :en en-line :eo eo-line))
+      (list (move 'player (list :Δx (getf trigger-plist :Δx)
+                                :Δy (getf trigger-plist :Δy)
+                                :x (getf trigger-plist :x)
+                                :y (getf trigger-plist :y))))))))
 
 
 (defun entrance-trigger (map trigger-plist)
@@ -617,30 +624,10 @@ avoid triggering this."
           (flashback-casino-outro map)))
 
 
-(defun flashback-casino-trigger (map &optional trigger-plist)
+(defun flashback-casino-seat-trigger (map &optional trigger-plist)
     (make-dialogue-state
      map
      (flashback-casino-dialogue map)))
-
-
-(defun flashback-casino-exit-top-trigger (map &optional trigger-plist)
-  (make-dialogue-state
-   map
-   (start-dialogue
-    (mumble 'player :eo "(Mi eble reiru al la gepatroj.)"
-                    :en "(I should probably get back to my folks.)")
-    (mumble 'player :eo "(Ili atendas min por ekfesti!)"
-                    :en "(They're waiting on me, after all!)")
-    (move 'player '(:x 35 :y 2)))))
-
-
-(defun flashback-casino-exit-bottom-trigger (map &optional trigger-plist)
-  (make-dialogue-state
-   map
-   (start-dialogue
-    (mumble 'player :eo "(Mi ne fuĝu de mia propra naskiĝtaga festo!)"
-                    :en "(I can't ditch my own birthday party!)")
-    (move 'player '(:x 36 :y 17)))))
 
 
 

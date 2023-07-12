@@ -36,7 +36,6 @@ exceeds the size of SEQUENCE, the returned subsequence is equivalent to SEQUENCE
   "Convert a list of items’ plists (that one might get from OVERWORLD’s map
 :ITEMS) into a pretty and presentable menu-grid of items, for use with
 📋:MENU-STATE(-*)."
-  (format *error-output* "ITEMS ~S~%" item-plists)
   (let* ((label-width 7)
          (border-width 2)
          ;; Weird bounding, whoops! I’m so clumsy, it’s endearing instead of just annoying! … Right? =w=”
@@ -54,7 +53,7 @@ exceeds the size of SEQUENCE, the returned subsequence is equivalent to SEQUENCE
                                                              (getf (cdr item) :name-eo)))
                             :selected (and (eq row 0) (eq column 0))
                             :selection (if (and (eq row 0) (eq column 0)) 100 0)
-                            :return nil
+                            :submenu 't
                             :row row)
                       (cdr item)))
             item-plists)))
@@ -64,13 +63,42 @@ exceeds the size of SEQUENCE, the returned subsequence is equivalent to SEQUENCE
 ;;; ———————————————————————————————————
 ;;; Inventory loop logic
 ;;; ———————————————————————————————————
-(defun inventory-state-update (map inventory-menu)
+(defun submenu (item)
+  "Create a ITEM’s submenu, from its plist."
+  (nconc (when (getf item :use)
+           (list
+            (list :en "Use it!"
+                  :eo  "Uzi ĝin!"
+                  :selected 't :selection 100
+                  :use 't)))
+         (list
+           (list :en "Lose it!"
+                 :eo "Ne!"
+                 :use nil))))
+
+
+(defun inventory-state-update (map inventory-menu submenu)
   "The input-taking/logic-handling component of the inventory state-function.
 Part of INVENTORY-STATE."
-  (if (📋:menu-state-update inventory-menu)
-      (list :map map :inventory inventory-menu)
-      (values nil
-             (list :map map))))
+  (let ((menu-return (📋:menu-state-update (if submenu submenu inventory-menu)))
+        (selected-item (📋:selected-menu-item inventory-menu)))
+    (cond
+      ;; Display the pop-up menu when an item is selected.
+      ((and (listp menu-return) (getf menu-return :submenu))
+       (list :parameters (list :map map :inventory inventory-menu
+                               :submenu (submenu selected-item))))
+      ;; User decided to use the item, let’s go!
+      ((and (listp menu-return) (getf menu-return :use) (getf selected-item :use))
+       (funcall (…:string->symbol (getf selected-item :use)) map selected-item))
+      ;; User decided not to use the item.
+      ((and (listp menu-return) (member :use menu-return))
+       (list :parameters (list :map map :inventory inventory-menu)))
+      ;; Return the menu itself, if non-nil.
+      (menu-return
+       menu-return)
+      ;; If menu-return was non-nil, the user left the menu. Let’s leave inventory!
+      ('t
+       (list :drop 1 :parameters (list :map map))))))
 
 
 
@@ -92,27 +120,28 @@ the bottom of the screen."
                           '(:x 1 :y 18) :width 70)))
 
 
-(defun inventory-state-draw (matrix items)
+(defun inventory-state-draw (matrix items submenu)
   "The drawing component of the inventory state-function.
 Part of INVENTORY-STATE."
   (📋:menu-state-draw matrix items)
-  (render-selected-item matrix items))
+  (render-selected-item matrix items)
+  (when submenu
+    (📋:menu-state-draw matrix submenu)))
 
 
 
 ;;; ———————————————————————————————————
 ;;; Inventory loop
 ;;; ———————————————————————————————————
-(defun inventory-state (matrix &key map inventory)
+(defun inventory-state (matrix &key map inventory (submenu nil))
   "A state-function for use with STATE-LOOP."
   (sleep .02)
-  (inventory-state-draw matrix inventory)
-  (inventory-state-update map inventory))
+  (inventory-state-draw matrix inventory submenu)
+  (inventory-state-update map inventory submenu))
 
 
 (defun make-inventory-state (map)
   "Return a state-function for inventory-listing, for use with STATE-LOOP."
-  (lambda (matrix &key (map map) (inventory (items->menu-plist (gethash :items map))))
+  (lambda (matrix &key (map map) (submenu nil) (inventory (items->menu-plist (gethash :items map))))
     (apply #'🎒:inventory-state
-           (list matrix :map map :inventory inventory))))
-
+           (list matrix :map map :inventory inventory :submenu submenu))))

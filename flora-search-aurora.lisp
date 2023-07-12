@@ -631,6 +631,13 @@ avoid triggering this."
      (flashback-casino-dialogue map)))
 
 
+(defun cry (&optional map ring)
+  (nconc (list :drop 1)
+         (make-dialogue-state
+           map
+           (start-dialogue (mumble 'player :en "FUCK")))))
+
+
 
 ;;; ———————————————————————————————————
 ;;; Main-menu data

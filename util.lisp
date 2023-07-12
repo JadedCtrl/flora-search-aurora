@@ -123,8 +123,20 @@ minimum returns your more pitiful of moments."
 
 
 ;;; ———————————————————————————————————
-;;; Linguistic affirs
+;;; Linguistic & symbolic affirs
 ;;; ———————————————————————————————————
+(defun string->symbol (string)
+  "Given a STRING with an optionally defined package (e.g., “package:symbol”),
+return it as an appopriate symbol."
+  (let* ((split (str:split ":" (string-upcase string)))
+         (package (when (eq (length split) 2)
+                    (car split)))
+         (symbol (or (cadr split) (car split))))
+    (if package
+        (intern symbol package)
+        (intern symbol))))
+
+
 (defun langcode->keysym (str)
   "Given a language’s code (es/cz/it/etc.), return a corresponding key symbol,
 if the language is among the supported. Otherwise, nil."

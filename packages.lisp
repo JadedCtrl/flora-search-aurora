@@ -22,6 +22,7 @@
            #:plist=
            #:incf-0
            #:at-least #:at-most
+           #:string->symbol
            #:system-language #:langcode->keysym #:getf-lang))
 
 (defpackage :flora-search-aurora.input
@@ -74,7 +75,6 @@
            #:world-coords->screen-coords
            #:world-coords-chunk
            #:map->plist #:plist->map
-           #:string->symbol
            #:save-map-to-file))
 
 (defpackage :flora-search-aurora.overworld

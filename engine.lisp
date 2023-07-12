@@ -39,7 +39,7 @@ overheat, or something ¯\_(ツ)_/¯"
     (let ((state-result
             (apply (car states) (cons matrix state-params)))) ;; Run the last-added state-loop.
       (✎:print-screen-matrix (✎:matrix-delta last-matrix matrix)) ;; Print its results.
-      (format *error-output* "~S~%" state-result)
+;;      (format *error-output* "~S~%" state-result)
       (force-output)
       (state-loop
        (cond ((listp state-result)

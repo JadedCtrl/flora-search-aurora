@@ -403,6 +403,7 @@ Fojfoje mi ja ŝatas mian fakon, mdr.</property>
     <property name="name-en" value="ring"/>
     <property name="name-eo" value="ringo"/>
     <property name="reaction-face" value="&gt;_&lt;"/>
+    <property name="use" value="✿:cry"/>
    </properties>
    <point/>
   </object>

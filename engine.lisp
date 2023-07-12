@@ -31,31 +31,31 @@ to the terminal.
 What the state-function returns is pretty important, having different repercussions:
   * NIL       —  The function is removed from STATES, and so the next function in STATES will start
                  getting executed instead.
-  * NIL; List —  The function is popped off STATES and the list is used as the new parameters for
-                 the next function in STATES.
-  * Function  —  The function is pushed to the front of STATES, and so is executed instead of the
-                 current function.
-  * List      —  The current function (front of STATES) continues to be executed with the given
-                 list as a parameters list.
+  * T         —  The function will continue to be run with the same parameters.
+  * (:FUNCTION FUNCTION :PARAMETERS LIST :DROP NUMBER)
 Make note to add a delay w SLEEP to your state functions, or… well, y’know. Your computer will
 overheat, or something ¯\_(ツ)_/¯"
   (when states
-    (multiple-value-bind (state-result new-state-params)
-        (apply (car states) (cons matrix state-params)) ;; Run the latest-added update/draw loop
+    (let ((state-result
+            (apply (car states) (cons matrix state-params)))) ;; Run the last-added state-loop.
       (✎:print-screen-matrix (✎:matrix-delta last-matrix matrix)) ;; Print its results.
+      (format *error-output* "~S~%" state-result)
       (force-output)
       (state-loop
-          (cond ((functionp state-result)
-                 (cons state-result states))
-                ((not state-result)
-                 (cdr states))
-                ('t states))
-          :last-matrix matrix
-          :state-params
-          (cond ((not state-result)
-                 new-state-params)
-                ((listp state-result)
-                 state-result))))))
+       (cond ((listp state-result)
+              (nconc (if (getf state-result :function)
+                         (list (getf state-result :function)))
+                     (nthcdr (or (getf state-result :drop) 0) states)))
+             ((not state-result)
+              (cdr states))
+             ('t states))
+       :state-params
+       (cond ((listp state-result)
+              (getf state-result :parameters))
+             ((not state-result)
+              nil)
+             ('t state-params))
+       :last-matrix matrix))))
 
 
 (defun main (states)

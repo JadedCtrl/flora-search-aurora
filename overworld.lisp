@@ -210,9 +210,9 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
                   (interaction (getf (cdr interactee) :interact)))
              (if interaction
                  (apply (string->symbol interaction) (list map interactee-id))
-                 (list :map map))))
+                 (list :parameters (list :map map)))))
           ('⌨:❎
-           (🎒:make-inventory-state map))
+           (list :function (🎒:make-inventory-state map)))
           ;; Simple up-down-left-right movements
           ('⌨:→
            (move-player map :Δx 1))
@@ -231,8 +231,8 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
           ('⌨:↳
            (move-player map :Δx 1 :Δy 1))
           (otherwise
-           (list :map map))))
-      (list :map map)))
+           (list :parameters (list :map map)))))
+      (list :parameters (list :map map))))
 
 
 (defun move-player (map &key (Δx 0) (Δy 0))
@@ -244,7 +244,7 @@ Very kindly removes a list of parameters to be returned by the overworld state-f
     (if (and trigger (getf trigger :function))
         (apply (string->symbol (getf trigger :function))
                (list map trigger))
-        (list :map map))))
+        (list :parameters (list :map map)))))
 
 
 (defun move-entity (map entity-id &key (Δx 0) (Δy 0))

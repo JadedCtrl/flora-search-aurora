@@ -145,6 +145,7 @@ That is, 0 for non-selected items and 100 for selected items."
              (selected-item (nth (selected-menu-item-position menu-plist)
                                  menu-plist))
              (func (getf selected-item :function))
+             (exec (getf selected-item :exec))
              (return-val-p (member :return selected-item))
              (return-val (getf selected-item :return)))
         (case (getf input :semantic)
@@ -171,16 +172,9 @@ That is, 0 for non-selected items and 100 for selected items."
           ('⌨:❎
            nil)
           ('⌨:🆗
-           (cond ((and func return-val-p)
-                  (apply func '())
-                  return-val)
-                 (func
-                  (apply func '()))
-                 (return-val-p
-                  return-val)
-                 ('t
-                  't)))
-          (otherwise 't)))
+           (if (getf selected-item :exec)
+               (apply (getf selected-item :exec) '())
+               selected-item))))
       't))
 
 

@@ -213,19 +213,20 @@ Returns the state for use with STATE-LOOP, pay attention!"
       ((or (and did-press-enter-p did-finish-printing-p did-finish-moving-p)
            (and (not text) did-finish-moving-p))
        (if (cdr dialogue-list)
-          (list :dialogue (cdr dialogue-list) :map map)
+          (list :parameters (list :dialogue (cdr dialogue-list) :map map))
           (progn
             (✎:hide-cursor)
-            (values (or (getf dialogue :return) nil)
-                    (or (getf dialogue :return-2)
-                        (list :map map))))))
+            (list :drop 1
+                  :function (getf dialogue :function)
+                  :parameters (or (getf dialogue :parameters)
+                                  (list :map map))))))
       ;; Allow interupting text-printing to end it!
       ((and did-press-enter-p (not did-finish-printing-p))
        (setf (getf (car dialogue-list) :progress) (length text))
-       (list :dialogue dialogue-list :map map))
+       (list :parameters (list :dialogue dialogue-list :map map)))
       ;; If no input, keep steady!
       ('t
-       (list :dialogue dialogue-list :map map)))))
+       (list :parameters (list :dialogue dialogue-list :map map))))))
 
 
 
@@ -394,9 +395,10 @@ A state-function for use with STATE-LOOP."
 
 (defun make-dialogue-state (map dialogue-list)
   "Return a state-function for a section of dialogue, for use with STATE-LOOP."
-  (lambda (matrix &key (map map) (dialogue dialogue-list))
-    (🌍:overworld-state-draw matrix map)
-    (dialogue-state matrix :map map :dialogue dialogue)))
+  (list :function
+        (lambda (matrix &key (map map) (dialogue dialogue-list))
+          (🌍:overworld-state-draw matrix map)
+          (dialogue-state matrix :map map :dialogue dialogue))))
 
 
 ;; Split a banana in two, bisection-fruit,

@@ -129,7 +129,8 @@ Useful for making barriers the player character refuses to traverse."
 (defun entrance-trigger (map trigger-plist)
   "A trigger that can be used to move the user from one MAP to another, via the
 :MAP property in a trigger’s Tiled entity."
-  (list :map (🌍:merge-maps map (symbol-value (read-from-string (getf trigger-plist :map))))))
+  (list :parameters
+        (list :map (🌍:merge-maps map (symbol-value (read-from-string (getf trigger-plist :map)))))))
 
 
 
@@ -365,7 +366,7 @@ avoid triggering this."
     (say    'player :eo "Vi teruras, Saŝa."
                     :en "You're the worst, Sasha.")
     (move   'player '(:x 51 :y 19))
-    `((:return-2 ,(list :map (merge-maps map *casino-map*)))))))
+    `((:parameters ,(list :map (merge-maps map *casino-map*)))))))
 
 
 
@@ -615,7 +616,7 @@ avoid triggering this."
    (say 'flashback-casino-dealer
         :eo "Nu, ĉiu krom li, metu viajn vetaĵojn. Ni komencos je la Nula Epoko!"
         :en "As for the rest of you, place your bets. It's time for the Zeroth Era!")
-   `((:return-2 ,(list :map (merge-maps map *outdoors-map*))))))
+   `((:parameters ,(list :map (merge-maps map *outdoors-map*))))))
 
 
 (defun flashback-casino-dialogue (map)
@@ -638,18 +639,18 @@ avoid triggering this."
   `((:en "IDK"
      :selection 100 :selected t)
     (:en "GO BACK"
-     :return nil)))
+     :drop 1)))
 
 
 (defun main-menu ()
   `((:en "PLAY" :eo "EKLUDI"
      :selection 100 :selected t
-     :return ,(🌍:make-overworld-state *outdoors-map*))
+     :function ,(🌍:make-overworld-state *outdoors-map*))
     (:en "SUBMENU" :eo "SUBMENUO" :row 1
-     :return ,(📋:make-menu-state (submenu)))
+     :function ,(📋:make-menu-state (submenu)))
     (:en "TERURE" :eo "BADLY" :row 1)
     (:en "QUIT" :eo "REZIGNI" :row 2
-     :return nil)))
+     :drop 1)))
 
 
 

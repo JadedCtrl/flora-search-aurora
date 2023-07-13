@@ -145,3 +145,16 @@ corresponding item in the other list, by index."
   (let ((index (position item-a list-a :test test)))
     (if index
         (nth index list-b))))
+
+
+(defun pressed-enter-p ()
+  "Whether or not the enter/return key has been pressed recently.
+Man, today’s a good day. Well, it wasn’t great, too be honest. Kind of bad,
+I slightly humiliated myself a tiny bit. But wow, I’m having such nice tea!
+Programming with nice tea! What a nice day this is. If you happen to be
+reading this, I hope your day is going well too!
+If not, have some tea on me: I’m paying. =w="
+  (and (listen)
+       (let ((input (getf (⌨:read-gamefied-char-plist) :semantic)))
+         (or (eq input '⌨:🆗)
+             (eq input '⌨:❎)))))

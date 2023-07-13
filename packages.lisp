@@ -31,6 +31,7 @@
   (:export #:read-char-plist #:read-gamefied-char-plist
            #:normalize-char-plist #:gameify-char-plist
            #:plist-char-p
+           #:pressed-enter-p
    :control :meta :shift
    +qwerty-layout+ +dvorak-layout+
    +arrows-game-layout+ +wasd-game-layout+ +ijkl-game-layout+
@@ -66,7 +67,8 @@
 (defpackage :flora-search-aurora.intermission
   (:nicknames :fsa.int :intermission :🎭)
   (:use :cl)
-  (:export :*standard-font* :*small-font*))
+  (:export
+   :make-intermission-state))
 
 (defpackage :flora-search-aurora.overworld.util
   (:nicknames :fsa.o.u :overworld.util :🌍.…)

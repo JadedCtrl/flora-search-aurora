@@ -18,11 +18,75 @@
 
 (in-package :flora-search-aurora.intermission)
 
+
+;;; ———————————————————————————————————
+;;; Intermission loop logic
+;;; ———————————————————————————————————
+(defun intermission-state-update (title subtitle side-text progress return)
+  "The input-taking/logic-handling component of the inventory state-function.
+Part of INVENTORY-STATE."
+  (if (and (⌨:pressed-enter-p) (eq progress 72))
+      return
+      (list :parameters
+            (list :title title
+                  :subtitle subtitle
+                  :side-text side-text
+                  :return return
+                  :progress (…:at-most 72 (+ progress .5))))))
 
-(defun render-clock-base (matrix coords)
-  (✎:render-string-verbatim matrix *clock-base* coords))
+
+
+;;; ———————————————————————————————————
+;;; Intermission loop drawing
+;;; ———————————————————————————————————
+(defun render-centered-line (matrix string &key (y 0))
+  "Given a STRING and a Y-position, render it to the MATRIX centered horizontally."
+  (display:render-line
+   matrix
+   string
+   (list :y y
+         :x (floor (/ (- (second (array-dimensions matrix))
+                         (length string))
+                      2)))))
 
 
+(defun intermission-state-draw (matrix title subtitle side-text progress)
+  "The drawing component of the inventory state-function.
+Part of INVENTORY-STATE."
+  (let* ((title (…:getf-lang title))
+         (title-border (subseq (make-string (length title) :initial-element #\=)
+                              0 (…:at-most (length title) (floor progress)))))
+   ;; Render the title
+   (render-centered-line matrix title :y 1)
+   ;; Render the borders surrounding the title
+   (render-centered-line matrix title-border :y 0)
+   (render-centered-line matrix title-border :y 2))
+ ;; Now the sub-title…
+  (render-centered-line matrix (…:getf-lang subtitle) :y 4)
+  ;; And the side-text…!
+  (display:render-string matrix (…:getf-lang side-text) '(:x 55 :y 10) :width 14)
+  ;; A little touch; a simple animation-ish line down the middle.
+  (display:render-line
+   matrix
+   (subseq (make-string (second (array-dimensions matrix))
+                        :initial-element #\~)
+           0 (floor progress))
+   '(:x 0 :y 9)))
 
-;;(defun render-clock-face (matrix x y &optional (hour 0) (minute 5))
-;;  ())
+
+
+;;; ———————————————————————————————————
+;;; Intermission loop
+;;; ———————————————————————————————————
+(defun intermission-state (matrix &key title subtitle side-text progress return)
+  "A state-function for use with STATE-LOOP."
+  (sleep .02)
+  (intermission-state-draw matrix title subtitle side-text progress)
+  (intermission-state-update title subtitle side-text progress return))
+
+
+(defun make-intermission-state (title subtitle side-text return)
+  "Return a state-function for intermission, for use with STATE-LOOP."
+  (lambda (matrix &key (title title) (subtitle subtitle) (side-text side-text) (return return) (progress 0))
+    (funcall #'intermission-state
+             matrix :title title :subtitle subtitle :side-text side-text :progress progress :return return)))

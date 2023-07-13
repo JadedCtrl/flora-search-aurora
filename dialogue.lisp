@@ -20,23 +20,6 @@
 
 
 ;;; ———————————————————————————————————
-;;; Misc. utilities
-;;; ———————————————————————————————————
-(defun pressed-enter-p ()
-  "Whether or not the enter/return key has been pressed recently.
-Man, today’s a good day. Well, it wasn’t great, too be honest. Kind of bad,
-I slightly humiliated myself a tiny bit. But wow, I’m having such nice tea!
-Programming with nice tea! What a nice day this is. If you happen to be
-reading this, I hope your day is going well too!
-If not, have some tea on me: I’m paying. =w="
-  (and (listen)
-       (let ((input (getf (⌨:read-gamefied-char-plist) :semantic)))
-         (or (eq input '⌨:🆗)
-             (eq input '⌨:❎)))))
-
-
-
-;;; ———————————————————————————————————
 ;;; Dialogue-generation helpers
 ;;; ———————————————————————————————————
 (defun start-dialogue (&rest dialogue-tree)
@@ -200,7 +183,7 @@ Returns the state for use with STATE-LOOP, pay attention!"
   ;; Progress to the next line of dialogue as appropriate.
   (let* ((dialogue (car dialogue-list))
          (text (getf dialogue :text))
-         (did-press-enter-p (pressed-enter-p))
+         (did-press-enter-p (⌨:pressed-enter-p))
          (did-finish-printing-p (finished-printing-p dialogue))
          (did-finish-moving-p (progress-movement map dialogue)))
     ;; Only show the cursor when rendering text!

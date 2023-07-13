@@ -180,10 +180,11 @@ run the :USE function of the nearest entity, if it has any."
             (list (nconc (list :drop 1) use-result))
             (t use-result)))
         (nconc
-         (list :drop 1
-           (make-dialogue-state
-             map
-             (start-dialogue (mumble 'player :en "(They don't seem to want it.)"))))))))
+         (list :drop 1)
+         (make-dialogue-state
+           map
+           (start-dialogue (mumble 'player :en "(They don't seem to want it.)"
+                                           :eo "(Ĝi verŝajne ne volas tion.)")))))))
 
 
 
@@ -333,93 +334,200 @@ run the :USE function of the nearest entity, if it has any."
   (make-dialogue-state map (childhood-friend-dialogue map)))
 
 
+(defun childhood-friend-dialogue-bracelet-intro (sasha)
+  (start-dialogue
+   (face 'player "=w=" "=v=")
+   (say 'player  :eo "Nu, mi ankoraŭ opinias ke ĉi tio akordas vian stilon tre bone."
+                 :en "I still think this suits you, you know.")
+   (face sasha   ";w:" ":o:")
+   (say sasha    :en "...")
+   (say sasha    :eo "... vi ankoraŭ havas tion?"
+                 :en "... you still have that?")
+   (say 'player  :eo "Kompreneble mi plu havas!"
+                 :en "Of course I do!")
+   (say 'player  :eo "Sed mi ne plu; ĝi ja estas via."
+                 :en "But I shouldn't; it's yours, after all.")
+   (say sasha    :en "...")))
+
+
+(defun childhood-friend-dialogue-bracelet-bad-end (sasha)
+  (start-dialogue
+   (face sasha   "v-v" "vov")
+   (face 'player ":w;" ":o;")
+   (say  sasha   :eo "Pŝ!"
+                 :en "Psh!")
+   (say  sasha   :eo "Ankoraŭ estas la malĝusta koloro, do..!"
+                 :en "It's still the wrong colour, so..!"
+                 :face "<o<")
+   (say  sasha   :eo "Lasu min!"
+                 :en "Leave me alone!"
+                 :face ">o<")
+   (say  'player :eo "Kial vi ankoraŭ forpuŝas min ĉi tiom?"
+                 :en "Why do you still push me away this much?")
+   (say  sasha   :eo "Puŝas? Bona ideo, mi falpuŝu vin al la maro!"
+                 :en "Push? Good idea, I'll push you off this cliff!")
+   (say  'player :eo "Vi ankoraŭ kompenas nenion ajn, Saŝa."
+                 :en "You still don't get it at all, Sasha.")
+   (say  'player :eo "... kaj ne puŝu min, bonvole!!"
+                 :en "... and please don't push me!!"
+                 :face "@o@")))
+
+
+(defun childhood-friend-dialogue-bracelet-good-end (sasha)
+  (start-dialogue
+   (face   sasha   "=v=\"" "=v=\"")
+   (say    sasha   :eo "Nu, dankon..."
+                   :en "Well, thanks...")
+   (say    sasha   :eo "[SAŜA prenas ĈIRKAŬMANON de vi.]"
+                   :en "[SASHA takes BRACELET from you.]")
+   (face   sasha  "<w<" "<w<")
+   (say    sasha   :eo "Verdire, mi mensogetis tiam..."
+                   :en "To be honest, I lied a bit, back then...")
+   (say    sasha   :eo "Ĉi tiu koloro fakte tre plaĉas al mi."
+                   :en "I actually really like this colour."
+                   :face ">w>")
+   (say    'player :eo "Mi ĝojas, ke finfine estos via."
+                   :en "I'm glad it's finally yours.")
+   (say    sasha   :eo "Mi suportos ĝin ĉiutage!"
+                   :en "I'll wear it every day!"
+                   :face "^o^")
+   (say    sasha   :eo "... ho. Fek! Nu!"
+                   :en "... wait. Shit!"
+                   :face "<w<\"")
+   (say    sasha   :eo "Simple pro la aspekto! Ne gravas al mi, ĉu estas donaco aŭ ne!!"
+                   :en "Just because it's pretty! I don't care that it's a gift or whatever!!"
+                   :face ">o<")
+   (face   'player "` `" "`o`")
+   (mumble 'player :eo "(Mi supozas, ke la kerno de homo ne tro multe sanĝiĝas...)"
+                   :en "(At the end of the day, I guess people can't change too much...)")
+   (mumble 'player :eo "(Sed tamen."
+                   :en "(But y'know what? This is good enough for me.)")
+   (face   'player "^w^" "^o^")
+   (mumble 'player :eo "(Ĉi tio sufiĉas al mi!)"
+                   :en "(This is good enough for me!)")))
+
+
+(defun childhood-friend-dialogue-bracelet (map sasha)
+  (append (childhood-friend-dialogue-bracelet-intro sasha)
+          (if (getf-act map :sasha-flourish)
+              (childhood-friend-dialogue-bracelet-good-end sasha)
+              (childhood-friend-dialogue-bracelet-bad-end sasha))))
+
+
+(defun childhood-friend-use (map item-plist &optional entity-id)
+  (let ((item-id (…:string->symbol (getf item-plist :id))))
+    (cond ((eq item-id 'bracelet)
+           (make-dialogue-state
+            map
+            (childhood-friend-dialogue-bracelet map entity-id)))
+          ('t
+           (refusal-use map item-plist entity-id)))))
+
+
 
 ;;; ———————————————————————————————————
 ;;; School prologue: Childhood friend
 ;;; ———————————————————————————————————
-(defun flashback-school-trigger (map)
+(defun flashback-school-trigger (map &optional trigger-plist)
   "This is triggered right as the player enters the map — they literally can't
 avoid triggering this."
   (take-item map 'bracelet)
   't)
 
 
-(defun flashback-childhood-friend-interact (map &optional sasha)
+(defun flashback-childhood-friend-dialogue-intro (sasha)
+  (start-dialogue
+   (face   'player "` `" "`o`")
+   (say    'player :eo "Ĉu ĉio enordas, Saŝa? Iom malfruas, ĉu ne?"
+                   :en "Is everything OK, Sasha? It's a bit late, isn't it?")
+   (face   sasha   "=_=" "=o=")
+   (say    sasha   :eo "Ho, jes, mi simple ĵus eliris klubkunvenon."
+                   :en "Yea, I just left a club-meeting, is all.")
+   (say    'player :eo "Hodiaŭ ne estas klubotago..."
+                   :en "Today isn't club day...")
+   (say    sasha   :eo "Nu, estas escepte speciala klubo!"
+                   :en "Well, whatever, it's a special club!"
+                   :face "<o<")
+   (say    sasha   :eo "Nu, kial VI restas? Ĉu ankoraŭ havas ne amikojn?"
+                   :en "And what're YOU doing here? Still no friends?")
+   (say    'player :eo "Ankoraŭ sole vin."
+                   :en "Still just you.")
+   (face   sasha   ":v:" ":o:")
+   (mumble sasha   :en "...")
+   (say    sasha   :eo "Nu..."
+                   :en "Well...")
+   (mumble sasha   :en "...")
+   (face   sasha   "<-<" "<o<")
+   (face   'player ":w:" ":u:")
+   (say    sasha   :eo "Pŝ! Fermu la buŝon, vermo!"
+                   :en "Ugh! Just shut up, you loser!")
+   (face   sasha   ">->" ">o>")
+   (say    sasha   :eo "Kvazaŭ ni povus esti tiel!"
+                   :en "As if!")
+   (face   sasha   "<-<" "<o<")
+   (say    sasha   :eo "Simple lasu min al paco, fek'!!"
+                   :en "Just get the hell out of my face!!"
+                   :face ">o<")
+   (say    'player :eo "Bedaŭron..."
+                   :en "Sorry...")
+   (move   'player '(:x 46 :y 11) :delay .05)
+   (face   'player "^_^" "^o^")
+   (say    'player :eo "Ho, jes!"
+                   :en "Oh, yea!")
+   (move   sasha  '(:x 36 :y 3) :delay .03)
+   (move   'player '(:x 43 :y 4) :delay .05)
+   (move   sasha  '(:x 37 :y 3))))
+
+
+(defun flashback-childhood-friend-dialogue-bracelet (map sasha)
+  (start-dialogue
+   (say    'player :eo "Mi freŝe trovis ĉi tion, ĝi ŝajnis akorda al via stilo."
+                   :en "I found this a while back, I thought you'd like it.")
+   (face   sasha   ";w:" ";u:")
+   (mumble 'player :eo "[Vi donas al SAŜA ĉirkaŭmanon belbrilan.]"
+                   :en "[You give SASHA a shiny bracelet.]")
+   (say    sasha   :eo "Ho, tio surprize afablis...."
+                   :en "Oh, that's surprisingly nice...")
+   (face   sasha   "<w<" "<o<")
+   (face   'player ":w;" ":o;")
+   (say    sasha   :eo "... jen la sola koloro, kiun mi malamas."
+                   :en "... this is literally the one color I hate.")
+   (say    sasha   :eo "Kial vi ne elektis bluan? Dio mia."
+                   :en "You couldn't have gotten blue?")
+   (say    sasha   :eo "Mi jam bone sciu, ne atendi bonon de vi."
+                   :en "I should know not to expect so much from you...")
+   (say    sasha   :eo "Bonaj \"amikoj\" ni estas, ja..."
+                   :en "\"Friends,\" whatever...")
+   (face   'player "T_T" "ToT")
+   (move   'player '(:x 41 :y 3) :delay .05)
+   (face   sasha   ":_;")
+   (mumble 'player :eo "[Vi prenas de SAŜA ĉirkaŭmanon belbrilan.]"
+                   :en "[You take a shiny bracelet from SASHA.]")
+   (move   'player '(:x 46 :y 5) :delay .05)
+   (move   'player '(:x 47 :y 9) :delay .05)
+   (move   'player '(:x 51 :y 19))
+   `((:parameters ,(list :map (merge-maps map *casino-map*))))))
+
+
+(defun flashback-childhood-friend-dialogue (map sasha)
+  (append (flashback-childhood-friend-dialogue-intro sasha)
+          (flashback-childhood-friend-dialogue-bracelet map sasha)))
+
+
+(defun flashback-childhood-friend-interact (map entity-id)
   (make-dialogue-state
    map
-   (start-dialogue
-    (face   'player "` `" "`o`")
-    (say    'player :eo "Ĉu ĉio enordas, Saŝa? Iom malfruas, ĉu ne?"
-                    :en "Is everything OK, Sasha? It's a bit late, isn't it?")
-    (face   sasha   "=_=" "=o=")
-    (say    sasha   :eo "Ho, jes, mi simple ĵus eliris klubkunvenon."
-                    :en "Yea, I just left a club-meeting, is all.")
-    (say    'player :eo "Hodiaŭ ne estas klubotago..."
-                    :en "Today isn't club day...")
-    (say    sasha   :eo "Nu, estas escepte speciala klubo!"
-                    :en "Well, whatever, it's a special club!"
-                    :face "<o<")
-    (say    sasha   :eo "Nu, kial VI restas? Ĉu ankoraŭ havas ne amikojn?"
-                    :en "And what're YOU doing here? Still no friends?")
-    (say    'player :eo "Ankoraŭ sole vin."
-                    :en "Still just you.")
-    (face   sasha   ":v:" ":o:")
-    (mumble sasha   :en "...")
-    (say    sasha   :eo "Nu..."
-                    :en "Well...")
-    (mumble sasha   :en "...")
-    (face   sasha   "<-<" "<o<")
-    (face   'player ":w:" ":u:")
-    (say    sasha   :eo "Pŝ! Fermu la buŝon, vermo!"
-                    :en "Ugh! Just shut up, you loser!")
-    (face   sasha   ">->" ">o>")
-    (say    sasha   :eo "Kvazaŭ ni povus esti tiel!"
-                    :en "As if!")
-    (face   sasha   "<-<" "<o<")
-    (say    sasha   :eo "Simple lasu min al paco, fek'!!"
-                    :en "Just get the hell out of my face!!"
-                    :face ">o<")
-    (say    'player :eo "Bedaŭron..."
-                    :en "Sorry...")
-    (move   'player '(:x 46 :y 11) :delay .05)
-    (face   'player "^_^" "^o^")
-    (say    'player :eo "Ho, jes!"
-                    :en "Oh, yea!")
-    (move   sasha  '(:x 36 :y 3) :delay .03)
-    (move   'player '(:x 43 :y 4) :delay .05)
-    (move   sasha  '(:x 37 :y 3))
-    (say    'player :eo "Mi freŝe trovis ĉi tion, ĝi ŝajnis akorda al via stilo."
-                    :en "I found this a while back, I thought you'd like it.")
-    (face   sasha   ":w:" ":u:")
-    (mumble 'player :eo "[Vi donas al SAŜA ĉirkaŭmanon belbrilan.]"
-                    :en "[You give SASHA a shiny bracelet.]")
-    (say    sasha   :eo "Ho, tio surprize afablis...."
-                    :en "Oh, that's surprisingly nice...")
-    (face   sasha   "<w<" "<o<")
-    (face   'player ";w:" ";o:")
-    (say    sasha   :eo "... jen la sola koloro, kiun mi malamas."
-                    :en "... this is literally the one color I hate.")
-    (say    sasha   :eo "Kial vi ne elektis bluan? Dio mia."
-                    :en "You couldn't have gotten blue?")
-    (say    sasha   :eo "Mi jam bone sciu, ne atendi bonon de vi."
-                    :en "I should know not to expect so much from you...")
-    (say    sasha   :eo "Bonaj \"amikoj\" ni estas, ja..."
-                    :en "\"Friends\" my ass.")
-    (face   'player "T_T" "ToT")
-    (say    'player :eo "Je Dio, mi ne povas elteni plu. Mi rezignas."
-                    :en "You know what? I give up.")
-    (move   'player '(:x 41 :y 3) :delay .05)
-    (face   sasha   ";_:")
-    (mumble 'player :eo "[Vi prenas de SAŜA ĉirkaŭmanon belbrilan.]"
-                    :en "[You take a shiny bracelet from SASHA.]")
-    (move   'player '(:x 46 :y 5) :delay .05)
-    (say    'player :eo "Mi rezignas."
-                    :en "I can't take this anymore.")
-    (move   'player '(:x 47 :y 9) :delay .05)
-    (say    'player :eo "Vi teruras, Saŝa."
-                    :en "You're the worst, Sasha.")
-    (move   'player '(:x 51 :y 19))
-    `((:parameters ,(list :map (merge-maps map *casino-map*)))))))
+   (flashback-childhood-friend-dialogue map entity-id)))
+
+
+(defun flashback-childhood-friend-use (map item-plist &optional entity-id)
+  (if (eq (…:string->symbol (getf item-plist :id)) 'bracelet)
+      ;; If player gives her the special bracelet, skip the dialogue intro
+      (make-dialogue-state
+       map
+       (flashback-childhood-friend-dialogue-bracelet map entity-id))
+      ;; Otherwise, have her politely refuse. =w=
+      (refusal-use map item-plist entity-id)))
 
 
 
@@ -427,6 +535,68 @@ avoid triggering this."
 ;;; Casino!
 ;;; ———————————————————————————————————
 
+(defun boozy-lady-dialogue-ring ()
+  (start-dialogue
+   (say 'boozy-lady   :eo "Vi volas edzinigi min, belulo?"
+                      :en "Ya wanna marry me, hot stuff?")
+   (say 'boozy-lady   :eo "Booone, niiru tuj!"
+                      :en "Shuree, lez go now!")
+   (say 'boozy-friend :eo "Vi NE iros tuj."
+                      :en "You \"shure\" as hell WON'T.")))
+
+
+(defun boozy-lady-dialogue-wallet ()
+  (start-dialogue
+   (say 'boozy-lady   :eo "...? Monujo?"
+                      :en "...? Wallet?")
+   (say 'boozy-lady   :eo "Monujo, mono! Mono, biero!!"
+                      :en "Wallet, money! Money, booze!")
+   (say 'boozy-friend :eo "... kaj vi certe ne bezonas pli da TIO."
+                      :en "You don't need any more of THAT, hon.")))
+
+
+(defun boozy-lady-dialogue-bracelet ()
+  (start-dialogue
+   (face 'player     "^_^" "^o^")
+   (say  'boozy-lady  :eo "Ooo, brile! Ĝi belasss"
+                      :en "Ooo, shiny! It's prettyy")
+   (say  'boozy-lady  :eo "Ĉu por mji?"
+                      :en "Is it for mi?")
+   (say  'player      :eo "Estos via, se vi ĵuras ne plu drinki ĉi-nokte."
+                      :en "It's yours, if you promise to slow your roll a bit.")
+   (say  'boozy-lady  :eo "Jeŝ! Ne pluuu!"
+                      :en "Okieeee!"
+                      :face "= w =")
+   (say  'boozy-lady  :eo "[MAJA prenas ĈIRKAŬMANON de vi.]"
+                      :en "[MAJA takes BRACELET from you.]"
+                      :face "= w =")
+   (face 'player      ">_<" ">o<")
+   (say  'boozy-lady  :eo "Plia biero por mi, sinjoro!!"
+                      :en "Jkjk. One more for me, barkeep!!")
+   (say  'casino-bartender
+         :eo "Bone, momenton!!"
+         :en "Sure thing, lady!"
+         :face "xD ")))
+
+
+(defun boozy-lady-use (map item-plist &optional entity-id)
+  (let ((item-id (…:string->symbol (getf item-plist :id))))
+    (cond ((eq item-id 'ring)
+           (make-dialogue-state
+            map
+            (boozy-lady-dialogue-ring)))
+          ((eq item-id 'bracelet)
+           (make-dialogue-state
+            map
+            (boozy-lady-dialogue-bracelet)))
+          ((eq item-id 'wallet)
+           (make-dialogue-state
+            map
+            (boozy-lady-dialogue-wallet)))
+          ('t
+           (refusal-use map item-plist entity-id)))))
+
+
 ;;; ———————————————————————————————————
 ;;; Destitute Gambler arc
 ;;; ———————————————————————————————————
@@ -698,7 +868,7 @@ avoid triggering this."
 (defun main-menu ()
   `((:en "PLAY" :eo "EKLUDI"
      :selection 100 :selected t
-     :function ,(🌍:make-overworld-state *outdoors-map*))
+     :function ,(🌍:make-overworld-state *flashback-school-map*))
     (:en "SUBMENU" :eo "SUBMENUO" :row 1
      :function ,(📋:make-menu-state (submenu)))
     (:en "TERURE" :eo "BADLY" :row 1)

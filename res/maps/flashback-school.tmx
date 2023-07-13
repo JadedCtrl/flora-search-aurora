@@ -284,12 +284,13 @@
     <property name="avatar" value="$$$"/>
     <property name="desc-en" value="(My wallet, right where I left it.)"/>
     <property name="desc-eo" value="(Mia monujo, ĝuste kie mi lasis ĝin.)"/>
-    <property name="id" value="✿:ring"/>
+    <property name="id" value="✿:wallet"/>
     <property name="interact" value="✿:TAKE-ITEM-INTERACT"/>
     <property name="name-en" value="wallet"/>
     <property name="name-eo" value="monujo"/>
     <property name="remark-en" value="Whew! Nearly lost it!"/>
     <property name="remark-eo" value="Ve, dankinde!"/>
+    <property name="use" value="✿:to-person-use"/>
    </properties>
    <point/>
   </object>
@@ -304,6 +305,7 @@
     <property name="inv-name-eo" value="ĉirkaŭmano"/>
     <property name="name-en" value="dazzling bracelet"/>
     <property name="name-eo" value="belbrila ĉirkaŭmano"/>
+    <property name="use" value="✿:to-person-use"/>
    </properties>
    <point/>
   </object>
@@ -322,8 +324,14 @@
     <property name="facing-right" type="bool" value="true"/>
     <property name="id" value="✿:childhood-friend"/>
     <property name="interact" value="✿:flashback-childhood-friend-interact"/>
+    <property name="item-default-en" value="What? God, I don't want that!"/>
+    <property name="item-default-eo" value="He? Fek', mi ne volas tion!"/>
+    <property name="item-speech-en">✿:ring	... what an ugly little ring. You've got no taste at all.
+</property>
+    <property name="item-speech-eo" value="✿:ring&#9;... kia malbela ringo. Via gusto teruras."/>
     <property name="normal-face" value="=_="/>
     <property name="talking-face" value="=o="/>
+    <property name="use" value="✿:flashback-childhood-friend-use"/>
    </properties>
    <point/>
   </object>

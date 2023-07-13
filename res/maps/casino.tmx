@@ -323,6 +323,8 @@
     <property name="facing-right" type="bool" value="false"/>
     <property name="id" value="✿:boozy-lady"/>
     <property name="interact" value="✿:random-monologue-interact"/>
+    <property name="item-default-en" value="Mmm... god your so cute~"/>
+    <property name="item-default-eo" value="Mmm... vi tiom ĉarmas~"/>
     <property name="normal-face" value="=///="/>
     <property name="speech-en">Let momma show you a good *hic* timeee
 HeeeEey sweet-cheeks, u wan sum..?
@@ -338,6 +340,7 @@ Restu kun miii! &lt;3
 Mia sino malvarmassss! Hlepu min, karulo~
 </property>
     <property name="talking-face" value="=///="/>
+    <property name="use" value="✿:boozy-lady-use"/>
    </properties>
    <point/>
   </object>
@@ -346,12 +349,15 @@ Mia sino malvarmassss! Hlepu min, karulo~
     <property name="facing-right" type="bool" value="false"/>
     <property name="id" value="✿:boozy-friend"/>
     <property name="interact" value="✿:monologue-interact"/>
+    <property name="item-default-en" value="No thanks, man."/>
+    <property name="item-default-eo" value="Ne, sed dankon."/>
     <property name="normal-face" value="&lt;s&lt;"/>
     <property name="speech-en">I swear, she gets like this every time.
 It's so embarrasing...</property>
     <property name="speech-eo">Kial ŝi ĉiufoje tiom ebriiĝas?
 Kia ĝeno, tiom hontindas...!</property>
     <property name="talking-face" value="&lt;o&lt;"/>
+    <property name="use" value="✿:refusal-use"/>
    </properties>
    <point/>
   </object>
@@ -360,8 +366,33 @@ Kia ĝeno, tiom hontindas...!</property>
     <property name="facing_right" type="bool" value="false"/>
     <property name="id" value="✿:bad-gambler"/>
     <property name="interact" value="✿:bad-gambler-interact"/>
+    <property name="item-default-en">Hold on to that, dear pal.
+It'll be more use to you than to me... it's simply too late for me.</property>
+    <property name="item-default-eo">Plu tenu tion, kara amiko.
+Ĝi pliutilos al vi, ol al mi... mi jam estas perdita.</property>
+    <property name="item-speech-en">✿:wallet	I'm not looking for a hand-out, pal!
+✿:wallet	I mean, it'd be useful, but still!
+✿:wallet	What'd my lady think, if she heard I was taking money from people in casinos to repay my debt?
+✿:wallet	She'd leave me! Kill me, then leave me!
+✿:wallet	Taking money from people to play slots, though...
+✿:wallet	Wait, no! Damned temptation!
+✿:wallet	Back to wallowing.
+✿:wallet	Wallowing is free.
+✿:ring	My... wedding ring?
+✿:ring	Oh, I don't need it anyway... I'm too far gone...</property>
+    <property name="item-speech-eo">✿:wallet	Kara amiko, mi ne petas almozon!
+✿:wallet	Nu, ĝi utilus, sed tamen!
+✿:wallet	Se la edzino sciiĝus, ke mi prenas mondonacojn de homoj en hazardludejoj por repagi ŝuldon, ŝi tiom malestimus!
+✿:wallet	Mi povas imagi la mienon, tiom akre! Ŝi forlasus min!
+✿:wallet	Preni mondonacon por uzi harardludojn, tamen...
+✿:wallet	... Momenton, ne! Fia tento, ne!!
+✿:wallet	Ree al diboĉado, mia amiko.
+✿:wallet	Diboĉi senkostas.
+✿:ring	Mia... geedziĝa ringo?
+✿:ring	Mi ne plu bezonas ĝin... mi estas jam perdita...</property>
     <property name="normal-face" value=";~:"/>
     <property name="talking-face" value="&gt;o&lt;"/>
+    <property name="use" value="✿:refusal-use"/>
    </properties>
    <point/>
   </object>
@@ -370,12 +401,19 @@ Kia ĝeno, tiom hontindas...!</property>
     <property name="facing-right" type="bool" value="false"/>
     <property name="id" value="✿:casino-attendant"/>
     <property name="interact" value="✿:monologue-interact"/>
+    <property name="item-default-en" value="That's very kind, but no thank you."/>
+    <property name="item-default-eo" value="Tio afablas de vi, sed mi ne akceptu donacojn de vizitantoj."/>
+    <property name="item-speech-en">✿:ring	I'm flattered, but I'd rather not marry a guest whose name I don't know.
+</property>
+    <property name="item-speech-eo">✿:ring	Vi flatas min, dankon, sed mi preferus ne edziĝi al nekonata gasto.
+</property>
     <property name="normal-face" value="^3^"/>
     <property name="speech-en">Welcome in, good sir!
 Have fun; may lady luck blow you a kiss!</property>
     <property name="speech-eo">Bonvenon, estimata sinjoro!
 Ĝuu la ludadon, kaj sorto ridetu al vi!</property>
     <property name="talking-face" value="^O^"/>
+    <property name="use" value="✿:refusal-use"/>
    </properties>
    <point/>
   </object>
@@ -403,7 +441,7 @@ Fojfoje mi ja ŝatas mian fakon, mdr.</property>
     <property name="name-en" value="ring"/>
     <property name="name-eo" value="ringo"/>
     <property name="reaction-face" value="&gt;_&lt;"/>
-    <property name="use" value="✿:cry"/>
+    <property name="use" value="✿:to-person-use"/>
    </properties>
    <point/>
   </object>

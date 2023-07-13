@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="left-down" width="288" height="100" tilewidth="12" tileheight="17" infinite="0" nextlayerid="20" nextobjectid="121">
+<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="left-down" width="288" height="100" tilewidth="12" tileheight="17" infinite="0" nextlayerid="20" nextobjectid="128">
  <tileset firstgid="1" source="font.tsx"/>
  <layer id="1" name="Background" width="288" height="100">
   <properties>
@@ -753,39 +753,6 @@
 </data>
  </layer>
  <objectgroup id="18" name="Descriptions.Lageto" locked="1">
-  <object id="51" name="Anaso flosas" x="2861.67" y="1487.67">
-   <properties>
-    <property name="desc-en">(A duck floats serenely in the middle of a small pond.)
-(This is pretty clearly their territory -- I shouldn't bother them!)</property>
-    <property name="desc-eo">(Anaso flosas trankvile meze de lageto.)
-(Klare ĝi opinias la lageton ĝia -- mi nepre ne ĝin ĝenu!)</property>
-    <property name="id" value="✿:duck-floats"/>
-    <property name="interact" value="✿:description-interact"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="52" name="Anaso flosas" x="3117.5" y="1565.34">
-   <properties>
-    <property name="desc-en">(A duck floats serenely in the middle of a small pond.)
-(This is pretty clearly their territory -- I shouldn't bother them!)</property>
-    <property name="desc-eo">(Anaso flosas trankvile meze de lageto.)
-(Klare ĝi opinias la lageton ĝia -- mi nepre ne ĝin ĝenu!)</property>
-    <property name="id" value="✿:duck-floats"/>
-    <property name="interact" value="✿:description-interact"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="53" name="Anaso flosas" x="3104.34" y="1502.17">
-   <properties>
-    <property name="desc-en">(A duck floats serenely in the middle of a small pond.)
-(This is pretty clearly their territory -- I shouldn't bother them!)</property>
-    <property name="desc-eo">(Anaso flosas trankvile meze de lageto.)
-(Klare ĝi opinias la lageton ĝia -- mi nepre ne ĝin ĝenu!)</property>
-    <property name="id" value="✿:duck-floats"/>
-    <property name="interact" value="✿:description-interact"/>
-   </properties>
-   <point/>
-  </object>
   <object id="54" name="Anaso flosas" x="3043.5" y="1607.5">
    <properties>
     <property name="desc-en">(A duck floats serenely in the middle of a small pond.)
@@ -794,10 +761,13 @@
 (Klare ĝi opinias la lageton ĝia -- mi nepre ne ĝin ĝenu!)</property>
     <property name="id" value="✿:duck-floats"/>
     <property name="interact" value="✿:description-interact"/>
+    <property name="item-default-en" value="Quack quack!"/>
+    <property name="item-default-eo" value="Mak mak!"/>
+    <property name="use" value="✿:refusal-use"/>
    </properties>
    <point/>
   </object>
-  <object id="55" name="Anaso flosas" x="2988" y="1480">
+  <object id="121" name="Anaso flosas" x="3102" y="1579.33">
    <properties>
     <property name="desc-en">(A duck floats serenely in the middle of a small pond.)
 (This is pretty clearly their territory -- I shouldn't bother them!)</property>
@@ -805,10 +775,13 @@
 (Klare ĝi opinias la lageton ĝia -- mi nepre ne ĝin ĝenu!)</property>
     <property name="id" value="✿:duck-floats"/>
     <property name="interact" value="✿:description-interact"/>
+    <property name="item-default-en" value="Quack quack!"/>
+    <property name="item-default-eo" value="Mak mak!"/>
+    <property name="use" value="✿:refusal-use"/>
    </properties>
    <point/>
   </object>
-  <object id="56" name="Anaso flosas" x="2931.17" y="1615.17">
+  <object id="122" name="Anaso flosas" x="3124" y="1517.33">
    <properties>
     <property name="desc-en">(A duck floats serenely in the middle of a small pond.)
 (This is pretty clearly their territory -- I shouldn't bother them!)</property>
@@ -816,10 +789,13 @@
 (Klare ĝi opinias la lageton ĝia -- mi nepre ne ĝin ĝenu!)</property>
     <property name="id" value="✿:duck-floats"/>
     <property name="interact" value="✿:description-interact"/>
+    <property name="item-default-en" value="Quack quack!"/>
+    <property name="item-default-eo" value="Mak mak!"/>
+    <property name="use" value="✿:refusal-use"/>
    </properties>
    <point/>
   </object>
-  <object id="57" name="Anaso flosas" x="2791.67" y="1601.67">
+  <object id="123" name="Anaso flosas" x="2982.67" y="1471.33">
    <properties>
     <property name="desc-en">(A duck floats serenely in the middle of a small pond.)
 (This is pretty clearly their territory -- I shouldn't bother them!)</property>
@@ -827,10 +803,13 @@
 (Klare ĝi opinias la lageton ĝia -- mi nepre ne ĝin ĝenu!)</property>
     <property name="id" value="✿:duck-floats"/>
     <property name="interact" value="✿:description-interact"/>
+    <property name="item-default-en" value="Quack quack!"/>
+    <property name="item-default-eo" value="Mak mak!"/>
+    <property name="use" value="✿:refusal-use"/>
    </properties>
    <point/>
   </object>
-  <object id="58" name="Anaso flosas" x="2732.67" y="1530.67">
+  <object id="124" name="Anaso flosas" x="2838.67" y="1470">
    <properties>
     <property name="desc-en">(A duck floats serenely in the middle of a small pond.)
 (This is pretty clearly their territory -- I shouldn't bother them!)</property>
@@ -838,6 +817,51 @@
 (Klare ĝi opinias la lageton ĝia -- mi nepre ne ĝin ĝenu!)</property>
     <property name="id" value="✿:duck-floats"/>
     <property name="interact" value="✿:description-interact"/>
+    <property name="item-default-en" value="Quack quack!"/>
+    <property name="item-default-eo" value="Mak mak!"/>
+    <property name="use" value="✿:refusal-use"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="125" name="Anaso flosas" x="2730" y="1504.67">
+   <properties>
+    <property name="desc-en">(A duck floats serenely in the middle of a small pond.)
+(This is pretty clearly their territory -- I shouldn't bother them!)</property>
+    <property name="desc-eo">(Anaso flosas trankvile meze de lageto.)
+(Klare ĝi opinias la lageton ĝia -- mi nepre ne ĝin ĝenu!)</property>
+    <property name="id" value="✿:duck-floats"/>
+    <property name="interact" value="✿:description-interact"/>
+    <property name="item-default-en" value="Quack quack!"/>
+    <property name="item-default-eo" value="Mak mak!"/>
+    <property name="use" value="✿:refusal-use"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="126" name="Anaso flosas" x="2753.33" y="1580">
+   <properties>
+    <property name="desc-en">(A duck floats serenely in the middle of a small pond.)
+(This is pretty clearly their territory -- I shouldn't bother them!)</property>
+    <property name="desc-eo">(Anaso flosas trankvile meze de lageto.)
+(Klare ĝi opinias la lageton ĝia -- mi nepre ne ĝin ĝenu!)</property>
+    <property name="id" value="✿:duck-floats"/>
+    <property name="interact" value="✿:description-interact"/>
+    <property name="item-default-en" value="Quack quack!"/>
+    <property name="item-default-eo" value="Mak mak!"/>
+    <property name="use" value="✿:refusal-use"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="127" name="Anaso flosas" x="2874.67" y="1622.67">
+   <properties>
+    <property name="desc-en">(A duck floats serenely in the middle of a small pond.)
+(This is pretty clearly their territory -- I shouldn't bother them!)</property>
+    <property name="desc-eo">(Anaso flosas trankvile meze de lageto.)
+(Klare ĝi opinias la lageton ĝia -- mi nepre ne ĝin ĝenu!)</property>
+    <property name="id" value="✿:duck-floats"/>
+    <property name="interact" value="✿:description-interact"/>
+    <property name="item-default-en" value="Quack quack!"/>
+    <property name="item-default-eo" value="Mak mak!"/>
+    <property name="use" value="✿:refusal-use"/>
    </properties>
    <point/>
   </object>
@@ -1850,8 +1874,14 @@ DANĜERA LOKO - VENENA MATERIO
     <property name="facing-right" type="bool" value="false"/>
     <property name="id" value="✿:childhood-friend"/>
     <property name="interact" value="✿:childhood-friend-interact"/>
+    <property name="item-default-en" value="What? God, I don't want that!"/>
+    <property name="item-default-eo" value="He? Fek', mi ne volas tion!"/>
+    <property name="item-speech-en">✿:ring	... what an ugly little ring. You've got no taste at all.
+</property>
+    <property name="item-speech-eo" value="✿:ring&#9;... kia malbela ringo. Via gusto teruras."/>
     <property name="normal-face" value="=_="/>
     <property name="talking-face" value="=o="/>
+    <property name="use" value="✿:childhood-friend-use"/>
    </properties>
    <point/>
   </object>
@@ -1860,8 +1890,11 @@ DANĜERA LOKO - VENENA MATERIO
     <property name="facing-right" type="bool" value="true"/>
     <property name="id" value="✿:kvincent"/>
     <property name="interact" value="✿:kvincent-interact"/>
+    <property name="item-default-en" value="That's a funny-looking mushroom."/>
+    <property name="item-default-eo" value="He? Tio ne estas fungo!"/>
     <property name="normal-face" value="@w@"/>
     <property name="talking-face" value="@o@"/>
+    <property name="use" value="✿:refusal-use"/>
    </properties>
    <point/>
   </object>

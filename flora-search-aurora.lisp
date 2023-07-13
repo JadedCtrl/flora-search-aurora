@@ -133,6 +133,59 @@ Useful for making barriers the player character refuses to traverse."
         (list :map (🌍:merge-maps map (symbol-value (read-from-string (getf trigger-plist :map)))))))
 
 
+(defun item-refusal-lines (string item)
+  "Given an ITEM’s symbol ID, return all speech lines according it.
+These are encoded in an entity’s :ITEM-SPEECH-[EN|EO] properties, with the ID at
+the start of each line followed by a tab and the speech line."
+  (mapcar #'cadr
+   (remove-if-not
+    (lambda (pair)
+      (eq (…:string->symbol (car pair)) item))
+    (mapcar
+     (lambda (line)
+       (str:split #\tab line))
+     (str:lines string)))))
+
+
+(defun refusal-use (map item-plist entity)
+  "A generic use function for entities that can be used to display refusal
+messages embedded in the Tiled map data."
+  (let* ((refusal-en-lines (item-refusal-lines (getf-entity-data map entity :item-speech-en)
+                                               (…:string->symbol (getf item-plist :id))))
+         (refusal-eo-lines (item-refusal-lines (getf-entity-data map entity :item-speech-eo)
+                                               (…:string->symbol (getf item-plist :id))))
+         (en-lines (if (str:emptyp (str:unlines refusal-en-lines))
+                       (str:lines (or (getf-entity-data map entity :item-default-en) "No thanks."))
+                       refusal-en-lines))
+         (eo-lines (if (str:emptyp (str:unlines refusal-eo-lines))
+                       (str:lines (or (getf-entity-data map entity :item-default-eo) "Ne, dankon."))
+                       refusal-eo-lines)))
+    (make-dialogue-state
+     map
+     (apply #'start-dialogue
+            (loop for eo-line in eo-lines
+                  for en-line in en-lines
+                  collect (say entity :en en-line :eo eo-line))))))
+
+
+(defun to-person-use (&optional map item-plist)
+  "A function ran by INVENTORY 🎒 when an item is “used”, which will try to
+run the :USE function of the nearest entity, if it has any."
+  (let ((nearby (car (entities-near-entity (getf-entity map 'player)
+                                           (gethash :entities map)))))
+    (if (and nearby (getf (cdr nearby) :use))
+        (let ((use-result (funcall (…:string->symbol (getf (cdr nearby) :use))
+                                   map item-plist (car nearby))))
+          (typecase use-result
+            (list (nconc (list :drop 1) use-result))
+            (t use-result)))
+        (nconc
+         (list :drop 1
+           (make-dialogue-state
+             map
+             (start-dialogue (mumble 'player :en "(They don't seem to want it.)"))))))))
+
+
 
 ;;; ———————————————————————————————————
 ;;; The Outside World™
@@ -629,13 +682,6 @@ avoid triggering this."
     (make-dialogue-state
      map
      (flashback-casino-dialogue map)))
-
-
-(defun cry (&optional map ring)
-  (nconc (list :drop 1)
-         (make-dialogue-state
-           map
-           (start-dialogue (mumble 'player :en "FUCK")))))
 
 
 

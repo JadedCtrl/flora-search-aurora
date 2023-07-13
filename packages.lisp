@@ -85,6 +85,7 @@
            #:merge-maps
            #:world-coords->screen-coords
            #:getf-entity #:getf-entity-data #:removef-entity
+           #:entities-near-entity
            #:aget-item #:getf-act #:getf-know
            #:move-entity-to #:move-entity
            #:plist->map

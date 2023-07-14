@@ -561,9 +561,37 @@ avoid triggering this."
 
 
 ;;; ———————————————————————————————————
+;;; Military base!
+;;; ———————————————————————————————————
+(defun captain-snake-interact (map &optional entity-id)
+  (make-dialogue-state
+   map
+   (start-dialogue
+    (💬:say    'beatnick      :eo "Mi havas sagacan planon, sinjoro."
+                              :en "I've got a cunning plan, sir.")
+    (💬:say    'captain-snake :en "Of course you do."
+                              :eo "Laŭkutime.")
+    (💬:say    'captain-snake :en "And what is it this time, Beatnick?"
+                              :eo "Do, kiom ĝi malbonas cî-foje, Balnik?")
+    (💬:say    'beatnick      :en "Well, I figured that, as officers, our job is to catch baddies..."
+                              :eo "Nu, mi rimarkis ke, kiel oficiroj, nia tasko estas kapti malbonulojn...")
+    (💬:say    'captain-snake :en "Yes..?"
+                              :eo "Kaj..?")
+    (💬:say    'beatnick      :en "... and, well, if we were baddies, we'd have to catch ourselves, wouldn't we?"
+                              :eo "... kaj, nu, se ni estus la malbonuloj, ni devus kapti nin mem, ĉu ne?")
+    (💬:say    'captain-snake :en "Beatnick, is your plan for us to commit a minor crime so we get tossed in jail rather than shot for desertion?"
+                              :eo "Balnik, ĉu via plano estas ke ni faru krimeton por ke ni malliberiĝu anstataŭ mortpafiĝu?")
+    (💬:say    'beatnick      :en "Yes, sir, Captain Snake sir."
+                              :eo "Jes, sinjoro, Kapitano Serpento.")
+    (💬:mumble 'captain-snake :en "...")
+    (💬:say    'captain-snake :en "It's no world-beater, but it's the only plan we've got."
+                              :eo "Ĝi ne savos la mondon, sed ĝi ja estas nia sola plano."))))
+
+
+
+;;; ———————————————————————————————————
 ;;; Casino!
 ;;; ———————————————————————————————————
-
 (defun boozy-lady-dialogue-ring ()
   (start-dialogue
    (💬:say 'boozy-lady   :eo "Vi volas edzinigi min, belulo?"
@@ -925,7 +953,6 @@ avoid triggering this."
     (list :drop 1 :parameters (list :map (merge-maps map *outdoors-map*))))))
 
 
-
 
 ;;; ———————————————————————————————————
 ;;; Main-menu data
@@ -940,7 +967,8 @@ Initializes the current instance of the game, and such."
   (defparameter *flashback-casino-map* (🌍:plist->map (metacopy:copy-thing *flashback-casino-map-plist*)))
   (defparameter *flashback-school-map* (🌍:plist->map (metacopy:copy-thing *flashback-school-map-plist*)))
   (defparameter *outdoors-map*         (🌍:plist->map (metacopy:copy-thing *outdoors-map-plist*)))
-  (make-flashback-function (alexandria:random-elt (flashbacks))))
+;;  (make-flashback-function (alexandria:random-elt (flashbacks))))
+  (make-overworld-function *base-map*))
 
 
 (defun submenu ()

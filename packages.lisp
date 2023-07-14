@@ -23,8 +23,8 @@
            #:incf-0
            #:at-least #:at-most
            #:string->symbol
-           #:system-language #:langcode->keysym #:getf-lang))
-
+           #:system-language #:langcode->keysym #:getf-lang
+           :*language*))
 
 (defpackage :flora-search-aurora.input
   (:use :cl)
@@ -36,7 +36,8 @@
    :control :meta :shift
    +qwerty-layout+ +dvorak-layout+
    +arrows-game-layout+ +wasd-game-layout+ +ijkl-game-layout+
-   :↑ :← :→ :↓ :↰ :↱ :↲ :↳ :🆗 :❎))
+   :↑ :← :→ :↓ :↰ :↱ :↲ :↳ :🆗 :❎
+   :*keyboard* :*controls*))
 
 (defpackage :flora-search-aurora.display
   (:nicknames :fsa.dsp :display :✎)
@@ -53,6 +54,12 @@
            #:selected-menu-item
            :label :selection :selected))
 
+(defpackage :flora-search-aurora.settings
+  (:nicknames :fsa.set :settings :🔧)
+  (:use :cl)
+  (:export #:make-settings-menu-function #:settings-menu))
+
+
 (defpackage :flora-search-aurora.dialogue
   (:nicknames :fsa.dia :dialogue :💬)
   (:use :cl)
@@ -63,7 +70,7 @@
 (defpackage :flora-search-aurora.inventory
   (:nicknames :fsa.inv :inventory :🎒)
   (:use :cl)
-  (:export #:inventory-state #:make-inventory-state))
+  (:export #:inventory-state #:make-inventory-function))
 
 (defpackage :flora-search-aurora.intermission
   (:nicknames :fsa.int :intermission :🎭)
@@ -72,19 +79,21 @@
    :make-intermission-function))
 
 (defpackage :flora-search-aurora.overworld.util
-  (:nicknames :fsa.o.u :overworld.util :🌍.…)
+  (:nicknames :fsa.ovr.… :overworld.util :🌍.…)
   (:use :cl)
   (:export #:coords->symbol #:symbol->coords
            #:world-coords->screen-coords
            #:world-coords-chunk
            #:map->plist #:plist->map
-           #:save-map-to-file))
+           #:save-map-to-file
+           :*language*))
 
 (defpackage :flora-search-aurora.overworld
-  (:nicknames :fsa.o :overworld :🌍)
+  (:nicknames :fsa.ovr :overworld :🌍)
   (:use :cl
    :flora-search-aurora.overworld.util)
-  (:export #:overworld-state #:overworld-state-draw #:make-overworld-function
+  (:export #:make-overworld-state #:make-overworld-function
+           #:overworld-state #:overworld-state-draw
            #:merge-maps
            #:world-coords->screen-coords
            #:getf-entity #:getf-entity-data #:removef-entity

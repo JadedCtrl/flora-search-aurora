@@ -13,7 +13,7 @@
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-;;;; FLORA-SEARCH-AURORA.UI
+;;;; FLORA-SEARCH-AURORA.MENU 📋
 ;;;; Generic menu-making, displaying, and management.
 ;;;; Let's get to it, we're on a deadline!
 
@@ -168,7 +168,7 @@ That is, 0 for non-selected items and 100 for selected items."
                        (select-right-menu-item menu-plist)
                        't))
           ('⌨:❎
-           nil)
+           (list :drop 1))
           ('⌨:🆗
            (if (getf selected-item :exec)
                (apply (getf selected-item :exec) '())

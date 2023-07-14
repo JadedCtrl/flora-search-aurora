@@ -153,8 +153,11 @@ if the language is among the supported. Otherwise, nil."
       :en))
 
 
-(defun getf-lang (plist &optional (language (system-language)) (fallback-lang :en))
-  "With a plist containing keys of language-codes, return the property either fitting the
+(defun getf-lang (plist &key language (fallback-lang :en))
+  "With a PLIST containing keys of language-codes, return the property either fitting the
 preferred LANGUAGE, or the backup FALLBACK-LANG (if LANGUAGE’s is NIL)."
-  (or (getf plist language)
+  (or (getf plist (or language (ignore-errors *language*) (system-language)))
       (getf plist fallback-lang)))
+
+
+(defparameter *language* (…:system-language))

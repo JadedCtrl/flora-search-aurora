@@ -13,7 +13,7 @@
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-;;;; FLORA-SEARCH-AURORA.INPUT
+;;;; FLORA-SEARCH-AURORA.INPUT ⌨
 ;;;; All input-related voodoo goes here: Input reading, translating, parsing, etc.
 
 (in-package :flora-search-aurora.input)
@@ -58,6 +58,10 @@
           +numpad-game-layout+))
 
 
+(defparameter *keyboard* +qwerty-layout+)
+(defparameter *controls* +arrows-game-layout+)
+
+
 (defun read-char-plist (&optional (stream *standard-input*))
   "Reads a character directly from standard-input (sans buffering).
 Simple terminal escape codes (like arrow-keys) are translated into
@@ -84,7 +88,7 @@ docstring of #'escape-code-to-character for more info."
       (list :char the-char :modifier modifier :escaped escaped))))
 
 
-(defun normalize-char-plist (char-plist &optional (layout +qwerty-layout+))
+(defun normalize-char-plist (char-plist &optional (layout *keyboard*))
   "Given a character input property list (as received from READ-CHAR-PLIST),
 massage the output into parsable, deescaped, QWERTY-according format."
   (let ((normalized (deescape-char-plist char-plist)))
@@ -102,7 +106,7 @@ Not at all comprehensive, but probably-mostly-just-good-enough. ¯\_ (ツ)_/¯"
 
 
 (defun read-gamefied-char-plist
-    (&optional (stream *standard-input*) (layout +qwerty-layout+) (game-layout +arrows-game-layout+))
+    (&optional (stream *standard-input*) (layout *keyboard*) (game-layout *controls*))
   "Read a character directly from standard-input, then translating its character into the QWERTY
 equivalent, then parsing that character into semantic meaning. Results in a plist like so:
    (:char #\w :semantic ↑ :modifier nil :escaped nil)"
@@ -110,7 +114,7 @@ equivalent, then parsing that character into semantic meaning. Results in a plis
                       game-layout))
 
 
-(defun gameify-char-plist (char-plist &optional (game-layout +arrows-game-layout+))
+(defun gameify-char-plist (char-plist &optional (game-layout *keyboard*))
   "Given a character input plist (as received by READ-CHAR-PLIST), return a
 char plist containing a :FUNCTION property, which contains one of several
 semantic symbols that match up for menus/gameplay: ↑, →, ←, ↓, 🆗, or ❎."
@@ -118,7 +122,6 @@ semantic symbols that match up for menus/gameplay: ↑, →, ←, ↓, 🆗, or 
     (if semantic-value
         (append (list :semantic semantic-value) char-plist)
         char-plist)))
-
 
 
 (defun deescape-char-plist (char-plist)

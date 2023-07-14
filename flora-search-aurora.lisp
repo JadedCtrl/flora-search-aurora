@@ -13,7 +13,7 @@
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-;;;; FLORA-SEARCH-AURORA
+;;;; FLORA-SEARCH-AURORA ✿
 ;;;; A simple TUI-game made for the text-flavoured LibreJam of 2023-06!
 ;;;; See: https://jamgaroo.xyz/jams/2
 
@@ -561,7 +561,7 @@ avoid triggering this."
 
 
 ;;; ———————————————————————————————————
-;;; Military base!
+;;; Military-base!
 ;;; ———————————————————————————————————
 (defun captain-snake-interact (map &optional entity-id)
   (make-dialogue-state
@@ -962,30 +962,23 @@ avoid triggering this."
 Initializes the current instance of the game, and such."
   ;; We’ve gotta make fresh copies of the maps, in case the user’s restarted the game.
   ;; metacopy, I love you <3 <3 <3
-  (defparameter *base-map*             (🌍:plist->map (metacopy:copy-thing *base-map-plist*)))
-  (defparameter *casino-map*           (🌍:plist->map (metacopy:copy-thing *casino-map-plist*)))
-  (defparameter *flashback-casino-map* (🌍:plist->map (metacopy:copy-thing *flashback-casino-map-plist*)))
-  (defparameter *flashback-school-map* (🌍:plist->map (metacopy:copy-thing *flashback-school-map-plist*)))
-  (defparameter *outdoors-map*         (🌍:plist->map (metacopy:copy-thing *outdoors-map-plist*)))
-;;  (make-flashback-function (alexandria:random-elt (flashbacks))))
-  (make-overworld-function *base-map*))
-
-
-(defun submenu ()
-  `((:en "IDK"
-     :selection 100 :selected t)
-    (:en "GO BACK"
-     :drop 1)))
+  (lambda (matrix)
+    (defparameter *base-map*             (🌍:plist->map (metacopy:copy-thing *base-map-plist*)))
+    (defparameter *casino-map*           (🌍:plist->map (metacopy:copy-thing *casino-map-plist*)))
+    (defparameter *flashback-casino-map* (🌍:plist->map (metacopy:copy-thing *flashback-casino-map-plist*)))
+    (defparameter *flashback-school-map* (🌍:plist->map (metacopy:copy-thing *flashback-school-map-plist*)))
+    (defparameter *outdoors-map*         (🌍:plist->map (metacopy:copy-thing *outdoors-map-plist*)))
+    ;;  (make-flashback-function (alexandria:random-elt (flashbacks))))
+    (make-overworld-state *casino-map*)))
 
 
 (defun main-menu ()
-  `((:en "PLAY" :eo "EKLUDI"
-     :selection 100 :selected t
+  `((:en "Play" :eo "Ekludi"
+     :selection 50 :selected t
      :function ,(start-game-function))
-    (:en "SUBMENU" :eo "SUBMENUO" :row 1
-     :function ,(📋:make-menu-function (submenu)))
-    (:en "TERURE" :eo "BADLY" :row 1)
-    (:en "QUIT" :eo "REZIGNI" :row 2
+    (:en "Settings" :eo "Agordoj" :row 1
+     :function ,(🔧:make-settings-menu-function))
+    (:en "Give in" :eo "Cedi" :row 2
      :drop 1)))
 
 

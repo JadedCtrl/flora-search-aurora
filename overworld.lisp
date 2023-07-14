@@ -13,7 +13,7 @@
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-;;;; FLORA-SEARCH-AURORA.OVERWORLD
+;;;; FLORA-SEARCH-AURORA.OVERWORLD 🌍
 ;;;; All game-functions and data relating to the “overworld” (that is,
 ;;;; the primary gameplay, the RPG-ish-ish bits).
 
@@ -212,7 +212,17 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
                  (apply (…:string->symbol interaction) (list map interactee-id))
                  (list :parameters (list :map map)))))
           ('⌨:❎
-           (list :function (🎒:make-inventory-state map)))
+           (list :function
+                 (📋:make-menu-function
+                  `((:en "Continue" :eo "Malpaŭzigi"
+                     :drop 1 :selected t :selection 50)
+                    (:en "Backpack" :eo "Sako"
+                     :function ,(🎒:make-inventory-function map)
+                     :drop 1)
+                    (:en "Settings" :eo "Agordoj"
+                     :function ,(🔧:make-settings-menu-function))
+                    (:en "Give up" :eo "Rezigni"
+                     :drop 3)))))
           ;; Simple up-down-left-right movements
           ('⌨:→
            (move-player map :Δx 1))
@@ -401,7 +411,7 @@ plist containing a character (:CHAR) and :X & :Y coordinates."
 ;;; ———————————————————————————————————
 (defun overworld-state
     (matrix &key map (Δt .02))
-  "Render the given map to the matrix and take user-input — for one frame.
+  "Render the given map to the MATRIX and take user-input — for one frame.
 A state-function for use with STATE-LOOP."
   (sleep Δt)
   (overworld-state-draw matrix map)
@@ -409,7 +419,12 @@ A state-function for use with STATE-LOOP."
 
 
 (defun make-overworld-function (map)
-  "Return a state-function for a a map, for use with STATE-LOOP."
+  "Return a state-function for a a MAP, for use with STATE-LOOP."
   (lambda (matrix &key (map map))
     (apply #'🌍:overworld-state
            (list matrix :map map))))
+
+
+(defun make-overworld-state (map)
+  "Return a state-plist for a a MAP, for use with STATE-LOOP."
+  (list :function (make-overworld-function map)))

@@ -8,6 +8,7 @@
                (:file "display")
                (:file "input")
                (:file "menu")
+               (:file "settings")
                (:file "inventory")
                (:file "intermission")
                (:file "overworld.util")

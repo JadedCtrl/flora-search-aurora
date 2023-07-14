@@ -1,5 +1,5 @@
 (defsystem "flora-search-aurora"
-  :depends-on ("alexandria" "assoc-utils" "cl-charms" "str")
+  :depends-on ("alexandria" "assoc-utils" "cl-charms" "metacopy" "str")
   :build-operation "program-op"
   :build-pathname "flora-search-aurora"
   :entry-point "flora-search-aurora:main"

@@ -191,6 +191,7 @@ run the :USE function of the nearest entity, if it has any."
 ;;; ———————————————————————————————————
 ;;; The Outside World™
 ;;; ———————————————————————————————————
+
 (defun factory-window-interact (&optional map interactee-id)
   (make-dialogue-state
    map
@@ -428,7 +429,7 @@ run the :USE function of the nearest entity, if it has any."
 ;;; ———————————————————————————————————
 ;;; School prologue: Childhood friend
 ;;; ———————————————————————————————————
-(defparameter *flashback-school*
+(defun flashback-school ()
   (list
    :title '(:eo "ANTAŬLUDO I" :en "PROLOGUE I")
    :subtitle '(:eo "Antaŭ kvar jaroj..." :en "Four years ago...")
@@ -720,7 +721,7 @@ avoid triggering this."
 ;;; ———————————————————————————————————
 ;;; Casino prologue: Bad gambler!
 ;;; ———————————————————————————————————
-(defparameter *flashback-casino*
+(defun flashback-casino ()
   (list
    :title '(:eo "ANTAŬLUDO II" :en "PROLOGUE II")
    :subtitle '(:eo "Antaŭ du jaroj..." :en "Two years ago...")
@@ -873,8 +874,8 @@ avoid triggering this."
 ;;; ———————————————————————————————————
 ;;; Flashbacks, generally
 ;;; ———————————————————————————————————
-(defparameter *flashbacks*
-  (list *flashback-casino* *flashback-school*))
+(defun flashbacks ()
+  (list (flashback-casino) (flashback-school)))
 
 
 (defparameter *numerology-excerpts*
@@ -903,10 +904,23 @@ avoid triggering this."
     (list :drop 1 :parameters (list :map (merge-maps map *outdoors-map*))))))
 
 
+
 
 ;;; ———————————————————————————————————
 ;;; Main-menu data
 ;;; ———————————————————————————————————
+(defun start-game-function ()
+  "Returns a nameless function for use as a state function.
+Initializes the current instance of the game, and such."
+  ;; We’ve gotta make fresh copies of the maps, in case the user’s restarted the game.
+  ;; metacopy, I love you <3 <3 <3
+  (defparameter *outdoors-map*         (🌍:plist->map (metacopy:copy-thing *outdoors-map-plist*)))
+  (defparameter *casino-map*           (🌍:plist->map (metacopy:copy-thing *casino-map-plist*)))
+  (defparameter *flashback-casino-map* (🌍:plist->map (metacopy:copy-thing *flashback-casino-map-plist*)))
+  (defparameter *flashback-school-map* (🌍:plist->map (metacopy:copy-thing *flashback-school-map-plist*)))
+  (make-flashback-function (alexandria:random-elt (flashbacks))))
+
+
 (defun submenu ()
   `((:en "IDK"
      :selection 100 :selected t)
@@ -917,7 +931,7 @@ avoid triggering this."
 (defun main-menu ()
   `((:en "PLAY" :eo "EKLUDI"
      :selection 100 :selected t
-     :function ,(make-flashback-function (alexandria:random-elt *flashbacks*)))
+     :function ,(start-game-function))
     (:en "SUBMENU" :eo "SUBMENUO" :row 1
      :function ,(📋:make-menu-function (submenu)))
     (:en "TERURE" :eo "BADLY" :row 1)

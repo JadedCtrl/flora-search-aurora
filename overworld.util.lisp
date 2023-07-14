@@ -83,8 +83,8 @@ map hash-table, as used by the game."
     hash))
 
 
-(defun save-map-to-file (path map &optional (package ":FLORA-SEARCH-AURORA") (variable "*map*"))
+(defun save-map-to-file (path map &optional (package ":FLORA-SEARCH-AURORA") (variable "*map-plist*"))
   "Given a map, generate source-code that corresponds to it."
   (with-open-file (file-stream path :direction :output :if-exists :supersede)
-    (format file-stream "(in-package ~A)~%(defparameter ~A~%  (🌍.…:plist->map~%    (QUOTE ~S)))"
+    (format file-stream "(in-package ~A)~%(defvar ~A ~%    (QUOTE ~S))"
             package variable (map->plist map))))

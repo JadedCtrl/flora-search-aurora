@@ -428,6 +428,14 @@ run the :USE function of the nearest entity, if it has any."
 ;;; ———————————————————————————————————
 ;;; School prologue: Childhood friend
 ;;; ———————————————————————————————————
+(defparameter *flashback-school*
+  (list
+   :title '(:eo "ANTAŬLUDO I" :en "PROLOGUE I")
+   :subtitle '(:eo "Antaŭ kvar jaroj..." :en "Four years ago...")
+   :side-bar '(:eo "Amikoj, ĉu? Mi ne scias, eble..." :en "Friends? I don't know, maybe...")
+   :map *flashback-school-map*))
+
+
 (defun flashback-school-trigger (map &optional trigger-plist)
   "This is triggered right as the player enters the map — they literally can't
 avoid triggering this."
@@ -504,9 +512,8 @@ avoid triggering this."
    (mumble 'player :eo "[Vi prenas de SAŜA ĉirkaŭmanon belbrilan.]"
                    :en "[You take a shiny bracelet from SASHA.]")
    (move   'player '(:x 46 :y 5) :delay .05)
-   (move   'player '(:x 47 :y 9) :delay .05)
-   (move   'player '(:x 51 :y 19))
-   `((:parameters ,(list :map (merge-maps map *casino-map*))))))
+   (move   'player '(:x 51 :y 19) :delay .05)
+   (list (make-leave-flashback-state map))))
 
 
 (defun flashback-childhood-friend-dialogue (map sasha)
@@ -713,6 +720,14 @@ avoid triggering this."
 ;;; ———————————————————————————————————
 ;;; Casino prologue: Bad gambler!
 ;;; ———————————————————————————————————
+(defparameter *flashback-casino*
+  (list
+   :title '(:eo "ANTAŬLUDO II" :en "PROLOGUE II")
+   :subtitle '(:eo "Antaŭ du jaroj..." :en "Two years ago...")
+   :side-bar '(:eo "anyway whatever bruh" :en "sldkajsldkja")
+   :map *flashback-casino-map*))
+
+
 (defun flashback-bad-gambler-dialogue ()
   (let ((gambler 'flashback-bad-gambler))
     (start-dialogue
@@ -839,7 +854,7 @@ avoid triggering this."
    (say 'flashback-casino-dealer
         :eo "Nu, ĉiu krom li, metu viajn vetaĵojn. Ni komencos je la Nula Epoko!"
         :en "As for the rest of you, place your bets. It's time for the Zeroth Era!")
-   `((:parameters ,(list :map (merge-maps map *outdoors-map*))))))
+   (list (make-leave-flashback-state map))))
 
 
 (defun flashback-casino-dialogue (map)
@@ -856,6 +871,40 @@ avoid triggering this."
 
 
 ;;; ———————————————————————————————————
+;;; Flashbacks, generally
+;;; ———————————————————————————————————
+(defparameter *flashbacks*
+  (list *flashback-casino* *flashback-school*))
+
+
+(defparameter *numerology-excerpts*
+  '((:en "No. 1: \"VEGETATION: Azalea, Iris, Lilac. [...] Activate today's energetic, independent mood by choosing to wear a red tie or dress. Above all, do not be lazy.\""
+     :eo "N-ro 1: \"KRESKAĴOJ: Azaleo, irido, siringo. [...] Konduku vian tagon al energia kaj sendependa etoso per ruĝa kravato aŭ robo. Plej grave, ne maldiligentu.\"")))
+
+
+(defun make-flashback-function (flashback)
+  (🎭:make-intermission-function
+              (getf flashback :title)
+              (getf flashback :subtitle)
+              (getf flashback :side-text)
+              (list :drop 1
+                    :function
+                    (🌍:make-overworld-function (getf flashback :map)))))
+
+
+(defun make-leave-flashback-state (map)
+  (list
+   :parameters '()
+   :function
+   (🎭:make-intermission-function
+    '(:eo "NUNA TEMPO, NUNA DATO" :en "PRESENT DAY, PRESENT TIME")
+    '(:eo "La 3a de junio, 2006" :en "June 3rd, 2006")
+    (car *numerology-excerpts*)
+    (list :drop 1 :parameters (list :map (merge-maps map *outdoors-map*))))))
+
+
+
+;;; ———————————————————————————————————
 ;;; Main-menu data
 ;;; ———————————————————————————————————
 (defun submenu ()
@@ -868,9 +917,9 @@ avoid triggering this."
 (defun main-menu ()
   `((:en "PLAY" :eo "EKLUDI"
      :selection 100 :selected t
-     :function ,(🌍:make-overworld-state *flashback-school-map*))
+     :function ,(make-flashback-function (alexandria:random-elt *flashbacks*)))
     (:en "SUBMENU" :eo "SUBMENUO" :row 1
-     :function ,(📋:make-menu-state (submenu)))
+     :function ,(📋:make-menu-function (submenu)))
     (:en "TERURE" :eo "BADLY" :row 1)
     (:en "QUIT" :eo "REZIGNI" :row 2
      :drop 1)))
@@ -884,7 +933,7 @@ avoid triggering this."
   "A pathetic fascimile of a main loop. What does it do? WHAST DOES TI DODOO?
 What a mysteryyy! You’ll have to check out the engine to uncover it.
 engine.lisp, that is. Cheers! :D"
-  (⚙:main (list (📋:make-menu-state (main-menu)))))
+  (⚙:main (list (📋:make-menu-function (main-menu)))))
 
 
 ;; — Who’s there?

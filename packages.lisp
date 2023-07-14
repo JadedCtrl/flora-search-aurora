@@ -25,6 +25,7 @@
            #:string->symbol
            #:system-language #:langcode->keysym #:getf-lang))
 
+
 (defpackage :flora-search-aurora.input
   (:use :cl)
   (:nicknames :fsa.imp :input :⌨)
@@ -38,7 +39,7 @@
    :↑ :← :→ :↓ :↰ :↱ :↲ :↳ :🆗 :❎))
 
 (defpackage :flora-search-aurora.display
-  (:nicknames :fsa.d :display :✎)
+  (:nicknames :fsa.dsp :display :✎)
   (:use :cl)
   (:export #:make-screen-matrix #:print-screen-matrix #:matrix-delta
            #:render-line #:render-string #:render-string-verbatim #:render-string-partially
@@ -46,9 +47,9 @@
            #:hide-cursor #:show-cursor #:clear-screen))
 
 (defpackage :flora-search-aurora.menu
-  (:nicknames :fsa.men :menu :📋)
+  (:nicknames :fsa.mnu :menu :📋)
   (:use :cl)
-  (:export #:menu-state #:menu-state-update #:menu-state-draw #:make-menu-state
+  (:export #:menu-state #:menu-state-update #:menu-state-draw #:make-menu-function
            #:selected-menu-item
            :label :selection :selected))
 
@@ -68,7 +69,7 @@
   (:nicknames :fsa.int :intermission :🎭)
   (:use :cl)
   (:export
-   :make-intermission-state))
+   :make-intermission-function))
 
 (defpackage :flora-search-aurora.overworld.util
   (:nicknames :fsa.o.u :overworld.util :🌍.…)
@@ -83,7 +84,7 @@
   (:nicknames :fsa.o :overworld :🌍)
   (:use :cl
    :flora-search-aurora.overworld.util)
-  (:export #:overworld-state #:overworld-state-draw #:make-overworld-state
+  (:export #:overworld-state #:overworld-state-draw #:make-overworld-function
            #:merge-maps
            #:world-coords->screen-coords
            #:getf-entity #:getf-entity-data #:removef-entity

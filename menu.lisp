@@ -23,7 +23,7 @@
 ;;; ———————————————————————————————————
 ;;; Menu loops
 ;;; ——————————————————————————————————
-(defun make-menu-state (menu-list)
+(defun make-menu-function (menu-list)
   "Return a state-function for the game’s main menu, for use with STATE-LOOP."
   (lambda (matrix)
     (📋:menu-state matrix menu-list)))

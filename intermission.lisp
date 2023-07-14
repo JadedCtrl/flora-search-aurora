@@ -25,14 +25,14 @@
 (defun intermission-state-update (title subtitle side-text progress return)
   "The input-taking/logic-handling component of the inventory state-function.
 Part of INVENTORY-STATE."
-  (if (and (⌨:pressed-enter-p) (eq progress 72))
+  (if (and (⌨:pressed-enter-p) (> progress 60))
       return
       (list :parameters
             (list :title title
                   :subtitle subtitle
                   :side-text side-text
                   :return return
-                  :progress (…:at-most 72 (+ progress .5))))))
+                  :progress (…:at-most 107 (+ progress .5))))))
 
 
 
@@ -41,7 +41,7 @@ Part of INVENTORY-STATE."
 ;;; ———————————————————————————————————
 (defun render-centered-line (matrix string &key (y 0))
   "Given a STRING and a Y-position, render it to the MATRIX centered horizontally."
-  (display:render-line
+  (✎:render-line
    matrix
    string
    (list :y y
@@ -55,23 +55,27 @@ Part of INVENTORY-STATE."
 Part of INVENTORY-STATE."
   (let* ((title (…:getf-lang title))
          (title-border (subseq (make-string (length title) :initial-element #\=)
-                              0 (…:at-most (length title) (floor progress)))))
-   ;; Render the title
-   (render-centered-line matrix title :y 1)
-   ;; Render the borders surrounding the title
-   (render-centered-line matrix title-border :y 0)
-   (render-centered-line matrix title-border :y 2))
- ;; Now the sub-title…
-  (render-centered-line matrix (…:getf-lang subtitle) :y 4)
-  ;; And the side-text…!
-  (display:render-string matrix (…:getf-lang side-text) '(:x 55 :y 10) :width 14)
-  ;; A little touch; a simple animation-ish line down the middle.
-  (display:render-line
-   matrix
-   (subseq (make-string (second (array-dimensions matrix))
-                        :initial-element #\~)
-           0 (floor progress))
-   '(:x 0 :y 9)))
+                               0 (…:at-least 0 (…:at-most (length title)
+                                                          (floor (- progress 35)))))))
+    ;; Add a bit of a “blank” between scenes.
+    ;; Why? Pacing, of course!
+    (when (> progress 35)
+      ;; Render the title
+      (render-centered-line matrix title :y 1)
+      ;; Render the borders surrounding the title
+      (render-centered-line matrix title-border :y 0)
+      (render-centered-line matrix title-border :y 2)
+      ;; Now the sub-title…
+      (render-centered-line matrix (…:getf-lang subtitle) :y 4)
+      ;; And the side-text…!
+      (✎:render-string matrix (…:getf-lang side-text) '(:x 15 :y 10) :width 47)
+      ;; A little touch; a simple animation-ish line down the middle.
+      (✎:render-line
+       matrix
+       (subseq (make-string (second (array-dimensions matrix))
+                            :initial-element #\~)
+               0 (…:at-least 0 (floor (- progress 35))))
+       '(:x 0 :y 9)))))
 
 
 
@@ -85,7 +89,7 @@ Part of INVENTORY-STATE."
   (intermission-state-update title subtitle side-text progress return))
 
 
-(defun make-intermission-state (title subtitle side-text return)
+(defun make-intermission-function (title subtitle side-text return)
   "Return a state-function for intermission, for use with STATE-LOOP."
   (lambda (matrix &key (title title) (subtitle subtitle) (side-text side-text) (return return) (progress 0))
     (funcall #'intermission-state

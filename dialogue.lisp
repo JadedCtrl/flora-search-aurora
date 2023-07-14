@@ -199,9 +199,10 @@ Returns the state for use with STATE-LOOP, pay attention!"
           (list :parameters (list :dialogue (cdr dialogue-list) :map map))
           (progn
             (✎:hide-cursor)
-            (list :drop 1
+            (list :drop (1+ (or (getf dialogue :drop) 0))
                   :function (getf dialogue :function)
-                  :parameters (or (getf dialogue :parameters)
+                  :parameters (if (member :parameters dialogue)
+                                  (getf dialogue :parameters)
                                   (list :map map))))))
       ;; Allow interupting text-printing to end it!
       ((and did-press-enter-p (not did-finish-printing-p))

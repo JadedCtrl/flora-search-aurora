@@ -408,7 +408,7 @@ A state-function for use with STATE-LOOP."
   (overworld-state-update map Δt))
 
 
-(defun make-overworld-state (map)
+(defun make-overworld-function (map)
   "Return a state-function for a a map, for use with STATE-LOOP."
   (lambda (matrix &key (map map))
     (apply #'🌍:overworld-state

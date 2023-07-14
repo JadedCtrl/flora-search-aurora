@@ -130,7 +130,28 @@ Useful for making barriers the player character refuses to traverse."
   "A trigger that can be used to move the user from one MAP to another, via the
 :MAP property in a trigger’s Tiled entity."
   (list :parameters
-        (list :map (🌍:merge-maps map (symbol-value (read-from-string (getf trigger-plist :map)))))))
+        (list :map (🌍:merge-maps
+                    map (symbol-value (read-from-string (getf trigger-plist :map)))))))
+
+
+(defun entrance-interact (map interactee)
+  "An interact function that can be used to move the user from one MAP to another,
+via the :MAP property in the INTERACTEE’s Tiled entity."
+  (let ((new-parameters
+          (list :map
+                (merge-maps
+                 map (symbol-value (read-from-string (getf-entity-data map interactee :map)))))))
+    (if (getf-entity-data map interactee :desc-en)
+        (make-dialogue-state
+         map
+         (apply
+          #'start-dialogue
+          (append
+           (loop for en-line in (str:lines (getf-entity-data map interactee :desc-en))
+                for eo-line in (str:lines (getf-entity-data map interactee :desc-eo))
+                collect (💬:mumble 'player :en en-line :eo eo-line))
+           `(((:parameters ,new-parameters))))))
+        `(:parameters ,new-parameters))))
 
 
 (defun item-refusal-lines (string item)
@@ -268,7 +289,7 @@ run the :USE function of the nearest entity, if it has any."
   (let ((sasha 'childhood-friend))
     (case (getf-act map :sasha-greetings)
       (0
-       (💬:start-dialogue
+       (start-dialogue
         (💬:mumble sasha   :en "...")
         (💬:say    'player :eo "Kielas apud la mar'?"
                            :en "How's the view?")
@@ -914,10 +935,11 @@ avoid triggering this."
 Initializes the current instance of the game, and such."
   ;; We’ve gotta make fresh copies of the maps, in case the user’s restarted the game.
   ;; metacopy, I love you <3 <3 <3
-  (defparameter *outdoors-map*         (🌍:plist->map (metacopy:copy-thing *outdoors-map-plist*)))
+  (defparameter *base-map*             (🌍:plist->map (metacopy:copy-thing *base-map-plist*)))
   (defparameter *casino-map*           (🌍:plist->map (metacopy:copy-thing *casino-map-plist*)))
   (defparameter *flashback-casino-map* (🌍:plist->map (metacopy:copy-thing *flashback-casino-map-plist*)))
   (defparameter *flashback-school-map* (🌍:plist->map (metacopy:copy-thing *flashback-school-map-plist*)))
+  (defparameter *outdoors-map*         (🌍:plist->map (metacopy:copy-thing *outdoors-map-plist*)))
   (make-flashback-function (alexandria:random-elt (flashbacks))))
 
 
@@ -950,7 +972,8 @@ engine.lisp, that is. Cheers! :D"
   (⚙:main (list (📋:make-menu-function (main-menu)))))
 
 
+;; *Knock-knock*
 ;; — Who’s there?
 ;; — Yo momma!
 ;; — “Yo momma” who?
-;; — Yo momma’s a sweet lady, and I’d like to take her out for some tea!
+;; — Yo momma’s a sweet lady, and I’d like to take her out for coffee sometime!

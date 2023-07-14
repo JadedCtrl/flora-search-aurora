@@ -1,6 +1,7 @@
 # Flora Search Aurora
 _Flora Search Aurora_ is a game about destiny-making, peace-making, and (most importantly) bouquet-making.
 
+
 ## Installation
 
 You can run the game through a pre-built binary, available under Releases of this repository.
@@ -18,20 +19,44 @@ To do so, you can run the following commands, replacing `guix` with your package
 $ guix install sbcl
 $ wget https://beta.quicklisp.org/quicklisp.lisp
 $ sbcl --load quicklisp.lisp \
-	--eval '(quicklisp-quickstart:install :path "~/.local/share/quicklisp/)' \
+	--eval '(quicklisp-quickstart:install :path "~/.local/lib/quicklisp/)' \
 	--eval '(ql:add-to-init-file)'
 $ rm quicklisp.lisp
-$ cd ~/.local/share/quicklisp/local-projects/
+$ cd ~/.local/lib/quicklisp/local-projects/
 $ git clone https://notabug.org/jadedctrl/flora-search-aurora
 $ cd flora-search-aurora/
 $ make build
 $ ./flora-search-aurora
 ```
 
-For development, so that you can connect to the game’s REPL with (i.e.) [SLIME](https://slime.common-lisp.dev/), you might want to run the game like so:
-
-`$ USE_SWANK=yes SWANK=… make run`
-
-… where SWANK is the path to SLIME’s `swank-loader.lisp` file, probably at `~/.config/emacs/elpa/slime-*/swank-loader.lisp`.
-
 The game has been tested with both [Embeddable Common Lisp](https://ecl.common-lisp.dev/) and SBCL. It runs perfectly on both, but building a binary isn’t working on ECL at the moment.
+
+
+## LibreJam
+This game was made for the [2023-06 edition](https://jamgaroo.xyz/jams/2) of [LibreJam](https://bytecrab.org/librejam/).
+
+The theme of this LibreJam was “ASCII”, and several restrictions were imposted.
+Submitted games must:
+
+* Run in a terminal
+* Use only ASCII characters
+* Print no more than 72 columns and 20 rows
+* Display no colours or text formatting
+* Have source-code smaller than 1MiB
+
+Now, I’m proud to say that I meet these requirements! As for size, you can test like so:
+
+```
+$ du *.lisp res/maps/*.lisp \
+| awk '{ printf("%s +", $1) } END { printf("\n") }' \
+| sed 's/+$//' \
+| bc \
+| sed 's/$/KiB/'
+
+600KiB
+```
+
+
+## Misc. information
+Author: Jaidyn Ann <jadedctrl@posteo.at>
+License: GNU GPLv3

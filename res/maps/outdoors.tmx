@@ -1576,13 +1576,17 @@
   </object>
   <object id="19" name="Entrance window" x="2802.83" y="383.667">
    <properties>
-    <property name="desc-en">(These doors are *really* locked.)
-(Literally, I think they used pad-locks on padlocks...?)</property>
-    <property name="desc-eo">(La apudmara ŝtono!)
-(Mi memoras, ke la gepatroj rakontis al mi pri ĝi...)
-(... ke antaŭ jarcentoj, ĝi estis akra glavo kontraŭ granda drako.)</property>
+    <property name="desc-en">(Al ĉi tiu fenesto tute mankas vitro!)
+(Mi kredeble povus grimpi tien, fakte...)
+(... sed ĉu vere farindas?)
+</property>
+    <property name="desc-eo">(This window's got no pane at all!)
+(I could probably fit my way in there, actually...)
+(... but should I?)
+</property>
     <property name="id" value="✿:factory-window"/>
-    <property name="interact" value="✿:factory-window-interact"/>
+    <property name="interact" value="✿:entrance-interact"/>
+    <property name="map" value="✿::*factory-map*"/>
    </properties>
    <point/>
   </object>
@@ -1872,7 +1876,7 @@ DANĜERA LOKO - VENENA MATERIO
   </object>
  </objectgroup>
  <objectgroup id="7" name="People">
-  <object id="2" name="Player" type="Person" x="3341.33" y="1677.34">
+  <object id="2" name="Player" type="Person" x="2806.33" y="491.34">
    <properties>
     <property name="facing-right" type="bool" value="true"/>
     <property name="id" value="✿:player"/>

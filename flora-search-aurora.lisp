@@ -134,6 +134,14 @@ Useful for making barriers the player character refuses to traverse."
                     map (symbol-value (read-from-string (getf trigger-plist :map)))))))
 
 
+(defun avatar-change-trigger (map &optional trigger-plist)
+  "A somewhat weird trigger that changes the player's face or avatar."
+  (setf (getf-entity-data map 'player :talking-face) (getf trigger-plist :talking-face))
+  (setf (getf-entity-data map 'player :face) (getf trigger-plist :face))
+  (setf (getf-entity-data map 'player :avatar) (getf trigger-plist :avatar))
+  (list :parameters (list :map map)))
+
+
 (defun entrance-interact (map interactee)
   "An interact function that can be used to move the user from one MAP to another,
 via the :MAP property in the INTERACTEE’s Tiled entity."
@@ -212,21 +220,6 @@ run the :USE function of the nearest entity, if it has any."
 ;;; ———————————————————————————————————
 ;;; The Outside World™
 ;;; ———————————————————————————————————
-
-(defun factory-window-interact (&optional map interactee-id)
-  (make-dialogue-state
-   map
-   (start-dialogue
-    (💬:face 'player "` `" "`o`")
-    (💬:mumble 'player :eo "(Al ĉi tiu fenesto tute mankas vitro!)"
-                       :en "(This window's got no pane at all!)")
-    (💬:mumble 'player :eo "(Mi kredeble povus grimpi tien, fakte...)"
-                       :en "(I could probably fit my way in there, actually...)")
-    (💬:mumble 'player :eo "(... sed ĉu vere farindas?)"
-                       :en "(... but should I?)"
-                       :face "`o`"))))
-
-
 
 ;;; ———————————————————————————————————
 ;;; Random outdoors NPCs
@@ -820,6 +813,24 @@ avoid triggering this."
 
 
 ;;; ———————————————————————————————————
+;;; Factory!
+;;; ———————————————————————————————————
+(defun factory-window-interact (&optional map interactee-id)
+  (make-dialogue-state
+   map
+   (start-dialogue
+    (💬:face 'player "` `" "`o`")
+    (💬:mumble 'player :eo "(Al ĉi tiu fenesto tute mankas vitro!)"
+                       :en "(This window's got no pane at all!)")
+    (💬:mumble 'player :eo "(Mi kredeble povus grimpi tien, fakte...)"
+                       :en "(I could probably fit my way in there, actually...)")
+    (💬:mumble 'player :eo "(... sed ĉu vere farindas?)"
+                       :en "(... but should I?)"
+                       :face "`o`"))))
+
+
+
+;;; ———————————————————————————————————
 ;;; Casino!
 ;;; ———————————————————————————————————
 (defun boozy-lady-dialogue-ring ()
@@ -1204,6 +1215,7 @@ Initializes the current instance of the game, and such."
   (lambda (matrix)
     (defparameter *base-map*             (🌍:plist->map (metacopy:copy-thing *base-map-plist*)))
     (defparameter *casino-map*           (🌍:plist->map (metacopy:copy-thing *casino-map-plist*)))
+    (defparameter *factory-map*          (🌍:plist->map (metacopy:copy-thing *factory-map-plist*)))
     (defparameter *flashback-base-map*   (🌍:plist->map (metacopy:copy-thing *flashback-base-map-plist*)))
     (defparameter *flashback-casino-map* (🌍:plist->map (metacopy:copy-thing *flashback-casino-map-plist*)))
     (defparameter *flashback-school-map* (🌍:plist->map (metacopy:copy-thing *flashback-school-map-plist*)))

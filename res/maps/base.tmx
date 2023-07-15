@@ -132,8 +132,7 @@
 (Ĝi estas ŝlosit--he?! Ĝi NE estas ŝlosita?!)
 </property>
     <property name="id" value="✿:break-room-door"/>
-    <property name="interact" value="✿:entrance-interact"/>
-    <property name="map" value="✿::*breakroom-map*"/>
+    <property name="interact" value="✿:description-interact"/>
    </properties>
    <point/>
   </object>

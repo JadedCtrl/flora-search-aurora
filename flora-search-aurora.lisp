@@ -673,11 +673,11 @@ avoid triggering this."
 
 (defun sheriff-trigger (map &optional trigger-plist)
  (declare (ignore trigger-plist))
- (when (not (getf-act map :sheriff-met))
-   (setf (getf-act map :sheriff-met) 't)
-   (make-dialogue-state
-    map
-    (sheriff-trigger-dialogue map))))
+ (if (not (getf-act map :sheriff-met))
+     (progn
+       (setf (getf-act map :sheriff-met) 't)
+       (make-dialogue-state map (sheriff-trigger-dialogue map)))
+     (list :parameters (list :map map))))
 
 
 
@@ -1208,9 +1208,8 @@ Initializes the current instance of the game, and such."
     (defparameter *flashback-casino-map* (🌍:plist->map (metacopy:copy-thing *flashback-casino-map-plist*)))
     (defparameter *flashback-school-map* (🌍:plist->map (metacopy:copy-thing *flashback-school-map-plist*)))
     (defparameter *outdoors-map*         (🌍:plist->map (metacopy:copy-thing *outdoors-map-plist*)))
-    (make-flashback-state (third (flashbacks)))))
 ;;    (make-flashback-state (alexandria:random-elt (flashbacks)))))
-;;    (make-overworld-state *base-map*)))
+    (make-overworld-state *outdoors-map*)))
 
 
 (defun main-menu ()

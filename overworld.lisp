@@ -237,6 +237,7 @@ Returns parameters to be used in the next invocation of OVERWORLD-STATE."
            (list :function
                  (📋:make-menu-function
                   `((:en "Continue" :eo "Malpaŭzigi"
+                     :parameters ,(list :map map)
                      :drop 1 :selected t :selection 50)
                     (:en "Backpack" :eo "Sako"
                      :function ,(🎒:make-inventory-function map)

@@ -167,8 +167,8 @@ That is, 0 for non-selected items and 100 for selected items."
           ('⌨:↳ (progn (select-down-menu-item menu-plist)
                        (select-right-menu-item menu-plist)
                        't))
-          ('⌨:❎
-           (list :drop 1))
+;;          ('⌨:❎
+;;           (list :drop 1))
           ('⌨:🆗
            (if (getf selected-item :exec)
                (apply (getf selected-item :exec) '())

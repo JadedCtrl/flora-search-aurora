@@ -234,7 +234,7 @@ height — all parameters for use with RENDER-STRING & co."
                                   (- (getf coords :x) 3))))
          (lines (ignore-errors (str:lines (…:linewrap-string text text-width))))
          (text-height (length lines)))
-    (format *error-output* "HORIZ COORD: ~A HEIGHT: ~A WIDTH ~A LINES:~%~S~%" coords text-height text-width lines)
+;;    (format *error-output* "HORIZ COORD: ~A HEIGHT: ~A WIDTH ~A LINES:~%~S~%" coords text-height text-width lines)
     ;; When this layout is valid…
     (when (and lines
                (>= height text-height) ;; If the text’ll fit on screen
@@ -271,7 +271,7 @@ height (for use as parameters with RENDER-STRING et al.)."
                           (- text-y-margin 1)))
          (text-width (floor (* width 3/5))) ;; Too wide’s illegible! So ⅗-screen.
          (lines (ignore-errors (str:lines (…:linewrap-string text text-width)))))
-    (format *error-output* "VERT HEIGHT: ~A WIDTH ~A LINES: ~A~%" text-height text-width lines)
+;;    (format *error-output* "VERT HEIGHT: ~A WIDTH ~A LINES: ~A~%" text-height text-width lines)
     ;; When the text can be printed with this layout…
     (when (and lines (>= text-height (length lines)))
       (let* ((y (…:at-least

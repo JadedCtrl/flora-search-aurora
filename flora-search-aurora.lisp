@@ -32,6 +32,11 @@ That is, into MAP’s :ITEMS."
       (removef-entity map entity-id))))
 
 
+(defun remove-item (map item-id)
+  "Given an item’s id, remove it from the user’s inventory."
+  (…:remove-from-alistf item-id (gethash :items map)))
+
+
 (defun take-item-dialogue (item-plist)
   "Return some dialogue expressing surprise/dread or whatever at the collection
 of a new item. The attributes set for the entity item should be:
@@ -234,7 +239,6 @@ run the :USE function of the nearest entity, if it has any."
                          :en "AIIII! Woe is me! The Devil has come!")
       (💬:say  'player   :eo "Kvincent, Kvincent! Trankviliĝu, trankviliĝu! Estas mi!"
                          :en "Kvincent, Kvincent! Calm down, it's just me!")
-
       (💬:say  'kvincent :eo "... bedaŭron?"
                          :en "... pardon?")
       (💬:face 'kvincent "@w@" "@o@")
@@ -262,8 +266,14 @@ run the :USE function of the nearest entity, if it has any."
            (💬:face 'player   "` `" "`o`")
            (💬:say  'player   :eo "Ĉu ĉio enordas, Kvincent?"
                               :en "Everything alright, Kvincent?")
-           (💬:say  'kvincent :eo "Mi apenaŭ trovas fungojn, hodiaŭ... la dioj malbenis min!"
-                              :en "I'm hardly finding any mushrooms... I've been cursed!")
+           (💬:say  'kvincent :eo "Mi iom anksias, freŝe... mi aŭdas strangajn, metalajn sonojn proksime en la montoj!"
+                              :en "I'm a bit anxious, lately... I hear strange, metalic noises nearby in the mountains!")
+           (💬:say  'kvincent :eo "Mi iom anksias, freŝe... mi aŭdas strangajn, metalajn sonojn proksime en la montoj!"
+                              :en "I'm a bit anxious, lately... I hear strange, metalic noises nearby in the mountains!")
+           (💬:say 'kvincent :eo "Estas sendube diabloj!"
+                              :en "Without a doubt, the sounds of devils!")
+           (💬:say  'kvincent :eo "Kaj ankaŭ mi apenaŭ trovas fungojn, hodiaŭ... la dioj malbenis min!"
+                              :en "Not to mention that I'm hardly finding any mushrooms... I've been cursed!")
            (💬:say  'player   :eo "Nek mi povas trovi florojn! Kia malfacila tago."
                               :en "I can't find any flowers, either! Today sucks."
                               :face "vov\'"))))
@@ -422,6 +432,20 @@ run the :USE function of the nearest entity, if it has any."
                       :en "(This is good enough for me!)")))
 
 
+(defun childhood-friend-dialogue-edelweiss (sasha)
+  (start-dialogue
+   (say sasha   :eo "Ĝi iom belas, mi supozas."
+                :en "It's pretty, I guess.")
+   (say 'player :eo "Saŝa, mi komprenas vin finfine."
+                :en "Sasha, I think I understand you now.")
+   (say 'player :eo "Vi fermiĝas en vi mem, timante ke aliuloj vin vundos kaj malaprobos."
+                :en "You close up in yourself, afraid that others will reject you.")
+   (say 'player :eo "Saŝa--! Vi bezonas pli kuraĝi!"
+                :en "Sasha... you need to be brave!")
+   (say sasha   :eo "... Vi afektemas, laŭkutime."
+                :en "... You're pretentious, as per usual.")))
+
+
 (defun childhood-friend-dialogue-bracelet (map sasha)
   (append (childhood-friend-dialogue-bracelet-intro sasha)
           (if (getf-act map :sasha-flourish)
@@ -433,8 +457,10 @@ run the :USE function of the nearest entity, if it has any."
   (let ((item-id (…:string->symbol (getf item-plist :id))))
     (cond ((eq item-id 'bracelet)
            (make-dialogue-state
-            map
-            (childhood-friend-dialogue-bracelet map entity-id)))
+            map (childhood-friend-dialogue-bracelet map entity-id)))
+          ((eq item-id 'neĝfloro)
+           (remove-item map entity-id)
+           (make-dialogue-state map (childhood-friend-dialogue-edelweiss entity-id)))
           ('t
            (refusal-use map item-plist entity-id)))))
 
@@ -538,18 +564,20 @@ avoid triggering this."
 
 (defun flashback-childhood-friend-interact (map entity-id)
   (make-dialogue-state
-   map
-   (flashback-childhood-friend-dialogue map entity-id)))
+   map (flashback-childhood-friend-dialogue map entity-id)))
 
 
 (defun flashback-childhood-friend-use (map item-plist &optional entity-id)
-  (if (eq (…:string->symbol (getf item-plist :id)) 'bracelet)
-      ;; If player gives her the special bracelet, skip the dialogue intro
-      (make-dialogue-state
-       map
-       (flashback-childhood-friend-dialogue-bracelet map entity-id))
-      ;; Otherwise, have her politely refuse. =w=
-      (refusal-use map item-plist entity-id)))
+  (let ((item-id (…:string->symbol (getf item-plist :id))))
+    (cond ((eq item-id 'bracelet))
+           ;; If player gives her the special bracelet, skip the dialogue intro
+          (make-dialogue-state
+           map (flashback-childhood-friend-dialogue-bracelet map entity-id))
+          ((eq item-id 'neĝfloro)
+           (make-dialogue-state map (childhood-friend-dialogue-edelweiss entity-id)))
+          ('t
+           ;; Otherwise, have her politely refuse. =w=
+           (refusal-use map item-plist entity-id)))))
 
 
 
@@ -671,6 +699,42 @@ avoid triggering this."
        (setf (getf-act map :sheriff-met) 't)
        (make-dialogue-state map (sheriff-trigger-dialogue map)))
      (list :parameters (list :map map))))
+
+
+(defun scientist-dialogue-edelweiss (scientist)
+  (start-dialogue
+   (say 'player :eo "Jen, por vi."
+                :en "Here, for you.")
+   (say scientist :eo "... he?"
+                  :en "... huh?")
+   (say 'player :eo "Estas neĝfloro, ĉu vi konas ĝian signifon?"
+                :en "It's an Edelweiss. Do you know what it means?")
+   (say 'player :eo "Signifas kuraĝon kaj bravecon."
+                :en "It means courage and bravery.")
+   (say 'player :eo "La kuraĝo fidi je viaj juĝoj..."
+                :en "The courage to trust your judgement...")
+   (say 'player :eo "... kaj braveco por ilin esprimi."
+                :en "... and the bravery to speak your mind.")
+   (face scientist "8w8" "8v8")
+   (say scientist :eo "Dankon, staĝanto."
+                  :en "Thanks, intern.")
+   (say scientist :eo "Ĉi tio fakte tre agrablas de vi, multan, multan dankon."
+                  :en "This was actually very kind of you, thank you so much.")
+   (say scientist :eo "Mi pravas... mi scias, kion mi devas fari!"
+                  :en "I'm in the right... I know now what I have to do!")
+   (say scientist :en "Farewell, intern."
+                  :eo "Adiaŭ, S-ro staĝanto.")
+   (move scientist '(:x 145 :y 10))))
+
+
+(defun scientist-use (map item-plist &optional entity-id)
+  (let ((item-id (…:string->symbol (getf item-plist :id))))
+    (cond ((eq item-id 'neĝfloro)
+           (setf (getf-act map :encourage-scientist) 't)
+           (make-dialogue-state map (scientist-dialogue-edelweiss entity-id)))
+          ('t
+           ;; Otherwise, have her politely refuse. =w=
+           (refusal-use map item-plist entity-id)))))
 
 
 
@@ -1220,8 +1284,9 @@ Initializes the current instance of the game, and such."
     (defparameter *flashback-casino-map* (🌍:plist->map (metacopy:copy-thing *flashback-casino-map-plist*)))
     (defparameter *flashback-school-map* (🌍:plist->map (metacopy:copy-thing *flashback-school-map-plist*)))
     (defparameter *outdoors-map*         (🌍:plist->map (metacopy:copy-thing *outdoors-map-plist*)))
+    (take-item *base-map* 'neĝfloro)
 ;;    (make-flashback-state (alexandria:random-elt (flashbacks)))))
-    (make-overworld-state *outdoors-map*)))
+    (make-overworld-state *base-map*)))
 
 
 (defun main-menu ()

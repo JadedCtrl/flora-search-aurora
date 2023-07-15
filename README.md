@@ -18,9 +18,19 @@ To do so, you can run the following commands, replacing `guix` with your package
 ```
 $ guix install sbcl
 $ wget https://beta.quicklisp.org/quicklisp.lisp
-$ sbcl --load quicklisp.lisp \
-	--eval '(quicklisp-quickstart:install :path "~/.local/lib/quicklisp/)' \
-	--eval '(ql:add-to-init-file)'
+$ sbcl --load quicklisp.lisp
+```
+
+And in SBCL run…
+
+```
+* (quicklisp-quickstart:install :path "~/.local/lib/quicklisp/")
+* (ql:add-to-init-file)
+```
+
+Back in the shell…
+
+```
 $ rm quicklisp.lisp
 $ cd ~/.local/lib/quicklisp/local-projects/
 $ git clone https://notabug.org/jadedctrl/flora-search-aurora
@@ -53,7 +63,7 @@ $ du *.lisp res/maps/*.lisp \
 | bc \
 | sed 's/$/KiB/'
 
-600KiB
+764KiB
 ```
 
 

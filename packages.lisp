@@ -63,7 +63,7 @@
 (defpackage :flora-search-aurora.dialogue
   (:nicknames :fsa.dia :dialogue :💬)
   (:use :cl)
-  (:export #:dialogue-state #:make-dialogue-state
+  (:export #:dialogue-state #:make-dialogue-state #:make-dialogue-function
            #:start-dialogue #:face #:say #:mumble #:move
    :normal-face :talking-face))
 
@@ -76,7 +76,7 @@
   (:nicknames :fsa.int :intermission :🎭)
   (:use :cl)
   (:export
-   :make-intermission-function))
+   :make-intermission-state :make-intermission-function))
 
 (defpackage :flora-search-aurora.overworld.util
   (:nicknames :fsa.ovr.… :overworld.util :🌍.…)

@@ -13,7 +13,7 @@
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-;;;; FLORA-SEARCH-AURORA.DIALOGUE
+;;;; FLORA-SEARCH-AURORA.DIALOGUE 💬
 ;;;; The dialogue-scripting part of the game. This handles all dialogue!
 
 (in-package :flora-search-aurora.dialogue)
@@ -377,12 +377,16 @@ A state-function for use with STATE-LOOP."
   (dialogue-state-update map dialogue))
 
 
-(defun make-dialogue-state (map dialogue-list)
+(defun make-dialogue-function (map dialogue-list)
   "Return a state-function for a section of dialogue, for use with STATE-LOOP."
-  (list :function
-        (lambda (matrix &key (map map) (dialogue dialogue-list))
-          (🌍:overworld-state-draw matrix map)
-          (dialogue-state matrix :map map :dialogue dialogue))))
+  (lambda (matrix &key (map map) (dialogue dialogue-list))
+    (🌍:overworld-state-draw matrix map)
+    (dialogue-state matrix :map map :dialogue dialogue)))
+
+
+(defun make-dialogue-state (map dialogue-list)
+  "Return a state-plist for a section of dialogue, for use with STATE-LOOP."
+  (list :function (make-dialogue-function map dialogue-list)))
 
 
 ;; Split a banana in two, bisection-fruit,

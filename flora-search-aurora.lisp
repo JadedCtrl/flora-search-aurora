@@ -535,7 +535,7 @@ avoid triggering this."
                       :en "[You take a shiny bracelet from SASHA.]")
    (move   'player '(:x 46 :y 5) :delay .05)
    (move   'player '(:x 51 :y 19) :delay .05)
-   (list (make-leave-flashback-state map))))
+   (list (make-flashforward-state map))))
 
 
 (defun flashback-childhood-friend-dialogue (map sasha)
@@ -678,6 +678,144 @@ avoid triggering this."
    (make-dialogue-state
     map
     (sheriff-trigger-dialogue map))))
+
+
+
+;;; ———————————————————————————————————
+;;; Base prologue: Quiet scientist
+;;; ———————————————————————————————————
+(defun flashback-base-dialogue (map)
+  (let ((sheriff 'flashback-sheriff)
+        (scientist 'flashback-scientist))
+    (start-dialogue
+     (move   sheriff   '(:x 100 :y 26) :delay .1)
+     (move   sheriff   '(:x 90 :y 29) :delay .1)
+     (move   sheriff   '(:x 87 :y 29))
+     (mumble sheriff   :en "Hm?")
+     (move   scientist '(:x 112 :y 22) :delay 0)
+     (say    scientist :eo "Atendu, sinjoro!!"
+                       :en "Wait, sir!!")
+     (move   scientist '(:x 95 :y 29) :delay 0.02)
+     (say    scientist :eo "Momenton!"
+                       :en "Just a moment!")
+     (say    sheriff   :eo "Doktoro Tim?"
+                       :en "Doctor Tim?")
+     (say    sheriff   :eo "Kial la kurado, ĉu ĉio enordas?"
+                       :en "Why the hussle, has something happened?")
+     (say    scientist :eo "Mi pensas, ke vi bone konas la problemon, sinjoro."
+                       :en "I think you know very well what the problem is, sir.")
+     (say    sheriff   :eo "Pardonu, sed mi tute ne. Ĉu mi misdiris ion, dum la kunveno?"
+                       :en "Sorry, but I have no idea. Did I say    something wrong in the meeting?")
+     (say    scientist :eo "Eble mi misaŭdis, fakte..."
+                       :en "Maybe I just misheard, but...")
+     (say    scientist :eo "Ĉu vi vere volas TIOM da tankoj?"
+                       :en "Do you really want THAT MANY tanks?")
+     (say    sheriff   :eo "Ĉu tio problemas iel, doktoro?"
+                       :en "Is that a problem, doctor?")
+     (say    sheriff   :eo "Mi esperas, ke ne."
+                       :en "I certainly hope not.")
+     (say    scientist :eo "N-ne, ĉefo!"
+                       :en "N-no sheriff!")
+     (say    scientist :eo "Mi simple c-cerbumas..."
+                       :en "I'm just w-wondering, is all...")
+     (say    scientist :eo "Ĉu ni vere bezonas tiom multe da tankoj?"
+                       :en "Do we really need so many tanks?")
+     (say    scientist :eo "Nu, ha, mi simple iom prizorgas."
+                       :en "Well, eh, I'm just worrying a bit.")
+     (say    scientist :eo "Ĉu ne ni jam uzis tro da rimedoj por konstrui ĉi tiun bazon..?"
+                       :en "Haven't we already gone through too many resources just building this place..?")
+     (say    sheriff   :eo "He. Tial vi estas sciencisto, kaj nek kapitano nek kontisto."
+                       :en "Heh. That's why you're a scientist, and not a captain nor an accountant.")
+     (say    sheriff   :eo "Fidu je mi, Karla! Mi kontrolis la nombrojn, kaj ili balanciĝos bone."
+                       :en "Trust me, Karla! I looked at the numbers personally, and it all checks out.")
+     (say    scientist :eo "Bone, sinjoro. Kaj pardonu min pro la trudo, sinjoro, mi ne intencis malrespekton."
+                       :en "Alright then, sir. I'm sorry for the intrusion, I meant no disrespect.")
+     (say    sheriff   :eo "Ne zorgu, doktoro; mi ne dubas vian fidelecon."
+                       :en "Don't worry, doctor; I don't doubt your loyalty.")
+     (move   sheriff   '(:x 71 :y 29) :delay .1)
+     (move   sheriff   '(:x 40 :y 29) :delay 0)
+     (mumble scientist :en "...")
+     (mumble scientist :eo "(Simple... tute ne sencas!)"
+                       :en "(It just doesn't make any sense!)")
+     (move   scientist '(:x 80 :y 29) :delay 0)
+     (say    scientist :eo "S-sinjoro! Momenton plu, bonvolu!!"
+                       :en "S-sir! Just one more thing, please!!")
+     (move   scientist '(:x 71 :y 29) :delay 0)
+     (move   'player   '(:Δx -3 :Δy 0) :delay 0)
+     (move   scientist '(:x 56 :y 29) :delay 0)
+     (say    scientist :eo "Vi diras, ke la nombroj balanciĝos, sed... kiel?"
+                       :en "You say that the numbers'll balance out, but... how?")
+     (say    scientist :eo "Kiel tioma malŝparo repagiĝos? Kiel tioma truo pleniĝos?"
+                       :en "How could such a waste be paid back? Such a hole be filled?")
+     (say    sheriff   :eo "Ĉu \"malŝparo,\" Klara?"
+                       :en "\"Waste,\" you say?")
+     (say    scientist :eo "E-eee! Ne tiel, ĉefo! V-volis diri, ke..."
+                       :en "E-eee! Not like that, s-sir! I m-meant to say...")
+     (say    sheriff   :eo "Trankviliĝu."
+                       :en "Calm down.")
+     (say    sheriff   :eo "Sole kapitanoj scias ĉi tion ĝuste nun, sed..."
+                       :en "Only the captains know this right now, but...")
+     (say    sheriff   :eo "La urbolimo removiĝos iom. Preter tiu de nia najbaro, precize."
+                       :en "City limits are expanding somewhat. Beyond those of our neighbor, specifically.")
+     (say    sheriff   :eo "Ĝia estraro rifuzis nin, kompreneble, do ni devos peni iom."
+                       :en "Their city council refused our proposal, of course, so we'll have to put in some elbow grease.")
+     (say    sheriff   :eo "La landa armeo jam promesis ne entrudiĝi; ni rajtas fari ĉion necesan."
+                       :en "The national army's already promised to keep their nose out of this; we can do what needs to be done.")
+     (say    sheriff   :eo "Per la impostoj kaj landopagoj de Etburgo, niaj kontoj balanciĝos."
+                       :en "If we add in the all of Etteburg's revenue, our accounts will balance out.")
+     (say    sheriff   :eo "Ĉu vi komprenas, nun? Kiel vi opinias?"
+                       :en "Do you get it, now? What do you think?")
+     (say    scientist :eo "Jes, ĉefo! Dankon!"
+                       :en "Yes, sir! Thank you!")
+     (say    scientist :eo "Ĝi estas t-tre bona ideo, gratulon! Genie!"
+                       :en "It's a f-fantastic idea, sir! Perfect!")
+     (say    scientist :eo "N-nu! Bonan tagon!"
+                       :en "N-now! Good day!")
+     (say    sheriff   :eo "Bonan tagon, doktoro."
+                       :en "Good day, doctor.")
+     (move   sheriff   '(:x -5 :y 29) :delay .07)
+     (mumble scientist :eo "(... Li demandis min rekte, kial mi mensogis?)"
+                       :en "(... He asked me directly, so why did I lie?)")
+     (move   scientist '(:x 65 :y 29) :delay 0)
+     (mumble scientist :eo "(Ni kunigos Etburgon kaj Egburo, ĉi tiel?)"
+                       :en "(We'll merge Etteburg and Bigborough like that?)")
+     (move   scientist '(:x 45 :y 29) :delay 0)
+     (mumble scientist :eo "(Ĉi tio frenezas! Frenezas!)"
+                       :en "(This is insane! Insane!)")
+     (move   scientist '(:x 65 :y 29) :delay 0)
+     (mumble scientist :eo "(Kaj la kapitanoj vere aprobas ĉi tion?)"
+                       :en "(The captains really think this is a good idea?)")
+     (mumble scientist :eo "(Dum la kunveno, ili sciis la veron, kaj diris nenion--!)"
+                       :en "(During the meeting, they knew the truth, and said nothing--!")
+     (move   scientist '(:x 45 :y 29) :delay 0)
+     (mumble scientist :eo "(Fek'... Neeblas, ke ĉiu aprobas!)"
+                       :en "(Shit... It's impossible that everyone agrees!)")
+     (mumble scientist :eo "(Sed kio restas al mi?)"
+                       :en "(But what can I do?)")
+     (move   scientist '(:x 65 :y 29) :delay 0)
+     (mumble scientist :eo "(Mi ne povas esti la sola kontraŭanto!)"
+                       :en "(I couldn't argue against the sheriff alone!)")
+     (move   scientist '(:x 45 :y 29) :delay 0)
+     (mumble scientist :eo "(Fek'!)"
+                       :en "(Damn!)")
+     (move   scientist '(:x 65 :y 29) :delay 0)
+     (mumble scientist :en "(...)")
+     (mumble scientist :eo "(Mi malsatas...)"
+                       :en "(I'm hungry...)")
+     (mumble scientist :en "(...)")
+     (move   scientist '(:x 56 :y 31) :delay .07)
+     (move   scientist '(:x 56 :y 42) :delay .07)
+     (list (make-flashforward-state map :was-dialogue 't)))))
+
+
+(defun flashback-base ()
+  (list
+   :title '(:eo "ANTAŬLUDO III" :en "PROLOGUE III")
+   :subtitle '(:eo "Antaŭ du monatoj..." :en "Two months ago...")
+   :side-bar '(:eo "-- Li blokas vin sur la vojo. Kiel vi reagos al tio? -- Eee, mi afable ĉirkaŭmarŝos lin?"
+               :en "-- He’s blocking your path. What are you gonna do about it? -- Um, politely walk around him?")
+   :dialogue (flashback-base-dialogue *flashback-base-map*)
+   :map *flashback-base-map*))
 
 
 
@@ -996,7 +1134,7 @@ avoid triggering this."
    (💬:say 'flashback-casino-dealer
            :eo "Nu, ĉiu krom li, metu viajn vetaĵojn. Ni komencos je la Nula Epoko!"
            :en "As for the rest of you, place your bets. It's time for the Zeroth Era!")
-   (list (make-leave-flashback-state map))))
+   (list (make-flashforward-state map))))
 
 
 (defun flashback-casino-dialogue (map)
@@ -1016,7 +1154,7 @@ avoid triggering this."
 ;;; Flashbacks, generally
 ;;; ———————————————————————————————————
 (defun flashbacks ()
-  (list (flashback-casino) (flashback-school)))
+  (list (flashback-school) (flashback-casino) (flashback-base)))
 
 
 (defparameter *numerology-excerpts*
@@ -1024,25 +1162,34 @@ avoid triggering this."
      :eo "N-ro 1: \"KRESKAĴOJ: Azaleo, irido, siringo. [...] Konduku vian tagon al energia kaj sendependa etoso per ruĝa kravato aŭ robo. Plej grave, ne maldiligentu.\"")))
 
 
-(defun make-flashback-function (flashback)
-  (🎭:make-intermission-function
+(defun make-flashback-state (flashback)
+  "Given a FLASHBACK-plist, return a state plist suitable for use with STATE-LOOP.
+The plist should have :TITLE, :SUBTITLE, and :SIDE-TEXT strings, alongside :MAP.
+If you don’t want the player to be walking around (non-interactive flashback),
+you can add :DIALOGUE with a dialogue-list for use with a dialogue state."
+  (🎭:make-intermission-state
    (getf flashback :title)
    (getf flashback :subtitle)
    (getf flashback :side-text)
    (list :drop 1
          :function
-         (🌍:make-overworld-function (getf flashback :map)))))
+         (if (getf flashback :dialogue)
+             (💬:make-dialogue-function (getf flashback :map) (getf flashback :dialogue))
+             (🌍:make-overworld-function (getf flashback :map))))))
 
 
-(defun make-leave-flashback-state (map)
-  (list
-   :parameters '()
-   :function
-   (🎭:make-intermission-function
-    '(:eo "NUNA TEMPO, NUNA DATO" :en "PRESENT DAY, PRESENT TIME")
-    '(:eo "La 3a de junio, 2006" :en "June 3rd, 2006")
-    (car *numerology-excerpts*)
-    (list :drop 1 :parameters (list :map (merge-maps map *outdoors-map*))))))
+(defun make-flashforward-state (map &key (was-dialogue nil))
+  "Make a state-plist for use with STATE-LOOP that will give the player a smooth
+transition from a flashback MAP into the *OUTDOORS-MAP*.
+If the flashback was non-interactive (dialogue-only), WAS-DIALOGUE should be
+set."
+  (🎭:make-intermission-state
+   '(:eo "NUNA TEMPO, NUNA DATO" :en "PRESENT DAY, PRESENT TIME")
+   '(:eo "La 3a de junio, 2006" :en "June 3rd, 2006")
+   (car *numerology-excerpts*)
+   (list :drop 1
+         :function (when was-dialogue (🌍:make-overworld-function *outdoors-map*))
+         :parameters (list :map (merge-maps map *outdoors-map*)))))
 
 
 
@@ -1057,11 +1204,13 @@ Initializes the current instance of the game, and such."
   (lambda (matrix)
     (defparameter *base-map*             (🌍:plist->map (metacopy:copy-thing *base-map-plist*)))
     (defparameter *casino-map*           (🌍:plist->map (metacopy:copy-thing *casino-map-plist*)))
+    (defparameter *flashback-base-map*   (🌍:plist->map (metacopy:copy-thing *flashback-base-map-plist*)))
     (defparameter *flashback-casino-map* (🌍:plist->map (metacopy:copy-thing *flashback-casino-map-plist*)))
     (defparameter *flashback-school-map* (🌍:plist->map (metacopy:copy-thing *flashback-school-map-plist*)))
     (defparameter *outdoors-map*         (🌍:plist->map (metacopy:copy-thing *outdoors-map-plist*)))
-    ;;  (make-flashback-function (alexandria:random-elt (flashbacks))))
-    (make-overworld-state *base-map*)))
+    (make-flashback-state (third (flashbacks)))))
+;;    (make-flashback-state (alexandria:random-elt (flashbacks)))))
+;;    (make-overworld-state *base-map*)))
 
 
 (defun main-menu ()

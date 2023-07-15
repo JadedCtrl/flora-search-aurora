@@ -299,16 +299,16 @@ Very kindly removes a list of parameters to be returned by the overworld state-f
     ;; Change the entity’s world coordinates…
     (when (walkable-tile-p map x y)
       (setf (getf (getf-entity-data map entity :coords) :x) x)
-      (setf (getf (getf-entity-data map entity :coords) :y) y))
-    ;; If the entity’s moved into a different screen-chunk (and so into a different
-    ;; sub-alist of MAP hash-table’s :entities), move its list into the new chunk’s.
-    (when (not (eq old-chunk new-chunk))
-      ;; Add it to the new chunk list…
-      (setf (assoc-utils:aget (assoc-utils:aget (gethash :entities map) new-chunk) entity)
-            (cdr (getf-entity map entity)))
-      ;; Delete it from the old list…
-      (alexandria:deletef (assoc-utils:aget (gethash :entities map) old-chunk) entity
-                          :test (lambda (id alist) (eq id (car alist)))))))
+      (setf (getf (getf-entity-data map entity :coords) :y) y)
+      ;; If the entity’s moved into a different screen-chunk (and so into a different
+      ;; sub-alist of MAP hash-table’s :entities), move its list into the new chunk’s.
+      (when (not (eq old-chunk new-chunk))
+        ;; Add it to the new chunk list…
+        (setf (assoc-utils:aget (assoc-utils:aget (gethash :entities map) new-chunk) entity)
+              (cdr (getf-entity map entity)))
+        ;; Delete it from the old list…
+        (alexandria:deletef (assoc-utils:aget (gethash :entities map) old-chunk) entity
+                            :test (lambda (id alist) (eq id (car alist))))))))
 
 
 

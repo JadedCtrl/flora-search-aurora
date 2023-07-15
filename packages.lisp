@@ -22,6 +22,7 @@
            #:plist=
            #:incf-0
            #:at-least #:at-most
+           #:remove-from-alistf
            #:string->symbol
            #:system-language #:langcode->keysym #:getf-lang
            :*language*))
@@ -111,8 +112,9 @@
 (defpackage :flora-search-aurora
   (:nicknames :fsa :✿)
   (:export #:main
-   :player)
+   :player :*knows*)
   (:use :cl
    :flora-search-aurora.input :flora-search-aurora.display
    :flora-search-aurora.overworld :flora-search-aurora.dialogue
    :flora-search-aurora.menu))
+

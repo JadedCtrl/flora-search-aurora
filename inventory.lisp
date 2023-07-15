@@ -13,7 +13,7 @@
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-;;;; FLORA-SEARCH-AURORA.INVENTORY
+;;;; FLORA-SEARCH-AURORA.INVENTORY 🎒
 ;;;; The menu for inventory selection/management.
 
 (in-package :flora-search-aurora.inventory)
@@ -95,7 +95,7 @@ Part of INVENTORY-STATE."
        (list :parameters (list :map map :inventory inventory-menu)))
       ;; Return the menu itself, if non-nil.
       (menu-return
-       menu-return)
+       't)
       ;; If menu-return was non-nil, the user left the menu. Let’s leave inventory!
       ('t
        (list :drop 1 :parameters (list :map map))))))
@@ -108,15 +108,15 @@ Part of INVENTORY-STATE."
 (defun render-selected-item (matrix items)
   "Draw the title, avatar, and description of the currently-selected item to
 the bottom of the screen."
-  (let* ((item (menu:selected-menu-item items))
+  (let* ((item (📋:selected-menu-item items))
          (name (list :en (or (getf item :name-en) (getf item :inv-name-en) (getf item :id))
                      :eo (or (getf item :name-eo) (getf item :inv-name-eo))))
          (desc (list :en (getf item :desc-en)
                      :eo (getf item :desc-eo))))
-    (display:render-string-verbatim matrix (str:concat ":" (…:getf-lang name) ":  "
-                                                       (getf item :avatar))
+    (✎:render-string-verbatim matrix (str:concat ":" (…:getf-lang name) ":  "
+                                                 (getf item :avatar))
                                     '(:x 1 :y 17))
-    (display:render-string matrix (…:getf-lang desc)
+    (✎:render-string matrix (…:getf-lang desc)
                           '(:x 1 :y 18) :width 70)))
 
 
@@ -140,7 +140,7 @@ Part of INVENTORY-STATE."
   (inventory-state-update map inventory submenu))
 
 
-(defun make-inventory-state (map)
+(defun make-inventory-function (map)
   "Return a state-function for inventory-listing, for use with STATE-LOOP."
   (lambda (matrix &key (map map) (submenu nil) (inventory (items->menu-plist (gethash :items map))))
     (apply #'🎒:inventory-state

@@ -32,13 +32,6 @@ rectangle as defined by its TOP-LEFT-CORNER & BOTTOM-RIGHT-CORNER."
        (>= (getf point :y) (getf top-left-corner :y))))
 
 
-(defmacro remove-from-alistf (key alist)
-  "Remove the given item from an associative list destructively."
-  `(alexandria:removef
-    ,alist ,key
-    :test (lambda (key item) (eq key (car item)))))
-
-
 
 ;;; ———————————————————————————————————
 ;;; Accessors
@@ -61,7 +54,7 @@ rectangle as defined by its TOP-LEFT-CORNER & BOTTOM-RIGHT-CORNER."
 Literally kill them, show no mercy, dig your sharp nails into their fleshy
 stomache and PULL HARD, show NO REMORSE. RAAAAAA 🗡🩸"
   (mapcar (lambda (chunk-alist)
-            (overworld::remove-from-alistf entity-id (cdr chunk-alist)))
+            (…:remove-from-alistf entity-id (cdr chunk-alist)))
           (gethash :entities map)))
 
 
@@ -168,8 +161,10 @@ Used primarily in moving between different maps in an overworld state."
 (defun overworld-state-update (map Δt)
   "Do nothing, lol. Core part of OVERWORLD-STATE.
 Returns parameters to be used in the next invocation of OVERWORLD-STATE."
-  (process-overworld-time map Δt)
-  (process-overworld-input map))
+  (let ((time-result (process-overworld-time map Δt)))
+    (if time-result
+        time-result
+        (process-overworld-input map))))
 
 
 (defun seconds->game-datetime (seconds &key (game-day-length 240))
@@ -186,15 +181,42 @@ Returns a plist of properties :DAY, :HOUR, and :MINUTE, all numbers."
             :minute (floor (* 60 minutes-fraction))))))
 
 
+(defun end-game-string (map)
+  (str:concat
+   (if (getf-act map :encourage-scientist)
+       (…:getf-lang '(:en "The cities of Etteburg and Bigborough live in peace. Doctor Klara Tim reached new heights in her professional career."
+                      :eo "La urboj de Etburgo kaj Egburo apudvivas pace. Doktoro Klara Tim atingis altojn en sia kariero, plimemfide."))
+       (…:getf-lang '(:en "The city of Etteburg was nearly completely destroyed by the neighboring city Bigborough's police force, which claimed the city as its own.")))
+   " "
+   (if (getf-act map :perfect-friendship)
+       (…:getf-lang '(:en "Friendship with Sasha blossoms, and the two are closer than ever before. She no longer broods by the cliffside, but has reintegrated into society. What an impactful flower, huh?"))
+       (if (getf-act map :encourage-friendship)
+           (…:getf-lang '(:en "Friendship with Sasha is better than ever before, yet still somewhat distant. Often, Sasha returns to the cliffside."))
+           (…:getf-lang '(:en "To this day, Sasha broods by the cliffside alone."))))))
+
+
+(defun end-game (map)
+  (setf flora-search-aurora:*knows* (gethash :knows map))
+  (🎭:make-intermission-state
+   '(:eo "LUDO FINITA" :en "GAME OVER")
+   '(:en "Where are they now?")
+   (list :en (end-game-string map))
+   (list :drop 1)))
+
+
 (defun process-overworld-time (map Δt)
   "Do nothing, lol. Core part of OVERWORLD-STATE.
 Returns parameters to be used in the next invocation of OVERWORLD-STATE."
   (let* ((time (…:incf-0 (gethash :seconds map) Δt))
          (game-datetime (seconds->game-datetime time)))
-    ;; Go through the day-update procedures!
-    (when (not (eq (getf game-datetime :day)
-                   (gethash :day map)))
-      (setf (gethash :day map) (getf game-datetime :day)))))
+    (if (eq (gethash :day map) 3)
+        (end-game map)
+        (progn
+         ;; Go through the day-update procedures!
+         (when (not (eq (getf game-datetime :day)
+                        (gethash :day map)))
+           (setf (gethash :day map) (getf game-datetime :day)))
+         nil))))
 
 
 (defun process-overworld-input (map)

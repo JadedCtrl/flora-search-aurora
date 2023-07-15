@@ -199,6 +199,7 @@ Returns the state for use with STATE-LOOP, pay attention!"
           (list :parameters (list :dialogue (cdr dialogue-list) :map map))
           (progn
             (✎:hide-cursor)
+            (clear-input)
             (list :drop (1+ (or (getf dialogue :drop) 0))
                   :function (getf dialogue :function)
                   :parameters (if (member :parameters dialogue)

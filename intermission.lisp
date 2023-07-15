@@ -94,3 +94,11 @@ Part of INVENTORY-STATE."
   (lambda (matrix &key (title title) (subtitle subtitle) (side-text side-text) (return return) (progress 0))
     (funcall #'intermission-state
              matrix :title title :subtitle subtitle :side-text side-text :progress progress :return return)))
+
+
+(defun make-intermission-state (title subtitle side-text return)
+  "Return a state-plist for intermission, for use with STATE-LOOP."
+  (list :parameters nil
+        :function
+        (make-intermission-function title subtitle side-text return)))
+

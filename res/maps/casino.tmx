@@ -430,7 +430,7 @@ Fojfoje mi ja ŝatas mian fakon, mdr.</property>
    </properties>
    <point/>
   </object>
-  <object id="10" name="Ring" type="Entity" x="346.347" y="606.126">
+  <object id="10" name="Ring" type="Entity" x="26.347" y="657.459">
    <properties>
     <property name="adjective-en" value="pretty"/>
     <property name="adjective-eo" value="bele"/>

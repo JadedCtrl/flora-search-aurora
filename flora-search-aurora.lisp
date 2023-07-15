@@ -446,9 +446,38 @@ run the :USE function of the nearest entity, if it has any."
                 :en "... You're pretentious, as per usual.")))
 
 
+(defun childhood-friend-dialogue-lavendula (sasha)
+  (start-dialogue
+   (say sasha :eo "Ee... dankon?"
+              :en "Uh... thanks?")
+   (say sasha :eo "Kion vi eĉ alcelas per ĉi tio? Je dio."
+              :en "What're you even getting at? Jesus.")
+   (say 'player :eo "Saŝa, mi pensas ke lavendo perfekte akordas vin."
+                :en "Sasha, I think lavender fits you perfectly.")
+   (say 'player :eo "Vi malfidas ĉiun, eĉ tiujn kiuj plej fidas je vi."
+                :en "You distrust and alienate everyone, even those who are most loyal to you.")
+   (say 'player :eo "Mi eble ne diris rekte ĝis nun, do jen:"
+                :en "Maybe I haven't said it directly before, so I'll go ahead now:")
+   (face sasha ";w:" ":w:")
+   (say 'player :eo "Mi zorgas pri vi multe, vi ĉiam estis mia plej kara amiko."
+                :en "I care about you a lot, Sasha, and you've always been my dearest friend.")
+   (say 'player :eo "Malgraŭ via mistraktado, mi neniam foriris, ĉu ne?"
+                :en "Despite your pushing me away -- violently -- I never did leave, right?")
+   (say 'player :eo "Mi konscias ke vi \"testadis\" nian amikecon, sed vi ne devas tion fari plu."
+                :en "I know you try to \"test\" our friendship, but you don't have to do that anymore.")
+   (say sasha   :en "...")
+   (say sasha   :eo "... ĉu vere bonas?"
+                :en "... is it really alright?")
+   (say 'player :eo "Jes. Friends?"
+                :en "Yea. Friends?")
+   (face sasha "<w<" "^o^")
+   (say sasha   :eo "Amikoj."
+                :en "Friends.")))
+
+
 (defun childhood-friend-dialogue-bracelet (map sasha)
   (append (childhood-friend-dialogue-bracelet-intro sasha)
-          (if (getf-act map :sasha-flourish)
+          (if (getf-act map :encourage-friendship)
               (childhood-friend-dialogue-bracelet-good-end sasha)
               (childhood-friend-dialogue-bracelet-bad-end sasha))))
 
@@ -456,11 +485,17 @@ run the :USE function of the nearest entity, if it has any."
 (defun childhood-friend-use (map item-plist &optional entity-id)
   (let ((item-id (…:string->symbol (getf item-plist :id))))
     (cond ((eq item-id 'bracelet)
+           (if (getf-act map :encourage-friendship)
+               (setf (getf-act map :perfect-friendship) 't))
            (make-dialogue-state
             map (childhood-friend-dialogue-bracelet map entity-id)))
           ((eq item-id 'neĝfloro)
            (remove-item map entity-id)
            (make-dialogue-state map (childhood-friend-dialogue-edelweiss entity-id)))
+          ((eq item-id 'lavendula)
+           (setf (getf-act map :encourage-friendship) 't)
+           (remove-item map entity-id)
+           (make-dialogue-state map (childhood-friend-dialogue-lavendula entity-id)))
           ('t
            (refusal-use map item-plist entity-id)))))
 
@@ -569,15 +604,11 @@ avoid triggering this."
 
 (defun flashback-childhood-friend-use (map item-plist &optional entity-id)
   (let ((item-id (…:string->symbol (getf item-plist :id))))
-    (cond ((eq item-id 'bracelet))
+    (cond ((eq item-id 'bracelet)
            ;; If player gives her the special bracelet, skip the dialogue intro
-          (make-dialogue-state
-           map (flashback-childhood-friend-dialogue-bracelet map entity-id))
-          ((eq item-id 'neĝfloro)
-           (make-dialogue-state map (childhood-friend-dialogue-edelweiss entity-id)))
-          ('t
-           ;; Otherwise, have her politely refuse. =w=
-           (refusal-use map item-plist entity-id)))))
+           (make-dialogue-state
+            map (flashback-childhood-friend-dialogue-bracelet map entity-id)))
+          ('t (childhood-friend-use map item-plist entity-id)))))
 
 
 
@@ -1284,9 +1315,8 @@ Initializes the current instance of the game, and such."
     (defparameter *flashback-casino-map* (🌍:plist->map (metacopy:copy-thing *flashback-casino-map-plist*)))
     (defparameter *flashback-school-map* (🌍:plist->map (metacopy:copy-thing *flashback-school-map-plist*)))
     (defparameter *outdoors-map*         (🌍:plist->map (metacopy:copy-thing *outdoors-map-plist*)))
-    (take-item *base-map* 'neĝfloro)
-;;    (make-flashback-state (alexandria:random-elt (flashbacks)))))
-    (make-overworld-state *base-map*)))
+    (take-item *base-map* 'lavendula)
+    (make-flashback-state (alexandria:random-elt (flashbacks)))))
 
 
 (defun main-menu ()

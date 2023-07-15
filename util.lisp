@@ -125,6 +125,13 @@ minimum returns your more pitiful of moments."
 ;;; ———————————————————————————————————
 ;;; Linguistic & symbolic affirs
 ;;; ———————————————————————————————————
+(defmacro remove-from-alistf (key alist &key (test 'eql))
+  "Remove the given item from an associative list destructively."
+  `(alexandria:removef
+    ,alist ,key
+    :test (lambda (key item) (,test key (car item)))))
+
+
 (defun string->symbol (string)
   "Given a STRING with an optionally defined package (e.g., “package:symbol”),
 return it as an appopriate symbol."

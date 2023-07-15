@@ -13,7 +13,7 @@
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-;;;; FLORA-SEARCH-AURORA.ENGINE
+;;;; FLORA-SEARCH-AURORA.ENGINE ⚙
 ;;;; The core of the game’s engine, the loop. Not much to see here other
 ;;;; than a loop. Honest!
 
@@ -39,7 +39,7 @@ overheat, or something ¯\_(ツ)_/¯"
     (let ((state-result
             (apply (car states) (cons matrix state-params)))) ;; Run the last-added state-loop.
       (✎:print-screen-matrix (✎:matrix-delta last-matrix matrix)) ;; Print its results.
-;;      (format *error-output* "~S~%" state-result)
+;;      (format *error-output* "S::~S~%D::~S~%" states state-result)
       (force-output)
       (state-loop
        (cond ((listp state-result)

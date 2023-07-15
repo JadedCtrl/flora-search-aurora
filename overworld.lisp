@@ -201,7 +201,7 @@ Returns a plist of properties :DAY, :HOUR, and :MINUTE, all numbers."
    '(:eo "LUDO FINITA" :en "GAME OVER")
    '(:en "Where are they now?")
    (list :en (end-game-string map))
-   (list :drop 1)))
+   (list :drop 3)))
 
 
 (defun process-overworld-time (map Δt)

@@ -1315,7 +1315,6 @@ Initializes the current instance of the game, and such."
     (defparameter *flashback-casino-map* (🌍:plist->map (metacopy:copy-thing *flashback-casino-map-plist*)))
     (defparameter *flashback-school-map* (🌍:plist->map (metacopy:copy-thing *flashback-school-map-plist*)))
     (defparameter *outdoors-map*         (🌍:plist->map (metacopy:copy-thing *outdoors-map-plist*)))
-    (take-item *base-map* 'lavendula)
     (make-flashback-state (alexandria:random-elt (flashbacks)))))
 
 

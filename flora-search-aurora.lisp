@@ -268,10 +268,8 @@ run the :USE function of the nearest entity, if it has any."
                               :en "Everything alright, Kvincent?")
            (💬:say  'kvincent :eo "Mi iom anksias, freŝe... mi aŭdas strangajn, metalajn sonojn proksime en la montoj!"
                               :en "I'm a bit anxious, lately... I hear strange, metalic noises nearby in the mountains!")
-           (💬:say  'kvincent :eo "Mi iom anksias, freŝe... mi aŭdas strangajn, metalajn sonojn proksime en la montoj!"
-                              :en "I'm a bit anxious, lately... I hear strange, metalic noises nearby in the mountains!")
            (💬:say 'kvincent :eo "Estas sendube diabloj!"
-                              :en "Without a doubt, the sounds of devils!")
+                             :en "Without a doubt, the sounds of devils!")
            (💬:say  'kvincent :eo "Kaj ankaŭ mi apenaŭ trovas fungojn, hodiaŭ... la dioj malbenis min!"
                               :en "Not to mention that I'm hardly finding any mushrooms... I've been cursed!")
            (💬:say  'player   :eo "Nek mi povas trovi florojn! Kia malfacila tago."

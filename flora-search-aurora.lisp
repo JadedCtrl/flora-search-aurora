@@ -585,7 +585,99 @@ avoid triggering this."
                               :eo "Jes, sinjoro, Kapitano Serpento.")
     (💬:mumble 'captain-snake :en "...")
     (💬:say    'captain-snake :en "It's no world-beater, but it's the only plan we've got."
-                              :eo "Ĝi ne savos la mondon, sed ĝi ja estas nia sola plano."))))
+                              :eo "Ĝia ne elstare bonas, sed ĝi elstaras inter la aliaj planoj... kiel nia sola plano.")
+    (move      'captain-snake '(:x 75 :y 10) :delay .07)
+    (💬:say    'beatnick      :eo "Ho, ni komencas nun, ĉu? Atendu min!"
+                              :en "Oh, we're starting now? Wait for me!"
+                              :face "ovo")
+    (move      'beatnick '(:x 75 :y 10) :delay 0)
+    (move      'captain-snake '(:x 150 :y 10) :delay 0)
+    (move      'beatnick '(:x 150 :y 10) :delay 0))))
+
+
+(defun sheriff-trigger-dialogue-intro ()
+  (start-dialogue
+   (face      'player  "o^o" "o*o")
+   (face      'sheriff ">,,,<" ">;;;<")
+   (💬:say    'sheriff :eo "TRUDANTO!"
+                       :en "INTRUDER!")
+   (move      'sheriff '(:x 29 :y 1) :delay 0)
+   (move      'sheriff '(:x 14 :y 10) :delay 0)
+   (face      'player  ">^<" ">o<")
+   (💬:say    'sheriff :eo "MANOJN LEVU! MANOJN POSTDORSU! SURPLANKIĜU!"
+                       :en "HANDS IN THE AIR! HANDS ON YOUR BACK! GET ON THE GROUND, NOW!")
+   (💬:mumble 'sheriff :en "...")
+   (face      'player  "o^<" "o.o")
+   (face      'sheriff "u,,,u" "u,,,o")
+   (💬:say    'sheriff :eo "Hooooooo, vi ne estas kontraŭulo!"
+                       :en "Ohhhhh, you're no enemy!")))
+
+
+(defun sheriff-trigger-dialogue-postintro (map)
+  (if (getf-know map :is-intern)
+      (start-dialogue
+       (face 'player "=w=" "=v=")
+       (say 'player  :eo "Kompreneble ke ne! Mi estas la nova staĝisto, sinjoro!"
+                     :en "Of course not! I'm the new intern, sir!")
+       (say 'sheriff :eo "Ha jes, bone do."
+                     :en "Right right, very good."))
+      (progn
+        (setf (getf-know map :is-intern) 't)
+        (start-dialogue
+          (💬:say    'sheriff :eo "Vi estas la staĝanto nova, ĉu?"
+                              :en "You're clearly the new intern.")
+          (face      'player  "=w=" "=v=")
+          (💬:say    'player  :eo "Eee... bone? Jes. Mi estas ja."
+                              :en "Eee... sure? Yes, I sure am."
+                              :face "=v='")
+          (💬:say    'sheriff :eo "Vi volis diri \"Mi estas ja, SINJORO.\""
+                              :en "You mean, \"I sure am, SIR.\"")
+          (💬:say    'sheriff :eo "Vi alparolas la policĉefon, ne forgesu tion!"
+                              :en "It's the sheriff you're talking to, and don't you forget it!")
+          (face      'player  "o^o" "o*o")
+          (💬:say    'sheriff :eo "Mi \"punos\" vin sekvafoje, ĉu ni interkompreniĝas?"
+                              :en "I'll have you \"reprimanded\" next time, are we clear?")
+          (💬:say    'player  :eo "Eeee!! Tutkomprenite, sinjoro! Pardonu min, sinjoro!"
+                              :en "Eeee!! Crystal, sir! Forgive me, sir!"
+                              :face ">o<")
+          (💬:say    'sheriff :eo "Bone, bone."
+                              :en "Good, then.")
+          (face      'player  "=*=" "=v=")))))
+
+
+(defun sheriff-trigger-dialogue-order (map)
+  (start-dialogue
+   (💬:say    'sheriff :eo "Nu, vi jam bone scias ke ne multe okupiĝos dum la sekvontaj kelkaj tagoj."
+                       :en "Now, I'm sure you're well aware of how busy we'll be for the next few days.")
+   (💬:say    'sheriff :eo "Mi mem okupiĝas multe kun tre prema planado kun la kapitanoj."
+                       :en "I'm currently busy making some last-minute plans with the captains.")
+   (💬:say    'sheriff :eo "Nu, ni komencu."
+                       :en "Now then, down to brass tacks.")
+   (💬:say    'sheriff :eo "Prenu por mi kafon de la plej proksima kafejo. Poste, petu Kapitanon Serpenton por viaj ordonoj."
+                       :en "Fetch me coffee from the nearest coffee house. Then, see Captain Snake for your orders.")
+   (if (getf-know map :is-intern)
+       (💬:say 'player :eo "Jes, sinjoro; mi faros tuj, sinjoro!"
+                       :en "Yes, sir; I'll do it right away, sir!")
+       (💬:say    'player  :eo "Jes sinjoro!! Tuj, sinjoro!!"
+                         :en "Sir yes sir!! Right away, sir!"
+                         :face ">o<"))
+   (move   'sheriff '(:x 29 :y 1))
+   (move   'sheriff '(:x 44 :y 1))))
+
+
+(defun sheriff-trigger-dialogue (map)
+  (append (sheriff-trigger-dialogue-intro)
+          (sheriff-trigger-dialogue-postintro map)
+          (sheriff-trigger-dialogue-order map)))
+
+
+(defun sheriff-trigger (map &optional trigger-plist)
+ (declare (ignore trigger-plist))
+ (when (not (getf-act map :sheriff-met))
+   (setf (getf-act map :sheriff-met) 't)
+   (make-dialogue-state
+    map
+    (sheriff-trigger-dialogue map))))
 
 
 
@@ -969,7 +1061,7 @@ Initializes the current instance of the game, and such."
     (defparameter *flashback-school-map* (🌍:plist->map (metacopy:copy-thing *flashback-school-map-plist*)))
     (defparameter *outdoors-map*         (🌍:plist->map (metacopy:copy-thing *outdoors-map-plist*)))
     ;;  (make-flashback-function (alexandria:random-elt (flashbacks))))
-    (make-overworld-state *casino-map*)))
+    (make-overworld-state *base-map*)))
 
 
 (defun main-menu ()

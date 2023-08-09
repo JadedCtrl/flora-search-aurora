@@ -1,6 +1,9 @@
 # Flora Search Aurora
 _Flora Search Aurora_ is a game about destiny-making, peace-making, and (most importantly) bouquet-making.
 
+![A screenshot from the game. A girl and a boy stand beside a cliffside. The girl cries out, “Don’t act all haughty when you’re such an aimless loser yourself!!”](res/screenshots/2.png)
+![A screenshot from the game. The player character stands on a town street, which contains three buildings: “E-burg Journal”, “MINA GROCER”, and a “Florist”.](res/screenshots/3.png)
+
 
 ## Installation
 
